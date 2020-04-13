@@ -1,0 +1,9 @@
+( library
+  ( name
+      stdlib2
+  )
+  ( wrapped
+      false
+  )
+)
+
