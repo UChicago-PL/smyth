@@ -1,0 +1,2 @@
+# smyth
+Smyth = Sketching + Myth
