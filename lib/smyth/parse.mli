@@ -1,8 +1,45 @@
 open Lang
 
-type problem
+type problem =
+  | ExpectingLeftParen
+  | ExpectingRightParen
+  | ExpectingComma
+  | ExpectingRightArrow
+  | ExpectingSpace
+  | ExpectingPound
+  | ExpectingDot
+  | ExpectingEquals
+  | ExpectingHole
+  | ExpectingLambda
+  | ExpectingSemicolon
 
-type context
+  | ExpectingLet
+  | ExpectingIn
+  | ExpectingCase
+  | ExpectingOf
+
+  | ExpectingConstructorName
+  | ExpectingVariableName
+
+  | ExpectingTupleSize
+  | ExpectingTupleIndex
+
+type context =
+  | CType
+  | CTTuple
+  | CTData
+  | CTArr
+
+  | CExp
+  | CELet
+  | CEVar
+  | CECtor
+  | CETuple
+  | CEProj
+  | CEApp
+  | CEHole
+  | CELambda
+  | CECase
 
 type 'a parser =
   (context, problem, 'a) Bark.parser

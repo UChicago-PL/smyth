@@ -14,9 +14,13 @@ type problem =
   | ExpectingDot
   | ExpectingEquals
   | ExpectingHole
+  | ExpectingLambda
+  | ExpectingSemicolon
 
   | ExpectingLet
   | ExpectingIn
+  | ExpectingCase
+  | ExpectingOf
 
   | ExpectingConstructorName
   | ExpectingVariableName
@@ -38,6 +42,8 @@ type context =
   | CEProj
   | CEApp
   | CEHole
+  | CELambda
+  | CECase
 
 type 'a parser =
   (context, problem, 'a) Bark.parser
@@ -56,9 +62,6 @@ let comma =
 let right_arrow =
   Token ("->", ExpectingRightArrow)
 
-let space =
-  Token (" ", ExpectingSpace)
-
 let pound =
   Token ("#", ExpectingPound)
 
@@ -71,6 +74,12 @@ let equals =
 let hole =
   Token ("??", ExpectingHole)
 
+let lambda =
+  Token ("\\", ExpectingLambda)
+
+let semicolon =
+  Token (";", ExpectingSemicolon)
+
 (* Keywords *)
 
 let let_keyword =
@@ -79,25 +88,13 @@ let let_keyword =
 let in_keyword =
   Token ("in", ExpectingIn)
 
+let case_keyword =
+  Token ("case", ExpectingCase)
+
+let of_keyword =
+  Token ("of", ExpectingOf)
+
 (* Parser helpers *)
-
-let _optional : 'a parser -> 'a option parser =
-  fun p ->
-    one_of
-      [ map (fun x -> Some x) p
-      ; succeed None
-      ]
-
-let spaces1 : unit parser =
-  succeed ()
-    |. token space
-    |. spaces
-
-let _spaces_after : 'a parser -> 'a parser =
-  fun p ->
-    succeed (fun x -> x)
-      |= p
-      |. spaces
 
 let tuple : ('a -> 'b) -> ('a list -> 'b) -> 'a parser -> 'b parser =
   fun single multiple item ->
@@ -198,7 +195,7 @@ let constructor_name : string parser =
 
 let variable_name : string parser =
   variable
-    ~start:lowercase_char
+    ~start:(fun c -> lowercase_char c || c = '_')
     ~inner:inner_char
     ~reserved:reserved_words
     ~expecting:ExpectingVariableName
@@ -228,7 +225,7 @@ let rec typ' : unit -> typ parser =
         )
       )
 
-let typ =
+let typ : typ parser =
   in_context CType (typ' ())
 
 (* Expressions *)
@@ -238,6 +235,24 @@ let placeholder_hole_name : hole_name =
 
 let rec exp' : unit -> exp parser =
   fun () ->
+    let branches =
+      loop []
+        ( fun rev_branches ->
+            one_of
+              [ succeed (fun c x body -> Loop ((c, (x, body)) :: rev_branches))
+                  |. spaces
+                  |= constructor_name
+                  |. spaces
+                  |= variable_name
+                  |. spaces
+                  |. symbol right_arrow
+                  |. spaces
+                  |= lazily exp'
+                  |. symbol semicolon
+              ; succeed (Done (List.rev rev_branches))
+              ]
+        )
+    in
     let rec ground_exp : unit -> exp parser =
       fun () ->
         succeed (fun e -> e)
@@ -255,6 +270,17 @@ let rec exp' : unit -> exp parser =
                      |. spaces
                      |= lazily exp'
                  )
+
+             ; in_context CECase
+                 ( succeed
+                    (fun scrutinee branches -> ECase (scrutinee, branches))
+                     |. keyword case_keyword
+                     |. spaces
+                     |= lazily exp'
+                     |. keyword of_keyword
+                     |= branches
+                 )
+
              ; in_context CEVar
                  ( map (fun name -> EVar name) variable_name
                  )
@@ -262,7 +288,7 @@ let rec exp' : unit -> exp parser =
              ; in_context CECtor
                  ( succeed (fun name arg -> ECtor (name, arg))
                      |= constructor_name
-                     |. spaces1
+                     |. spaces
                      |= lazily ground_exp
                  )
 
@@ -276,7 +302,7 @@ let rec exp' : unit -> exp parser =
                      |= Bark.int ExpectingTupleSize
                      |. symbol dot
                      |= Bark.int ExpectingTupleIndex
-                     |. spaces1
+                     |. spaces
                      |= lazily ground_exp
                  )
 
@@ -284,6 +310,17 @@ let rec exp' : unit -> exp parser =
                  ( succeed (EHole placeholder_hole_name)
                      |. symbol hole
                  )
+
+             ; in_context CELambda
+                ( succeed (fun param body -> EFix (None, param, body))
+                    |. symbol lambda
+                    |. spaces
+                    |= variable_name
+                    |. spaces
+                    |. symbol right_arrow
+                    |. spaces
+                    |= lazily exp'
+                )
              ]
           |. spaces
     in
@@ -291,7 +328,7 @@ let rec exp' : unit -> exp parser =
       ( succeed (fun head arg -> EApp (false, head, arg))
       )
 
-let exp =
+let exp : exp parser =
   in_context CExp (exp' ())
 
 (* Programs *)
@@ -303,5 +340,5 @@ type program =
   ; main : exp option
   }
 
-let program =
+let program : program parser =
   one_of []
