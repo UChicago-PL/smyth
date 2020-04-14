@@ -4,6 +4,9 @@ build:
 serve:
 	make build && python3 serve.py
 
+repl:
+	dune utop lib/smyth
+
 clean:
 	dune clean
 
