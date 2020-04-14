@@ -1,3 +1,6 @@
+let _ =
+  Parse.program
+
 (* Make ('a, 'e) result yojson-compatible *)
 
 type ('a, 'e) rresult = ('a, 'e) result =

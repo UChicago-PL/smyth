@@ -9,4 +9,4 @@ clean:
 
 deps:
 	opam install \
-		utop dune yojson ppx_deriving ppx_deriving_yojson
+		utop dune yojson ppx_deriving ppx_deriving_yojson bark
