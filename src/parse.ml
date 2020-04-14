@@ -13,6 +13,8 @@ type problem =
   | ExpectingPound
   | ExpectingDot
 
+  | ExpectingLet
+
   | ExpectingConstructorName
   | ExpectingVariableName
 
@@ -26,14 +28,18 @@ type context =
   | CTArr
 
   | CExp
+  | CELet
   | CEVar
   | CECtor
   | CETuple
   | CEProj
   | CEApp
+  | CEHole
 
 type 'a parser =
   (context, problem, 'a) Bark.parser
+
+(* Symbols *)
 
 let left_paren =
   Token ("(", ExpectingLeftParen)
@@ -55,6 +61,11 @@ let pound =
 
 let dot =
   Token (".", ExpectingDot)
+
+(* Keywords *)
+
+let let_keyword =
+  Token ("let", ExpectingLet)
 
 (* Parser helpers *)
 
@@ -100,31 +111,31 @@ let chainl1 : context -> 'a parser -> ('a -> 'a -> 'a) parser -> 'a parser =
   fun chain_context p op ->
     let rec next acc =
       one_of
-        [ begin
-            let* combiner =
-              op
-            in
-            p |> and_then (combiner acc >> next)
-          end
+        [ in_context chain_context
+            ( let* combiner =
+                op
+              in
+              p |> and_then (combiner acc >> next)
+            )
         ; succeed acc
         ]
     in
-    p |> (and_then next >> in_context chain_context)
+    p |> and_then next
 
 let chainr1 : context -> 'a parser -> ('a -> 'a -> 'a) parser -> 'a parser =
   fun chain_context p op ->
     let rec rest acc =
       one_of
-        [ begin
-            let* combiner =
-              op
-            in
-            map (combiner acc) (p |> and_then rest)
-          end
+        [ in_context chain_context
+            ( let* combiner =
+                op
+              in
+              map (combiner acc) (p |> and_then rest)
+            )
         ; succeed acc
         ]
     in
-    p |> (and_then rest >> in_context chain_context)
+    p |> (and_then rest)
 
 let ignore_with : 'a -> unit parser -> 'a parser =
   fun x p ->
@@ -187,13 +198,13 @@ let rec typ' : unit -> typ parser =
     let ground_typ : typ parser =
       succeed (fun t -> t)
         |= one_of
-             [ (* Tuple *)
-               in_context CTTuple @@
-                 tuple (fun t -> t) (fun ts -> TTuple ts) (lazily typ')
+             [ in_context CTTuple
+                 ( tuple (fun t -> t) (fun ts -> TTuple ts) (lazily typ')
+                 )
 
-               (* Data *)
-             ; in_context CTData @@
-                 map (fun name -> TData name) constructor_name
+             ; in_context CTData
+                 ( map (fun name -> TData name) constructor_name
+                 )
              ]
         |. spaces
     in
@@ -210,32 +221,57 @@ let typ =
 
 (* Expressions *)
 
+let placeholder_hole_name : hole_name =
+  -1
+
 let rec exp' : unit -> exp parser =
   fun () ->
     let rec ground_exp : unit -> exp parser =
       fun () ->
         succeed (fun e -> e)
           |= one_of
-             [ (* Variables *)
-               map (fun name -> EVar name) variable_name
+             [ in_context CELet
+                 ( succeed Desugar.lett
+                     |. keyword let_keyword
+                     |. spaces
+                     |= variable_name
+                     |. spaces
+                     |. symbol equals
+                     |. spaces
+                     |= lazily exp'
+                     |. keyword in_keyword
+                     |. spaces
+                     |= lazily exp'
+                 )
+             ; in_context CEVar
+                 ( map (fun name -> EVar name) variable_name
+                 )
 
-             ; (* Constructors *)
-               succeed (fun name arg -> ECtor (name, arg))
-                 |= constructor_name
-                 |. spaces1
-                 |= lazily ground_exp
+             ; in_context CECtor
+                 ( succeed (fun name arg -> ECtor (name, arg))
+                     |= constructor_name
+                     |. spaces1
+                     |= lazily ground_exp
+                 )
 
-             ; (* Tuples *)
-               tuple (fun e -> e) (fun es -> ETuple es) (lazily exp')
+             ; in_context CETuple
+                 ( tuple (fun e -> e) (fun es -> ETuple es) (lazily exp')
+                 )
 
-             ; (* Projections *)
-               succeed (fun n i arg -> EProj (n, i, arg))
-                 |. symbol pound
-                 |= Bark.int ExpectingTupleSize
-                 |. symbol dot
-                 |= Bark.int ExpectingTupleIndex
-                 |. spaces1
-                 |= lazily ground_exp
+             ; in_context CEProj
+                 ( succeed (fun n i arg -> EProj (n, i, arg))
+                     |. symbol pound
+                     |= Bark.int ExpectingTupleSize
+                     |. symbol dot
+                     |= Bark.int ExpectingTupleIndex
+                     |. spaces1
+                     |= lazily ground_exp
+                 )
+
+             ; in_context CEHole
+                 ( succeed (EHole placeholder_hole_name)
+                     |. symbol "??"
+                 )
              ]
           |. spaces
     in
