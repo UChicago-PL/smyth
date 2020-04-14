@@ -1,3 +1,5 @@
+open Pervasives2
+
 let pure_bind xs f =
   List.map f xs
 

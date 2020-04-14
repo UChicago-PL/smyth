@@ -12,8 +12,11 @@ type problem =
   | ExpectingSpace
   | ExpectingPound
   | ExpectingDot
+  | ExpectingEquals
+  | ExpectingHole
 
   | ExpectingLet
+  | ExpectingIn
 
   | ExpectingConstructorName
   | ExpectingVariableName
@@ -62,10 +65,19 @@ let pound =
 let dot =
   Token (".", ExpectingDot)
 
+let equals =
+  Token ("=", ExpectingEquals)
+
+let hole =
+  Token ("??", ExpectingHole)
+
 (* Keywords *)
 
 let let_keyword =
   Token ("let", ExpectingLet)
+
+let in_keyword =
+  Token ("in", ExpectingIn)
 
 (* Parser helpers *)
 
@@ -270,7 +282,7 @@ let rec exp' : unit -> exp parser =
 
              ; in_context CEHole
                  ( succeed (EHole placeholder_hole_name)
-                     |. symbol "??"
+                     |. symbol hole
                  )
              ]
           |. spaces

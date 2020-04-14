@@ -2,8 +2,11 @@
   ( name
       stdlib2
   )
+  ( wrapped
+      false
+  )
   ( flags
-      (-open Pervasives2 -w +a-4-9-42-48 -warn-error -a+1..66-3-33)
+      (-w +a-4-9-42-48 -warn-error -a+1..66-3-33)
   )
   ( ocamlopt_flags
       (-O3)
