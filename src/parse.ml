@@ -1,4 +1,5 @@
 open Bark
+open Bark.Syntax
 open Lang
 
 (* Parser specialization *)
@@ -8,11 +9,28 @@ type problem =
   | ExpectingRightParen
   | ExpectingComma
   | ExpectingRightArrow
+  | ExpectingSpace
+  | ExpectingPound
+  | ExpectingDot
 
   | ExpectingConstructorName
+  | ExpectingVariableName
+
+  | ExpectingTupleSize
+  | ExpectingTupleIndex
 
 type context =
-  unit
+  | CType
+  | CTTuple
+  | CTData
+  | CTArr
+
+  | CExp
+  | CEVar
+  | CECtor
+  | CETuple
+  | CEProj
+  | CEApp
 
 type 'a parser =
   (context, problem, 'a) Bark.parser
@@ -29,14 +47,88 @@ let comma =
 let right_arrow =
   Token ("->", ExpectingRightArrow)
 
+let space =
+  Token (" ", ExpectingSpace)
+
+let pound =
+  Token ("#", ExpectingPound)
+
+let dot =
+  Token (".", ExpectingDot)
+
 (* Parser helpers *)
 
-let optional : 'a parser -> 'a option parser =
+let _optional : 'a parser -> 'a option parser =
   fun p ->
     one_of
       [ map (fun x -> Some x) p
       ; succeed None
       ]
+
+let spaces1 : unit parser =
+  succeed ()
+    |. token space
+    |. spaces
+
+let _spaces_after : 'a parser -> 'a parser =
+  fun p ->
+    succeed (fun x -> x)
+      |= p
+      |. spaces
+
+let tuple : ('a -> 'b) -> ('a list -> 'b) -> 'a parser -> 'b parser =
+  fun single multiple item ->
+    map
+      ( fun inners ->
+          match inners with
+            | [inner] ->
+                single inner
+
+            | _ ->
+                multiple inners
+      )
+      ( sequence
+          ~start:left_paren
+          ~separator:comma
+          ~endd:right_paren
+          ~spaces:spaces
+          ~item:item
+          ~trailing:Forbidden
+      )
+
+let chainl1 : context -> 'a parser -> ('a -> 'a -> 'a) parser -> 'a parser =
+  fun chain_context p op ->
+    let rec next acc =
+      one_of
+        [ begin
+            let* combiner =
+              op
+            in
+            p |> and_then (combiner acc >> next)
+          end
+        ; succeed acc
+        ]
+    in
+    p |> (and_then next >> in_context chain_context)
+
+let chainr1 : context -> 'a parser -> ('a -> 'a -> 'a) parser -> 'a parser =
+  fun chain_context p op ->
+    let rec rest acc =
+      one_of
+        [ begin
+            let* combiner =
+              op
+            in
+            map (combiner acc) (p |> and_then rest)
+          end
+        ; succeed acc
+        ]
+    in
+    p |> (and_then rest >> in_context chain_context)
+
+let ignore_with : 'a -> unit parser -> 'a parser =
+  fun x p ->
+    map (fun _ -> x) p
 
 (* Character predicates *)
 
@@ -50,75 +142,109 @@ let lowercase_char : char -> bool =
     | 'a' .. 'z' -> true
     | _ -> false
 
-let _digit_char : char -> bool =
+let digit_char : char -> bool =
   function
     | '0' .. '9' -> true
     | _ -> false
 
-(* Constructors *)
+let inner_char : char -> bool =
+  fun c ->
+    lowercase_char c || uppercase_char c || digit_char c || c = '_'
 
-let constructor : string parser =
+(* Names *)
+
+let reserved_words =
+  String_set.of_list
+    [ "if"; "then"; "else"
+    ; "case"; "of"
+    ; "let"; "in"
+    ; "type"
+    ; "module"; "where"
+    ; "import"; "exposing"
+    ; "as"
+    ; "port"
+    ; "infix"; "infixl"; "infixr"
+    ]
+
+let constructor_name : string parser =
   variable
     ~start:uppercase_char
-    ~inner:(fun c -> lowercase_char c || uppercase_char c)
+    ~inner:inner_char
     ~reserved:String_set.empty
     ~expecting:ExpectingConstructorName
+
+let variable_name : string parser =
+  variable
+    ~start:lowercase_char
+    ~inner:inner_char
+    ~reserved:reserved_words
+    ~expecting:ExpectingVariableName
 
 (* Types *)
 
 let rec typ' : unit -> typ parser =
   fun () ->
     let ground_typ : typ parser =
-      one_of
-        [ (* Tuple *)
-          map
-            ( fun inner_types ->
-                match inner_types with
-                  | [inner_type] ->
-                      inner_type
+      succeed (fun t -> t)
+        |= one_of
+             [ (* Tuple *)
+               in_context CTTuple @@
+                 tuple (fun t -> t) (fun ts -> TTuple ts) (lazily typ')
 
-                  | _ ->
-                      TTuple inner_types
-            )
-            ( sequence
-                ~start:left_paren
-                ~separator:comma
-                ~endd:right_paren
-                ~spaces:spaces
-                ~item:(lazily typ')
-                ~trailing:Forbidden
-            )
-
-          (* Data *)
-        ; map (fun s -> TData s) constructor
-        ]
+               (* Data *)
+             ; in_context CTData @@
+                 map (fun name -> TData name) constructor_name
+             ]
+        |. spaces
     in
-    succeed
-      ( fun domain codomain_opt ->
-          match codomain_opt with
-            | None ->
-                domain
-
-            | Some codomain ->
-                TArr (domain, codomain)
+    chainr1 CTArr ground_typ
+      ( ignore_with (fun domain codomain -> TArr (domain, codomain))
+        ( succeed ()
+            |. symbol right_arrow
+            |. spaces
+        )
       )
-      |= ground_typ
-      |. spaces
-      |= optional
-           ( succeed (fun codomain -> codomain)
-               |. symbol right_arrow
-               |. spaces
-               |= lazily typ'
-               |. spaces
-           )
 
 let typ =
-  typ' ()
+  in_context CType (typ' ())
 
 (* Expressions *)
 
+let rec exp' : unit -> exp parser =
+  fun () ->
+    let rec ground_exp : unit -> exp parser =
+      fun () ->
+        succeed (fun e -> e)
+          |= one_of
+             [ (* Variables *)
+               map (fun name -> EVar name) variable_name
+
+             ; (* Constructors *)
+               succeed (fun name arg -> ECtor (name, arg))
+                 |= constructor_name
+                 |. spaces1
+                 |= lazily ground_exp
+
+             ; (* Tuples *)
+               tuple (fun e -> e) (fun es -> ETuple es) (lazily exp')
+
+             ; (* Projections *)
+               succeed (fun n i arg -> EProj (n, i, arg))
+                 |. symbol pound
+                 |= Bark.int ExpectingTupleSize
+                 |. symbol dot
+                 |= Bark.int ExpectingTupleIndex
+                 |. spaces1
+                 |= lazily ground_exp
+             ]
+          |. spaces
+    in
+    chainl1 CEApp (ground_exp ())
+      ( succeed (fun head arg -> EApp (false, head, arg))
+      )
+
 let exp =
-  one_of []
+  in_context CExp (exp' ())
 
 (* Programs *)
 
