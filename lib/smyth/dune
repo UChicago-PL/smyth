@@ -1,10 +1,10 @@
-( executable
+( library
   ( name
-      main
+      smyth
   )
   ( libraries
       ; user libraries
-      stdlib2 smyth
+      stdlib2
 
       ; opam libraries
       unix cohttp yojson ppx_deriving_yojson.runtime bark

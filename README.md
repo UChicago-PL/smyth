@@ -22,42 +22,44 @@ build`.  This command creates the Smyth executable in
 `_build/default/src/main.exe`, which is accessible via the `smyth` symlink in
 the root directory of the project.
 
-## Module Conventions
+## OCaml Module Conventions
 
-Utility/helper modules end with the character "2" so as to be consistent with
-one another as well as distinct from the OCaml standard library (e.g.
-[`List2`](src/list2.mli) and [`Option2`](src/option2.mli)).
+The library `Stdlib2` found in the [`lib/stdlib2/`](lib/stdlib2/) directory
+contains modules that extend the functionality of the regular OCaml standard
+library. The module [`Pervasives2`](lib/stdlib2/pervasives2.mli) found in this
+library contains a small set of core functions and is automatically `open`ed in
+every file.
 
-The module [`Stdlib2`](lib/stdlib2/stdlib2.mli) found in the
-[`lib/stdlib2/`](lib/stdlib2/) directory contains a small set of core utilities
-and is automatically `open`ed in every file.
+The module [`Main`](src/main.ml) found in the [`src/`](src/) directory provides
+a command-line interface to Smyth.
 
-All other source code can be found in the [`src`](src/) directory.
+The library `Smyth` found in the [`lib/smyth/`](lib/smyth/) directory contains
+all other source code for Smyth (i.e., the majority of the source code).
 
 ## Index
 
-| Concept                                     | File (in [`src/`](src/))
+| Concept                                     | File (in [`lib/smyth/`](lib/smyth/))
 | ------------------------------------------- | ------------------------------
-| Syntax of Core Smyth                        | [`lang.ml`](src/lang.ml)
-| Result classification                       | [`res.mli`](src/res.mli)/[`res.ml`](src/res.ml)
+| Syntax of Core Smyth                        | [`lang.ml`](lib/smyth/lang.ml)
+| Result classification                       | [`res.mli`](lib/smyth/res.mli)/[`res.ml`](lib/smyth/res.ml)
 | Type checking                               | In Elm codebase
-| Type equality                               | [`type.mli`](src/type.mli)/[`type.ml`](src/type.ml)
-| Evaluation                                  | [`eval.mli`](src/eval.mli)/[`eval.ml`](src/eval.ml)
-| Resumption                                  | [`eval.mli`](src/eval.mli)/[`eval.ml`](src/eval.ml)
-| Example syntax                              | [`lang.ml`](src/lang.ml)
-| Result-value coercions                      | [`res.mli`](src/res.mli)/[`res.ml`](src/res.ml)
-| Example-value coercions                     | [`example.mli`](src/example.mli)/[`example.ml`](src/example.ml)
-| Example satisfaction                        | [`example.mli`](src/example.mli)/[`example.ml`](src/example.ml)
-| Constraint syntax                           | [`lang.ml`](src/lang.ml)
-| Constraint satisfaction                     | [`constraints.mli`](src/constraints.mli)/[`constraints.ml`](src/constraints.ml)
-| Constraint merging                          | [`constraints.mli`](src/constraints.mli)/[`constraints.ml`](src/constraints.ml)
-| Live bidirectional example checking         | [`uneval.mli`](src/uneval.mli)/[`uneval.ml`](src/uneval.ml)
-| Example unevaluation                        | [`uneval.mli`](src/uneval.mli)/[`uneval.ml`](src/uneval.ml)
-| Result consistency                          | [`res.mli`](src/res.mli)/[`res.ml`](src/res.ml)
-| Assertion satisfaction and simplification   | [`uneval.mli`](src/uneval.mli)/[`uneval.ml`](src/uneval.ml)
-| Constraint simplification                   | [`solve.mli`](src/solve.mli)/[`solve.ml`](src/solve.ml)
-| Constraint solving                          | [`solve.mli`](src/solve.mli)/[`solve.ml`](src/solve.ml)
-| Hole filling                                | [`fill.mli`](src/fill.mli)/[`fill.ml`](src/fill.ml)
-| Type-and-example-directed refinement        | [`refine.mli`](src/refine.mli)/[`refine.ml`](src/refine.ml)
-| Type-and-example-directed branching         | [`branch.mli`](src/branch.mli)/[`branch.ml`](src/branch.ml)
-| Type-directed guessing (term generation)    | [`term_gen.mli`](src/term_gen.mli)/[`term_gen.ml`](src/term_gen.ml)
+| Type equality                               | [`type.mli`](lib/smyth/type.mli)/[`type.ml`](lib/smyth/type.ml)
+| Evaluation                                  | [`eval.mli`](lib/smyth/eval.mli)/[`eval.ml`](lib/smyth/eval.ml)
+| Resumption                                  | [`eval.mli`](lib/smyth/eval.mli)/[`eval.ml`](lib/smyth/eval.ml)
+| Example syntax                              | [`lang.ml`](lib/smyth/lang.ml)
+| Result-value coercions                      | [`res.mli`](lib/smyth/res.mli)/[`res.ml`](lib/smyth/res.ml)
+| Example-value coercions                     | [`example.mli`](lib/smyth/example.mli)/[`example.ml`](lib/smyth/example.ml)
+| Example satisfaction                        | [`example.mli`](lib/smyth/example.mli)/[`example.ml`](lib/smyth/example.ml)
+| Constraint syntax                           | [`lang.ml`](lib/smyth/lang.ml)
+| Constraint satisfaction                     | [`constraints.mli`](lib/smyth/constraints.mli)/[`constraints.ml`](lib/smyth/constraints.ml)
+| Constraint merging                          | [`constraints.mli`](lib/smyth/constraints.mli)/[`constraints.ml`](lib/smyth/constraints.ml)
+| Live bidirectional example checking         | [`uneval.mli`](lib/smyth/uneval.mli)/[`uneval.ml`](lib/smyth/uneval.ml)
+| Example unevaluation                        | [`uneval.mli`](lib/smyth/uneval.mli)/[`uneval.ml`](lib/smyth/uneval.ml)
+| Result consistency                          | [`res.mli`](lib/smyth/res.mli)/[`res.ml`](lib/smyth/res.ml)
+| Assertion satisfaction and simplification   | [`uneval.mli`](lib/smyth/uneval.mli)/[`uneval.ml`](lib/smyth/uneval.ml)
+| Constraint simplification                   | [`solve.mli`](lib/smyth/solve.mli)/[`solve.ml`](lib/smyth/solve.ml)
+| Constraint solving                          | [`solve.mli`](lib/smyth/solve.mli)/[`solve.ml`](lib/smyth/solve.ml)
+| Hole filling                                | [`fill.mli`](lib/smyth/fill.mli)/[`fill.ml`](lib/smyth/fill.ml)
+| Type-and-example-directed refinement        | [`refine.mli`](lib/smyth/refine.mli)/[`refine.ml`](lib/smyth/refine.ml)
+| Type-and-example-directed branching         | [`branch.mli`](lib/smyth/branch.mli)/[`branch.ml`](lib/smyth/branch.ml)
+| Type-directed guessing (term generation)    | [`term_gen.mli`](lib/smyth/term_gen.mli)/[`term_gen.ml`](lib/smyth/term_gen.ml)
