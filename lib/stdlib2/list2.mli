@@ -20,3 +20,5 @@ val uncons : 'a list -> ('a * 'a list) option
 val is_empty : 'a list -> bool
 val transpose : 'a list list -> 'a list list
 val collapse_equal : 'a list -> 'a option
+val index_left : 'a list -> (int * 'a) list
+val index_right : 'a list -> ('a * int) list

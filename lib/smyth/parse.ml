@@ -318,11 +318,15 @@ let rec exp' : unit -> exp parser =
       loop []
         ( fun rev_branches ->
             one_of
-              [ succeed (fun c x body -> Loop ((c, (x, body)) :: rev_branches))
+              [ succeed
+                 (fun c xs body -> Loop ((c, (xs, body)) :: rev_branches))
                   |. check_indent Strict
                   |= constructor_name
                   |. sspaces
-                  |= variable_name
+                  |= one_of
+                       [ tuple (fun x -> [x]) (fun xs -> xs) variable_name
+                       ; map (fun x -> [x]) variable_name
+                       ]
                   |. sspaces
                   |. symbol right_arrow
                   |. sspaces
@@ -351,8 +355,7 @@ let rec exp' : unit -> exp parser =
               )
 
           ; in_context CECase
-              ( succeed
-                 (fun scrutinee branches -> ECase (scrutinee, branches))
+              ( succeed Desugar.case
                   |. keyword case_keyword
                   |. sspaces
                   |= lazily exp'

@@ -127,7 +127,7 @@ let hash ({ term_kind; term_size; rel_binding; goal } : gen_input) : string =
     let gd_string =
       Option2.with_default "." goal_dec
     in
-      gamma_string ^ "$" ^ gt_string ^ "$" ^ gd_string
+      gamma_string ^ "!" ^ gt_string ^ "!" ^ gd_string
   in
     tk_string ^ "!" ^ ts_string ^ "@" ^ rb_string ^ "#" ^ goal_string
 

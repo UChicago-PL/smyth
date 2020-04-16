@@ -136,3 +136,9 @@ let collapse_equal xs =
           Some head
         else
           None
+
+let index_left xs =
+  List.mapi (fun i x -> (i, x)) xs
+
+let index_right xs =
+  List.mapi (fun i x -> (x, i)) xs
