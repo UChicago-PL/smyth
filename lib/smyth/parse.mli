@@ -26,6 +26,7 @@ type problem =
 
   | ExpectingConstructorName
   | ExpectingVariableName
+  | ExpectingHoleName
 
   | ExpectingTupleSize
   | ExpectingTupleIndex

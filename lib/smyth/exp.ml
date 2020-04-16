@@ -65,3 +65,47 @@ let rec syntactically_equal e1 e2 =
 
     | _ ->
         false
+
+let max x y =
+  if x > y then
+    x
+  else
+    y
+
+let rec largest_hole : exp -> hole_name =
+  fun exp ->
+    match exp with
+      (* Main case *)
+
+      | EHole hole_name ->
+          hole_name
+
+      (* Other cases *)
+
+      | EApp (_, e1, e2)
+      | EAssert (e1, e2) ->
+          max (largest_hole e1) (largest_hole e2)
+
+      | EFix (_, _, e)
+      | EProj (_, _, e)
+      | ECtor (_, e)
+      | ETypeAnnotation (e, _) ->
+          largest_hole e
+
+      | EVar _ ->
+          Fresh.unused
+
+      | ETuple components ->
+          components
+            |> List.map largest_hole
+            |> List2.maximum
+            |> Option2.with_default Fresh.unused
+
+      | ECase (scrutinee, branches) ->
+          let branch_max =
+            branches
+              |> List.map (snd >> snd >> largest_hole)
+              |> List2.maximum
+              |> Option2.with_default Fresh.unused
+          in
+          max (largest_hole scrutinee) branch_max

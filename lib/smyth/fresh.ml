@@ -1,5 +1,8 @@
+let unused =
+  -1
+
 let hole_counter =
-  ref 0
+  ref unused
 
 let set_largest_hole h =
   hole_counter := h

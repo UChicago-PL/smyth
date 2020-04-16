@@ -30,6 +30,7 @@ type problem =
 
   | ExpectingConstructorName
   | ExpectingVariableName
+  | ExpectingHoleName
 
   | ExpectingTupleSize
   | ExpectingTupleIndex
@@ -248,7 +249,7 @@ let digit_char : char -> bool =
 
 let inner_char : char -> bool =
   fun c ->
-    lowercase_char c || uppercase_char c || digit_char c || c = '_'
+    lowercase_char c || uppercase_char c || digit_char c || Char.equal c '_'
 
 (* Names *)
 
@@ -274,7 +275,7 @@ let constructor_name : string parser =
 
 let variable_name : string parser =
   variable
-    ~start:(fun c -> lowercase_char c || c = '_')
+    ~start:(fun c -> lowercase_char c || Char.equal c '_')
     ~inner:inner_char
     ~reserved:reserved_words
     ~expecting:ExpectingVariableName
@@ -308,9 +309,6 @@ let typ : typ parser =
   in_context CType (typ' ())
 
 (* Expressions *)
-
-let placeholder_hole_name : hole_name =
-  -1
 
 let rec exp' : unit -> exp parser =
   fun () ->
@@ -365,15 +363,12 @@ let rec exp' : unit -> exp parser =
                   |= branches
               )
 
-          ; in_context CEVar
-              ( map (fun name -> EVar name) variable_name
-              )
-
-          ; in_context CECtor
-              ( succeed (fun name arg -> ECtor (name, arg))
-                  |= constructor_name
-                  |. sspaces
-                  |= lazily ground_exp
+            (* Constructors handled in post-processing *)
+          ; map (fun name -> EVar name)
+              ( one_of
+                  [ in_context CEVar variable_name
+                  ; in_context CECtor constructor_name
+                  ]
               )
 
           ; in_context CETuple
@@ -391,8 +386,12 @@ let rec exp' : unit -> exp parser =
               )
 
           ; in_context CEHole
-              ( succeed (EHole placeholder_hole_name)
+              ( succeed
+                 ( fun name_opt ->
+                     EHole (Option2.with_default Fresh.unused name_opt)
+                 )
                   |. symbol hole
+                  |= optional (Bark.int ExpectingHoleName)
               )
 
           ; in_context CELambda
@@ -414,8 +413,74 @@ let rec exp' : unit -> exp parser =
           )
       )
 
+let post_exp : exp -> exp =
+  fun root ->
+    Fresh.set_largest_hole (Exp.largest_hole root);
+    let rec post_exp' exp =
+      match exp with
+        (* Main cases *)
+
+          (* Handle constructor applications *)
+        | EApp (special, e1, e2) ->
+            let default () =
+              EApp (special, post_exp' e1, post_exp' e2)
+            in
+            begin match e1 with
+              | EVar name ->
+                  if uppercase_char (String.get name 0) then
+                    ECtor (name, post_exp' e2)
+                  else
+                    default ()
+
+              | _ ->
+                  default ()
+            end
+
+          (* Handle syntactic sugar for unapplied constructors *)
+        | EVar name ->
+            if uppercase_char (String.get name 0) then
+              ECtor (name, ETuple [])
+            else
+              EVar name
+
+          (* Set proper hole names *)
+        | EHole hole_name ->
+            if Int.equal hole_name Fresh.unused then
+              EHole (Fresh.gen_hole ())
+            else
+              EHole hole_name
+
+        (* Other cases *)
+
+        | EFix (f, x, body) ->
+            EFix (f, x, post_exp' body)
+
+        | ETuple components ->
+            ETuple (List.map post_exp' components)
+
+        | EProj (n, i, arg) ->
+            EProj (n, i, post_exp' arg)
+
+        | ECtor (ctor_name, arg) ->
+            ECtor (ctor_name, post_exp' arg)
+
+        | ECase (scrutinee, branches) ->
+            ECase
+              ( post_exp' scrutinee
+              , List.map (Pair2.map_snd (Pair2.map_snd post_exp')) branches
+              )
+
+        | EAssert (e1, e2) ->
+            EAssert (post_exp' e1, post_exp' e2)
+
+        | ETypeAnnotation (e, tau) ->
+            ETypeAnnotation (post_exp' e, tau)
+    in
+      post_exp' root
+
 let exp : exp parser =
   in_context CExp (exp' ())
+    |> map post_exp
 
 (* Programs *)
 
