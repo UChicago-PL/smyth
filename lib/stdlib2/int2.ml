@@ -1,9 +1,3 @@
-let max x y =
-  if x > y then
-    x
-  else
-    y
-
 (* Source: https://crypto.stanford.edu/~blynn/haskell/count.html *)
 let rec partition ~n ~k =
   if n = 0 && k = 0 then

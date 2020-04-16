@@ -66,12 +66,6 @@ let rec syntactically_equal e1 e2 =
     | _ ->
         false
 
-let max x y =
-  if x > y then
-    x
-  else
-    y
-
 let rec largest_hole : exp -> hole_name =
   fun exp ->
     match exp with
