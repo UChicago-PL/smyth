@@ -13,3 +13,6 @@ clean:
 deps:
 	opam install \
 		utop dune yojson ppx_deriving ppx_deriving_yojson bark
+
+loc:
+	find lib src -name "*.ml" | xargs wc -l
