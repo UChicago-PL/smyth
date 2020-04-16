@@ -142,20 +142,10 @@ let check_indent : indent_strictness -> unit parser =
     let check_ok col indent =
       match indent_strictness with
         | Strict ->
-            begin
-              print_endline "strict (starts with col)";
-              print_endline (string_of_int col);
-              print_endline (string_of_int indent);
-              col > indent
-            end
+            col > indent
 
         | Lax ->
-            begin
-              print_endline "lax (starts with col)";
-              print_endline (string_of_int col);
-              print_endline (string_of_int indent);
-              col >= indent
-            end
+            col >= indent
     in
     let* ok =
       succeed check_ok
@@ -337,7 +327,7 @@ let rec exp' : unit -> exp parser =
                   |. symbol right_arrow
                   |. sspaces
                   |= lazily exp'
-                  |. lspaces
+                  |. spaces
               ; succeed (Done (List.rev rev_branches))
               ]
         )
@@ -414,9 +404,11 @@ let rec exp' : unit -> exp parser =
              )
           ]
     in
-    chainl1 CEApp (with_current_indent (ground_exp ()))
-      ( ignore_with (fun head arg -> EApp (false, head, arg))
-          (backtrackable sspaces)
+    with_current_indent
+      ( chainl1 CEApp (with_current_indent (ground_exp ()))
+          ( ignore_with (fun head arg -> EApp (false, head, arg))
+              (backtrackable sspaces)
+          )
       )
 
 let exp : exp parser =
@@ -467,14 +459,16 @@ let statement : statement parser =
             ( let* (name, the_typ) =
                 succeed Pair2.pair
                   |= backtrackable variable_name
-                  |. spaces
+                  |. backtrackable spaces
                   |. symbol colon
+                  |. spaces
                   |= typ
               in
               succeed (fun the_exp -> Definition (name, the_typ, the_exp))
                 |. keyword (Token (name, ExpectingName name))
                 |. sspaces
                 |. symbol equals
+                |. sspaces
                 |= exp
             )
         ]
@@ -520,6 +514,7 @@ let program : Desugar.program parser =
                        )
                  )
                   |= optional exp
+                  |. spaces
                   |. endd ExpectingEnd
               ]
         )

@@ -91,6 +91,19 @@ let () =
       |> print_endline
   in
   match command with
+    | "cli" ->
+        begin match Bark.run Parse.program user_input with
+          | Error _ ->
+              print_endline "parse error"
+
+          | Ok prog ->
+              let (_exp, _sigma) =
+                Desugar.program prog
+              in
+              print_endline "parse complete"
+        end
+
+
     | "eval" ->
         handle eval_request_of_yojson eval_response_to_yojson @@
           fun exp ->
