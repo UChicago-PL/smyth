@@ -386,12 +386,12 @@ let rec exp' : unit -> exp parser =
               )
 
           ; in_context CEHole
-              ( succeed
-                 ( fun name_opt ->
-                     EHole (Option2.with_default Fresh.unused name_opt)
-                 )
+              ( succeed (fun name -> EHole name)
                   |. symbol hole
-                  |= optional (Bark.int ExpectingHoleName)
+                  |= one_of
+                       [ Bark.int ExpectingHoleName
+                       ; succeed Fresh.unused
+                       ]
               )
 
           ; in_context CELambda
@@ -503,7 +503,10 @@ let statement : statement parser =
                      ( succeed (fun ctor_name arg -> [(ctor_name, arg)])
                          |= constructor_name
                          |. sspaces
-                         |= typ
+                         |= one_of
+                              [ typ
+                              ; succeed (TTuple [])
+                              ]
                      )
                      ( ignore_with List.append
                          ( succeed ()
