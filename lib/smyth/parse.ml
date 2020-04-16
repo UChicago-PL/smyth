@@ -17,6 +17,8 @@ type problem =
   | ExpectingLambda
   | ExpectingSemicolon
 
+  | ExpectingMoreIndent
+
   | ExpectingLet
   | ExpectingIn
   | ExpectingCase
@@ -77,9 +79,6 @@ let hole =
 let lambda =
   Token ("\\", ExpectingLambda)
 
-let semicolon =
-  Token (";", ExpectingSemicolon)
-
 (* Keywords *)
 
 let let_keyword =
@@ -96,6 +95,58 @@ let of_keyword =
 
 (* Parser helpers *)
 
+type indent_strictness =
+  | Strict
+  | Lax
+
+let check_indent : indent_strictness -> unit parser =
+  fun indent_strictness ->
+    let check_ok col indent =
+      match indent_strictness with
+        | Strict ->
+            begin
+              print_endline "strict (starts with col)";
+              print_endline (string_of_int col);
+              print_endline (string_of_int indent);
+              col > indent
+            end
+
+        | Lax ->
+            begin
+              print_endline "lax (starts with col)";
+              print_endline (string_of_int col);
+              print_endline (string_of_int indent);
+              col >= indent
+            end
+    in
+    let* ok =
+      succeed check_ok
+        |= get_col
+        |= get_indent
+    in
+    if ok then
+      succeed ()
+    else
+      problem ExpectingMoreIndent
+
+let with_current_indent : 'a parser -> 'a parser =
+  fun p ->
+    let* col =
+      get_col
+    in
+    with_indent col p
+
+(* Indented spaces *)
+let sspaces : unit parser =
+  succeed ()
+    |. spaces
+    |. check_indent Strict
+
+let lspaces : unit parser =
+  succeed ()
+    |. spaces
+    |. check_indent Lax
+
 let tuple : ('a -> 'b) -> ('a list -> 'b) -> 'a parser -> 'b parser =
   fun single multiple item ->
     map
@@ -111,7 +162,7 @@ let tuple : ('a -> 'b) -> ('a list -> 'b) -> 'a parser -> 'b parser =
           ~start:left_paren
           ~separator:comma
           ~endd:right_paren
-          ~spaces:spaces
+          ~spaces:lspaces
           ~item:item
           ~trailing:Forbidden
       )
@@ -150,7 +201,55 @@ let ignore_with : 'a -> unit parser -> 'a parser =
   fun x p ->
     map (fun _ -> x) p
 
+(*
+let actual_spaces : unit parser =
+  chomp_while (fun c -> c = ' ')
+
+let newline : unit parser =
+  chomp_if (fun c -> c = '\n' || c = '\r')
+
+let rest_of_line : unit parser =
+  succeed ()
+    |. actual_spaces
+    |. newline
+
+let current_indentation : unit parser =
+  let* indent =
+    get_indent
+  in
+  loop indent
+    ( fun remaining ->
+        if remaining = 0 then
+          succeed (Done ())
+        else
+          ignore_with (Loop (remaining - 1))
+            (chomp_if space_char)
+    )
+
+let hspaces : unit parser =
+  loop []
+    ( fun acc ->
+        succeed (fun x -> x)
+          |. current_indentation
+          |. chomp_while space_char
+          |= one_of
+               [ ignore_with (Loop ())
+                   newline
+               ; ignore_with (Done ())
+                   set
+               ]
+
+    )
+*)
+
 (* Character predicates *)
+
+(*
+let space_char : char -> bool =
+  function
+    | ' ' -> true
+    | _ -> false
+*)
 
 let uppercase_char : char -> bool =
   function
@@ -240,92 +339,94 @@ let rec exp' : unit -> exp parser =
         ( fun rev_branches ->
             one_of
               [ succeed (fun c x body -> Loop ((c, (x, body)) :: rev_branches))
-                  |. spaces
+                  |. check_indent Strict
                   |= constructor_name
-                  |. spaces
+                  |. sspaces
                   |= variable_name
-                  |. spaces
+                  |. sspaces
                   |. symbol right_arrow
-                  |. spaces
+                  |. sspaces
                   |= lazily exp'
-                  |. symbol semicolon
+                  |. lspaces
               ; succeed (Done (List.rev rev_branches))
               ]
         )
     in
     let rec ground_exp : unit -> exp parser =
       fun () ->
-        succeed (fun e -> e)
-          |= one_of
-             [ in_context CELet
-                 ( succeed Desugar.lett
-                     |. keyword let_keyword
-                     |. spaces
-                     |= variable_name
-                     |. spaces
-                     |. symbol equals
-                     |. spaces
-                     |= lazily exp'
-                     |. keyword in_keyword
-                     |. spaces
-                     |= lazily exp'
-                 )
+        one_of
+          [ in_context CELet
+              ( succeed Desugar.lett
+                  |. keyword let_keyword
+                  |. sspaces
+                  |= variable_name
+                  |. sspaces
+                  |. symbol equals
+                  |. sspaces
+                  |= lazily exp'
+                  |. lspaces
+                  |. keyword in_keyword
+                  |. lspaces
+                  |= lazily exp'
+              )
 
-             ; in_context CECase
-                 ( succeed
-                    (fun scrutinee branches -> ECase (scrutinee, branches))
-                     |. keyword case_keyword
-                     |. spaces
-                     |= lazily exp'
-                     |. keyword of_keyword
-                     |= branches
-                 )
+          ; in_context CECase
+              ( succeed
+                 (fun scrutinee branches -> ECase (scrutinee, branches))
+                  |. keyword case_keyword
+                  |. sspaces
+                  |= lazily exp'
+                  |. lspaces
+                  |. keyword of_keyword
+                  |. sspaces
+                  |= branches
+              )
 
-             ; in_context CEVar
-                 ( map (fun name -> EVar name) variable_name
-                 )
+          ; in_context CEVar
+              ( map (fun name -> EVar name) variable_name
+              )
 
-             ; in_context CECtor
-                 ( succeed (fun name arg -> ECtor (name, arg))
-                     |= constructor_name
-                     |. spaces
-                     |= lazily ground_exp
-                 )
+          ; in_context CECtor
+              ( succeed (fun name arg -> ECtor (name, arg))
+                  |= constructor_name
+                  |. sspaces
+                  |= lazily ground_exp
+              )
 
-             ; in_context CETuple
-                 ( tuple (fun e -> e) (fun es -> ETuple es) (lazily exp')
-                 )
+          ; in_context CETuple
+              ( tuple (fun e -> e) (fun es -> ETuple es) (lazily exp')
+              )
 
-             ; in_context CEProj
-                 ( succeed (fun n i arg -> EProj (n, i, arg))
-                     |. symbol pound
-                     |= Bark.int ExpectingTupleSize
-                     |. symbol dot
-                     |= Bark.int ExpectingTupleIndex
-                     |. spaces
-                     |= lazily ground_exp
-                 )
+          ; in_context CEProj
+              ( succeed (fun n i arg -> EProj (n, i, arg))
+                  |. symbol pound
+                  |= Bark.int ExpectingTupleSize
+                  |. symbol dot
+                  |= Bark.int ExpectingTupleIndex
+                  |. sspaces
+                  |= lazily ground_exp
+              )
 
-             ; in_context CEHole
-                 ( succeed (EHole placeholder_hole_name)
-                     |. symbol hole
-                 )
+          ; in_context CEHole
+              ( succeed (EHole placeholder_hole_name)
+                  |. symbol hole
+              )
 
-             ; in_context CELambda
-                ( succeed (fun param body -> EFix (None, param, body))
-                    |. symbol lambda
-                    |. spaces
-                    |= variable_name
-                    |. spaces
-                    |. symbol right_arrow
-                    |. spaces
-                    |= lazily exp'
-                )
-             ]
-          |. spaces
+          ; in_context CELambda
+             ( succeed (fun param body -> EFix (None, param, body))
+                 |. symbol lambda
+                 |. sspaces
+                 |= variable_name
+                 |. sspaces
+                 |. symbol right_arrow
+                 |. sspaces
+                 |= lazily exp'
+             )
+          ]
     in
-    chainl1 CEApp (ground_exp ())
-      ( succeed (fun head arg -> EApp (false, head, arg))
+    chainl1 CEApp (with_current_indent (ground_exp ()))
+      ( ignore_with (fun head arg -> EApp (false, head, arg))
+          (backtrackable sspaces)
       )
 
 let exp : exp parser =

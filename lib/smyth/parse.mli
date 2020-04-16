@@ -13,6 +13,8 @@ type problem =
   | ExpectingLambda
   | ExpectingSemicolon
 
+  | ExpectingMoreIndent
+
   | ExpectingLet
   | ExpectingIn
   | ExpectingCase
