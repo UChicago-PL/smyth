@@ -8,6 +8,12 @@ module Hole_map =
 type 'a hole_map =
   'a Hole_map.t
 
+type typ =
+  | TArr of typ * typ
+  | TTuple of typ list
+  | TData of string
+  [@@deriving yojson]
+
 type exp =
   | EFix of (string option) * string * exp
   (* bool: special recursive call (used only for "recursive window" UI) *)
@@ -20,12 +26,7 @@ type exp =
   | ECase of exp * (string * (string * exp)) list
   | EHole of hole_name
   | EAssert of exp * exp
-  [@@deriving yojson]
-
-type typ =
-  | TArr of typ * typ
-  | TTuple of typ list
-  | TData of string
+  | ETypeAnnotation of exp * typ
   [@@deriving yojson]
 
 type res =

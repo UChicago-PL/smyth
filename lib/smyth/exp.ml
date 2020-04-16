@@ -59,5 +59,9 @@ let rec syntactically_equal e1 e2 =
         syntactically_equal left1 left2
           && syntactically_equal right1 right2
 
+    | (ETypeAnnotation (e1, tau1), ETypeAnnotation (e2, tau2)) ->
+        Type.equal tau1 tau2
+          && syntactically_equal e1 e2
+
     | _ ->
         false

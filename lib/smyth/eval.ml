@@ -174,6 +174,9 @@ module FuelLimited = struct
                   Error "Result consistency failure"
             end
 
+      | ETypeAnnotation (e, _) ->
+          eval fuel env e
+
   let rec resume fuel hf res =
     let open Result2.Syntax in
     match res with

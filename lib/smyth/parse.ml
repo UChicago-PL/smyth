@@ -13,9 +13,11 @@ type problem =
   | ExpectingPound
   | ExpectingDot
   | ExpectingEquals
+  | ExpectingDoubleEquals
   | ExpectingHole
   | ExpectingLambda
-  | ExpectingSemicolon
+  | ExpectingPipe
+  | ExpectingColon
 
   | ExpectingMoreIndent
 
@@ -23,12 +25,18 @@ type problem =
   | ExpectingIn
   | ExpectingCase
   | ExpectingOf
+  | ExpectingType
+  | ExpectingAssert
 
   | ExpectingConstructorName
   | ExpectingVariableName
 
   | ExpectingTupleSize
   | ExpectingTupleIndex
+
+  | ExpectingName of string
+
+  | ExpectingEnd
 
 type context =
   | CType
@@ -46,6 +54,14 @@ type context =
   | CEHole
   | CELambda
   | CECase
+
+  | CStatement
+  | CSDatatype
+  | CSDatatypeCtors
+  | CSDefinition
+  | CSAssertion
+
+  | CProgram
 
 type 'a parser =
   (context, problem, 'a) Bark.parser
@@ -73,11 +89,20 @@ let dot =
 let equals =
   Token ("=", ExpectingEquals)
 
+let double_equals =
+  Token ("==", ExpectingDoubleEquals)
+
 let hole =
   Token ("??", ExpectingHole)
 
 let lambda =
   Token ("\\", ExpectingLambda)
+
+let pipe =
+  Token ("|", ExpectingPipe)
+
+let colon =
+  Token (":", ExpectingColon)
 
 (* Keywords *)
 
@@ -93,7 +118,20 @@ let case_keyword =
 let of_keyword =
   Token ("of", ExpectingOf)
 
+let type_keyword =
+  Token ("type", ExpectingType)
+
+let assert_keyword =
+  Token ("assert", ExpectingAssert)
+
 (* Parser helpers *)
+
+let optional : 'a parser -> 'a option parser =
+  fun p ->
+    one_of
+      [ map (fun x -> Some x) p
+      ; succeed None
+      ]
 
 type indent_strictness =
   | Strict
@@ -201,55 +239,7 @@ let ignore_with : 'a -> unit parser -> 'a parser =
   fun x p ->
     map (fun _ -> x) p
 
-(*
-let actual_spaces : unit parser =
-  chomp_while (fun c -> c = ' ')
-
-let newline : unit parser =
-  chomp_if (fun c -> c = '\n' || c = '\r')
-
-let rest_of_line : unit parser =
-  succeed ()
-    |. actual_spaces
-    |. newline
-
-let current_indentation : unit parser =
-  let* indent =
-    get_indent
-  in
-  loop indent
-    ( fun remaining ->
-        if remaining = 0 then
-          succeed (Done ())
-        else
-          ignore_with (Loop (remaining - 1))
-            (chomp_if space_char)
-    )
-
-let hspaces : unit parser =
-  loop []
-    ( fun acc ->
-        succeed (fun x -> x)
-          |. current_indentation
-          |. chomp_while space_char
-          |= one_of
-               [ ignore_with (Loop ())
-                   newline
-               ; ignore_with (Done ())
-                   set
-               ]
-
-    )
-*)
-
 (* Character predicates *)
-
-(*
-let space_char : char -> bool =
-  function
-    | ' ' -> true
-    | _ -> false
-*)
 
 let uppercase_char : char -> bool =
   function
@@ -318,10 +308,10 @@ let rec typ' : unit -> typ parser =
     in
     chainr1 CTArr ground_typ
       ( ignore_with (fun domain codomain -> TArr (domain, codomain))
-        ( succeed ()
-            |. symbol right_arrow
-            |. spaces
-        )
+          ( succeed ()
+              |. symbol right_arrow
+              |. spaces
+          )
       )
 
 let typ : typ parser =
@@ -434,12 +424,103 @@ let exp : exp parser =
 
 (* Programs *)
 
-type program =
-  { datatypes : datatype_ctx
-  ; bindings : string * (typ * exp) list
-  ; assertions : exp * exp list
-  ; main : exp option
-  }
+type statement =
+  | Datatype of (string * (string * typ) list)
+  | Definition of (string * typ * exp)
+  | Assertion of (exp * exp)
 
-let program : program parser =
-  one_of []
+let statement : statement parser =
+  in_context CStatement
+    ( one_of
+        [ in_context CSDatatype
+            ( succeed (fun data_name ctors -> Datatype (data_name, ctors))
+                |. keyword type_keyword
+                |. sspaces
+                |= constructor_name
+                |. sspaces
+                |. symbol equals
+                |= chainr1 CSDatatypeCtors
+                     ( succeed (fun ctor_name arg -> [(ctor_name, arg)])
+                         |= constructor_name
+                         |. sspaces
+                         |= typ
+                     )
+                     ( ignore_with List.append
+                         ( succeed ()
+                             |. symbol pipe
+                             |. sspaces
+                         )
+                     )
+            )
+
+        ; in_context CSAssertion
+            ( succeed (fun e1 e2 -> Assertion (e1, e2))
+                |. keyword assert_keyword
+                |= exp
+                |. sspaces
+                |. symbol double_equals
+                |. sspaces
+                |= exp
+            )
+
+        ; in_context CSDefinition
+            ( let* (name, the_typ) =
+                succeed Pair2.pair
+                  |= backtrackable variable_name
+                  |. spaces
+                  |. symbol colon
+                  |= typ
+              in
+              succeed (fun the_exp -> Definition (name, the_typ, the_exp))
+                |. keyword (Token (name, ExpectingName name))
+                |. sspaces
+                |. symbol equals
+                |= exp
+            )
+        ]
+    )
+
+let program : Desugar.program parser =
+  in_context CProgram
+    ( loop []
+        ( fun rev_statements ->
+            one_of
+              [ succeed (fun stmt -> Loop (stmt :: rev_statements))
+                  |= statement
+                  |. spaces
+
+              ; succeed
+                 ( fun main_opt ->
+                     Done
+                       ( let open Desugar in
+                         List.fold_right
+                           ( fun stmt prog ->
+                               match stmt with
+                                 | Datatype d ->
+                                     { prog with
+                                         datatypes = d :: prog.datatypes
+                                     }
+
+                                 | Definition d ->
+                                     { prog with
+                                         definitions = d :: prog.definitions
+                                     }
+
+                                 | Assertion a ->
+                                     { prog with
+                                         assertions = a :: prog.assertions
+                                     }
+                           )
+                           rev_statements
+                           { datatypes = []
+                           ; definitions = []
+                           ; assertions = []
+                           ; main_opt = main_opt
+                           }
+                       )
+                 )
+                  |= optional exp
+                  |. endd ExpectingEnd
+              ]
+        )
+    )
