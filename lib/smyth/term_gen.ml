@@ -428,7 +428,7 @@ and gen_i
                           )
                       }
                   in
-                    EFix (Some f_name, arg_name, body)
+                    EFix (Some f_name, PVar arg_name, body)
 
               | TTuple taus ->
                   let tuple_size =
@@ -516,7 +516,7 @@ and rel_gen_i
                     )
                 }
             in
-              EFix (Some f_name, arg_name, body)
+              EFix (Some f_name, PVar arg_name, body)
 
         | TTuple taus ->
             let tuple_size =

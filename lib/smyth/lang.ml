@@ -14,8 +14,14 @@ type typ =
   | TData of string
   [@@deriving yojson]
 
+type pat =
+  | PVar of string
+  | PTuple of pat list
+  | PWildcard
+  [@@deriving yojson]
+
 type exp =
-  | EFix of (string option) * string * exp
+  | EFix of (string option) * pat * exp
   (* bool: special recursive call (used only for "recursive window" UI) *)
   | EApp of bool * exp * exp
   | EVar of string
@@ -23,7 +29,7 @@ type exp =
   (* (n, i, arg) *)
   | EProj of int * int * exp
   | ECtor of string * exp
-  | ECase of exp * (string * (string * exp)) list
+  | ECase of exp * (string * (pat * exp)) list
   | EHole of hole_name
   | EAssert of exp * exp
   | ETypeAnnotation of exp * typ
@@ -31,14 +37,14 @@ type exp =
 
 type res =
   (* Determinate results *)
-  | RFix of env * (string option) * string * exp
+  | RFix of env * (string option) * pat * exp
   | RTuple of res list
   | RCtor of string * res
   (* Indeterminate results *)
   | RHole of env * hole_name
   | RApp of res * res
   | RProj of int * int * res
-  | RCase of env * res * (string * (string * exp)) list
+  | RCase of env * res * (string * (pat * exp)) list
   | RCtorInverse of string * res
   [@@deriving yojson]
 

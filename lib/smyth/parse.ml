@@ -19,6 +19,8 @@ type problem =
   | ExpectingPipe
   | ExpectingColon
 
+  | ExpectingWildcard
+
   | ExpectingMoreIndent
 
   | ExpectingLet
@@ -35,7 +37,7 @@ type problem =
   | ExpectingTupleSize
   | ExpectingTupleIndex
 
-  | ExpectingName of string
+  | ExpectingName of string * string
 
   | ExpectingEnd
 
@@ -44,6 +46,11 @@ type context =
   | CTTuple
   | CTData
   | CTArr
+
+  | CPat
+  | CPTuple
+  | CPVar
+  | CPWildcard
 
   | CExp
   | CELet
@@ -104,6 +111,9 @@ let pipe =
 
 let colon =
   Token (":", ExpectingColon)
+
+let wildcard =
+  Token ("_", ExpectingWildcard)
 
 (* Keywords *)
 
@@ -275,7 +285,7 @@ let constructor_name : string parser =
 
 let variable_name : string parser =
   variable
-    ~start:(fun c -> lowercase_char c || Char.equal c '_')
+    ~start:lowercase_char
     ~inner:inner_char
     ~reserved:reserved_words
     ~expecting:ExpectingVariableName
@@ -308,23 +318,59 @@ let rec typ' : unit -> typ parser =
 let typ : typ parser =
   in_context CType (typ' ())
 
+(* Patterns *)
+
+let rec pat' : unit -> pat parser =
+  fun () ->
+    one_of
+      [ in_context CPTuple
+          ( tuple (fun p -> p) (fun ps -> PTuple ps) (lazily pat')
+          )
+
+      ; in_context CPWildcard
+          ( ignore_with PWildcard (symbol wildcard)
+          )
+
+      ; in_context CPVar
+          ( map (fun name -> PVar name) variable_name
+          )
+      ]
+
+let pat : pat parser =
+  in_context CPat (pat' ())
+
 (* Expressions *)
 
-let rec exp' : unit -> exp parser =
+let rec binding' : unit -> (string * pat list * exp) parser =
+  fun () ->
+    succeed (fun name pats body -> (name, pats, body))
+      |= variable_name
+      |. sspaces
+      |= loop []
+           ( fun rev_patterns ->
+               one_of
+                 [ succeed (fun p -> Loop (p :: rev_patterns))
+                     |= pat
+                     |. sspaces
+                 ; succeed (Done (List.rev rev_patterns))
+                 ]
+           )
+      |. symbol equals
+      |. sspaces
+      |= lazily exp'
+
+and exp' : unit -> exp parser =
   fun () ->
     let branches =
       loop []
         ( fun rev_branches ->
             one_of
               [ succeed
-                 (fun c xs body -> Loop ((c, (xs, body)) :: rev_branches))
+                 (fun c x body -> Loop ((c, (x, body)) :: rev_branches))
                   |. check_indent Strict
                   |= constructor_name
                   |. sspaces
-                  |= one_of
-                       [ tuple (fun x -> [x]) (fun xs -> xs) variable_name
-                       ; map (fun x -> [x]) variable_name
-                       ]
+                  |= pat
                   |. sspaces
                   |. symbol right_arrow
                   |. sspaces
@@ -338,14 +384,13 @@ let rec exp' : unit -> exp parser =
       fun () ->
         one_of
           [ in_context CELet
-              ( succeed Desugar.lett
+              ( succeed
+                 ( fun (name, pats, body) rest ->
+                     Desugar.lett name (Desugar.func_args pats body) rest
+                 )
                   |. keyword let_keyword
                   |. sspaces
-                  |= variable_name
-                  |. sspaces
-                  |. symbol equals
-                  |. sspaces
-                  |= lazily exp'
+                  |= lazily binding'
                   |. lspaces
                   |. keyword in_keyword
                   |. lspaces
@@ -353,7 +398,7 @@ let rec exp' : unit -> exp parser =
               )
 
           ; in_context CECase
-              ( succeed Desugar.case
+              ( succeed (fun scrutinee branches -> ECase (scrutinee, branches))
                   |. keyword case_keyword
                   |. sspaces
                   |= lazily exp'
@@ -398,7 +443,7 @@ let rec exp' : unit -> exp parser =
              ( succeed (fun param body -> EFix (None, param, body))
                  |. symbol lambda
                  |. sspaces
-                 |= variable_name
+                 |= pat
                  |. sspaces
                  |. symbol right_arrow
                  |. sspaces
@@ -482,6 +527,9 @@ let exp : exp parser =
   in_context CExp (exp' ())
     |> map post_exp
 
+let binding : (string * pat list * exp) parser =
+  binding' ()
+
 (* Programs *)
 
 type statement =
@@ -535,12 +583,21 @@ let statement : statement parser =
                   |. spaces
                   |= typ
               in
-              succeed (fun the_exp -> Definition (name, the_typ, the_exp))
-                |. keyword (Token (name, ExpectingName name))
-                |. sspaces
-                |. symbol equals
-                |. sspaces
-                |= exp
+              let* (name', pats, body) =
+                binding
+              in
+              if not (String.equal name name') then
+                problem
+                  ( ExpectingName (name, name')
+                  )
+              else
+                succeed
+                  ( Definition
+                      ( name
+                      , the_typ
+                      , Desugar.func_args pats body
+                      )
+                  )
             )
         ]
     )

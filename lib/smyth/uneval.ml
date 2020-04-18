@@ -103,17 +103,15 @@ module FuelLimited = struct
             Constraints.unsolved_singleton hole_name [(env, ex)]
 
       | (RFix (env, f, x, body), ExInputOutput (input, output)) ->
-          let fix_extension =
-            begin match f with
-              | Some f_name ->
-                  (f_name, res) :: env
-
-              | None ->
-                  env
-            end
+          let fix_env_extension =
+            Pat.bind_var_opt f res
           in
-            check fuel delta sigma hf body @@
-              [((x, Res.from_value input) :: fix_extension, output)]
+          let* x_env_extension =
+            Pat.bind x (Res.from_value input)
+              |> Nondet.lift_option
+          in
+            check fuel delta sigma hf body
+              [(x_env_extension @ fix_env_extension @ env, output)]
 
       | (RApp (r1, r2), _) ->
           begin match Res.to_value r2 with
@@ -156,9 +154,13 @@ module FuelLimited = struct
               begin match r_scrutinee with
                 | RCtor (ctor_name, r_arg) ->
                     begin match List.assoc_opt ctor_name branches with
-                      | Some (arg_name, body) ->
+                      | Some (arg_pattern, body) ->
+                          let* arg_env_extension =
+                            Pat.bind arg_pattern r_arg
+                              |> Nondet.lift_option
+                          in
                           check fuel delta sigma hf' body @@
-                            [((arg_name, r_arg) :: env, ex)]
+                            [(arg_env_extension @ env, ex)]
 
                       | None ->
                           Nondet.none
@@ -171,14 +173,18 @@ module FuelLimited = struct
               Nondet.lift_option @@
                 Constraints.merge [ks_guesses; ks_scrutinee; ks_branch]
           else
-            let try_branch (ctor_name, (arg_name, body)) =
+            let try_branch (ctor_name, (arg_pattern, body)) =
               let* k1 =
                 uneval (fuel - 1) delta sigma hf scrutinee
                   (ExCtor (ctor_name, ExTop))
               in
+              let* arg_env_extension =
+                Pat.bind arg_pattern (RCtorInverse (ctor_name, scrutinee))
+                  |> Nondet.lift_option
+              in
               let* k2 =
                 check (fuel - 1) delta sigma hf body @@
-                  [((arg_name, RCtorInverse (ctor_name, scrutinee)) :: env, ex)]
+                  [(arg_env_extension @ env, ex)]
               in
                 Nondet.lift_option @@
                   Constraints.merge [k1; k2]

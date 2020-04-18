@@ -15,6 +15,8 @@ type problem =
   | ExpectingPipe
   | ExpectingColon
 
+  | ExpectingWildcard
+
   | ExpectingMoreIndent
 
   | ExpectingLet
@@ -31,7 +33,7 @@ type problem =
   | ExpectingTupleSize
   | ExpectingTupleIndex
 
-  | ExpectingName of string
+  | ExpectingName of string * string
 
   | ExpectingEnd
 
@@ -40,6 +42,11 @@ type context =
   | CTTuple
   | CTData
   | CTArr
+
+  | CPat
+  | CPTuple
+  | CPVar
+  | CPWildcard
 
   | CExp
   | CELet

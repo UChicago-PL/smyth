@@ -166,7 +166,7 @@ let branch
               )
             in
             let branch =
-              (ctor_name, (arg_name, EHole hole_name))
+              (ctor_name, (PVar arg_name, EHole hole_name))
             in
               (branch, goal) :: acc
         )

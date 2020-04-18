@@ -67,21 +67,12 @@ module FuelLimited = struct
           in
             begin match r1 with
               | RFix (f_env, f, x, body) ->
-                  let
-                    f_env_extension =
-                      begin match f with
-                        | Some f_name ->
-                            [(f_name, r1)]
-
-                        | None ->
-                            []
-                      end
+                  let f_env_extension =
+                      Pat.bind_var_opt f r1
                   in
-                  let x_env_extension =
-                    if Type.ignore_binding x then
-                      []
-                    else
-                      [(x, r2)]
+                  let* x_env_extension =
+                    Pat.bind x r2
+                      |> Option.to_result ~none:"Pattern match failed"
                   in
                   let new_env =
                     x_env_extension @ f_env_extension @ f_env
@@ -130,13 +121,17 @@ module FuelLimited = struct
             begin match r0 with
               | RCtor (ctor_name, r_arg) ->
                   begin match List.assoc_opt ctor_name branches with
-                    | Some (arg_name, body) ->
+                    | Some (arg_pattern, body) ->
+                        let* arg_env_extension =
+                          Pat.bind arg_pattern r_arg
+                            |> Option.to_result ~none:"Pattern match failed"
+                        in
                         Result2.map
                           ( Pair2.map_snd @@
                               fun ks_body -> ks0 @ ks_body
                           )
                           ( eval fuel
-                              ((arg_name, r_arg) :: env)
+                              (arg_env_extension @ env)
                               body
                           )
 
@@ -238,21 +233,12 @@ module FuelLimited = struct
           in
             begin match r1' with
               | RFix (f_env, f, x, body) ->
-                  let
-                    f_env_extension =
-                      begin match f with
-                        | Some f_name ->
-                            [(f_name, r1')]
-
-                        | None ->
-                            []
-                      end
+                  let f_env_extension =
+                      Pat.bind_var_opt f r1'
                   in
-                  let x_env_extension =
-                    if Type.ignore_binding x then
-                      []
-                    else
-                      [(x, r2')]
+                  let* x_env_extension =
+                    Pat.bind x r2'
+                      |> Option.to_result ~none:"Pattern match failed"
                   in
                   let new_env =
                     x_env_extension @ f_env_extension @ f_env
@@ -307,14 +293,14 @@ module FuelLimited = struct
             begin match r0 with
               | RCtor (ctor_name, r_arg) ->
                   begin match List.assoc_opt ctor_name branches with
-                    | Some (arg_name, body) ->
+                    | Some (arg_pattern, body) ->
                         Result2.map
                           ( Pair2.map_snd @@
                               fun ks_body -> ks0 @ ks_body
                           )
                           ( resume fuel hf @@
                               RApp
-                                ( RFix (env, None, arg_name, body)
+                                ( RFix (env, None, arg_pattern, body)
                                 , r_arg
                                 )
                           )

@@ -16,7 +16,7 @@ let rec syntactically_equal e1 e2 =
           end
         in
           mf_equal
-            && String.equal x1 x2
+            && Pat.syntactically_equal x1 x2
             && syntactically_equal body1 body2
 
     | (EApp (b1, head1, arg1), EApp (b2, head2, arg2)) ->
@@ -46,7 +46,7 @@ let rec syntactically_equal e1 e2 =
           && List.for_all2
                ( fun (ctor1, (arg1, body1)) (ctor2, (arg2, body2)) ->
                    String.equal ctor1 ctor2
-                     && String.equal arg1 arg2
+                     && Pat.syntactically_equal arg1 arg2
                      && syntactically_equal body1 body2
                )
                branches1

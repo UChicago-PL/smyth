@@ -41,7 +41,7 @@ let refine _delta sigma ((gamma, goal_type, goal_dec), worlds) =
                                       , RFix
                                           ( env
                                           , Some f_name
-                                          , x_name
+                                          , PVar x_name
                                           , EHole hole_name
                                           )
                                       )
@@ -67,7 +67,7 @@ let refine _delta sigma ((gamma, goal_type, goal_dec), worlds) =
             )
           in
           let exp =
-            EFix (Some f_name, x_name, EHole hole_name)
+            EFix (Some f_name, PVar x_name, EHole hole_name)
           in
             (exp, [new_goal])
 
