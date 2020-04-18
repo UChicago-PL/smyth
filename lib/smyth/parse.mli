@@ -3,6 +3,8 @@ open Lang
 type problem =
   | ExpectingLeftParen
   | ExpectingRightParen
+  | ExpectingLeftBracket
+  | ExpectingRightBracket
   | ExpectingComma
   | ExpectingRightArrow
   | ExpectingSpace
@@ -14,8 +16,11 @@ type problem =
   | ExpectingLambda
   | ExpectingPipe
   | ExpectingColon
+  | ExpectingFuncSpec
 
   | ExpectingWildcard
+
+  | ExpectingExactly of int * int
 
   | ExpectingMoreIndent
 
@@ -30,10 +35,15 @@ type problem =
   | ExpectingVariableName
   | ExpectingHoleName
 
+  | ExpectingFunctionArity
+
   | ExpectingTupleSize
   | ExpectingTupleIndex
 
   | ExpectingName of string * string
+
+  | NegativeArity of int
+  | ZeroArity
 
   | ExpectingEnd
 
@@ -64,6 +74,9 @@ type context =
   | CSDatatypeCtors
   | CSDefinition
   | CSAssertion
+  | CSFuncSpec
+  | CSFuncSpecInput
+  | CSFuncSpecOutput
 
   | CProgram
 

@@ -7,6 +7,8 @@ open Lang
 type problem =
   | ExpectingLeftParen
   | ExpectingRightParen
+  | ExpectingLeftBracket
+  | ExpectingRightBracket
   | ExpectingComma
   | ExpectingRightArrow
   | ExpectingSpace
@@ -18,8 +20,11 @@ type problem =
   | ExpectingLambda
   | ExpectingPipe
   | ExpectingColon
+  | ExpectingFuncSpec
 
   | ExpectingWildcard
+
+  | ExpectingExactly of int * int
 
   | ExpectingMoreIndent
 
@@ -34,10 +39,15 @@ type problem =
   | ExpectingVariableName
   | ExpectingHoleName
 
+  | ExpectingFunctionArity
+
   | ExpectingTupleSize
   | ExpectingTupleIndex
 
   | ExpectingName of string * string
+
+  | NegativeArity of int
+  | ZeroArity
 
   | ExpectingEnd
 
@@ -68,6 +78,9 @@ type context =
   | CSDatatypeCtors
   | CSDefinition
   | CSAssertion
+  | CSFuncSpec
+  | CSFuncSpecInput
+  | CSFuncSpecOutput
 
   | CProgram
 
@@ -81,6 +94,12 @@ let left_paren =
 
 let right_paren =
   Token (")", ExpectingRightParen)
+
+let left_bracket =
+  Token ("[", ExpectingLeftBracket)
+
+let right_bracket =
+  Token ("]", ExpectingRightBracket)
 
 let comma =
   Token (",", ExpectingComma)
@@ -134,6 +153,11 @@ let type_keyword =
 
 let assert_keyword =
   Token ("assert", ExpectingAssert)
+
+(* No-lookahead keywords *)
+
+let specify_function_token =
+  Token ("specifyFunction", ExpectingFuncSpec)
 
 (* Parser helpers *)
 
@@ -204,6 +228,29 @@ let tuple : ('a -> 'b) -> ('a list -> 'b) -> 'a parser -> 'b parser =
           ~spaces:lspaces
           ~item:item
           ~trailing:Forbidden
+      )
+
+let listt : 'a parser -> 'a list parser =
+  fun item ->
+    sequence
+      ~start:left_bracket
+      ~separator:comma
+      ~endd:right_bracket
+      ~spaces:lspaces
+      ~item:item
+      ~trailing:Forbidden
+
+let exactly : int -> 'a parser -> 'a list parser =
+  fun n p ->
+    loop (n, [])
+      ( fun (k, rev_xs) ->
+          if k <= 0 then
+            succeed (Done (List.rev rev_xs))
+          else
+            one_of
+              [ map (fun x -> Loop (k - 1, x :: rev_xs)) p
+              ; problem (ExpectingExactly (n, n - k))
+              ]
       )
 
 let chainl1 : context -> 'a parser -> ('a -> 'a -> 'a) parser -> 'a parser =
@@ -532,6 +579,23 @@ let binding : (string * pat list * exp) parser =
 
 (* Programs *)
 
+let specify_function_name : int parser =
+  let* arity =
+    succeed (fun n -> n)
+      (* Important: must be token (not keyword) so no lookahead! *)
+      |. token specify_function_token
+      |= one_of
+           [ Bark.int ExpectingFunctionArity
+           ; succeed 1
+           ]
+  in
+  if arity < 0 then
+    problem (NegativeArity arity)
+  else if arity = 0 then
+    problem ZeroArity
+  else
+    succeed arity
+
 type statement =
   | Datatype of (string * (string * typ) list)
   | Definition of (string * typ * exp)
@@ -572,6 +636,45 @@ let statement : statement parser =
                 |. symbol double_equals
                 |. sspaces
                 |= exp
+            )
+
+        ; in_context CSFuncSpec
+            ( let* (arity, func) =
+                succeed (fun n f -> (n, f))
+                  |= specify_function_name
+                  |. sspaces
+                  |= exp
+                  |. sspaces
+              in
+              let+ io_examples =
+                listt
+                  ( succeed (fun inputs output -> (inputs, output))
+                      |. symbol left_paren
+                      |= exactly arity
+                           ( in_context CSFuncSpecInput
+                               ( succeed (fun e -> e)
+                                   |. lspaces
+                                   |= exp
+                                   |. lspaces
+                                   |. symbol comma
+                               )
+                           )
+                      |. lspaces
+                      |= in_context CSFuncSpecOutput exp
+                      |. symbol right_paren
+                  )
+              in
+              let (left, right) =
+                io_examples
+                  |> List.map
+                       ( fun (inputs, output) ->
+                           ( Desugar.app func inputs
+                           , output
+                           )
+                       )
+                  |> List.split
+              in
+              Assertion (ETuple left, ETuple right)
             )
 
         ; in_context CSDefinition

@@ -10,6 +10,12 @@ let func_args : pat list -> exp -> exp =
         EFix (None, pat, body)
     )
 
+let app : exp -> exp list -> exp =
+  List.fold_left
+    ( fun acc arg ->
+        EApp (false, acc, arg)
+    )
+
 type program =
   { datatypes : datatype_ctx
   ; definitions : (string * typ * exp) list
