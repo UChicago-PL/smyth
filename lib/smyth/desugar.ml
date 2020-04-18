@@ -16,6 +16,25 @@ let app : exp -> exp list -> exp =
         EApp (false, acc, arg)
     )
 
+(* Precondition: input >= 0 *)
+let nat : int -> exp =
+  let rec helper acc n =
+    if n = 0 then
+      acc
+    else
+      helper (ECtor ("S", acc)) (n - 1)
+  in
+  helper (ECtor ("Z", ETuple []))
+
+let listt : exp list -> exp =
+  fun es ->
+    List.fold_right
+      ( fun e acc ->
+          ECtor ("Cons", ETuple [e; acc])
+      )
+      es
+      (ECtor ("Nil", ETuple []))
+
 type program =
   { datatypes : datatype_ctx
   ; definitions : (string * typ * exp) list

@@ -35,6 +35,8 @@ type problem =
   | ExpectingType
   | ExpectingAssert
 
+  | ExpectingNat
+
   | ExpectingConstructorName
   | ExpectingVariableName
   | ExpectingHoleName
@@ -72,6 +74,8 @@ type context =
   | CEHole
   | CELambda
   | CECase
+  | CEList
+  | CENat
 
   | CStatement
   | CSDatatype
@@ -496,6 +500,16 @@ and exp' : unit -> exp parser =
                  |. sspaces
                  |= lazily exp'
              )
+
+          ; in_context CEList
+              ( map Desugar.listt
+                  (listt (lazily exp'))
+              )
+
+          ; in_context CENat
+              ( map Desugar.nat
+                  (Bark.int ExpectingNat)
+              )
           ]
     in
     with_current_indent

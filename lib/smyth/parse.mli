@@ -31,6 +31,8 @@ type problem =
   | ExpectingType
   | ExpectingAssert
 
+  | ExpectingNat
+
   | ExpectingConstructorName
   | ExpectingVariableName
   | ExpectingHoleName
@@ -68,6 +70,8 @@ type context =
   | CEHole
   | CELambda
   | CECase
+  | CEList
+  | CENat
 
   | CStatement
   | CSDatatype
