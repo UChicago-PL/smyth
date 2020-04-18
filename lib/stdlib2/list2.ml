@@ -142,3 +142,17 @@ let index_left xs =
 
 let index_right xs =
   List.mapi (fun i x -> (x, i)) xs
+
+let rec find_map f xs =
+  match xs with
+    | [] ->
+        None
+
+    | head :: tail ->
+        begin match f head with
+          | Some x ->
+              Some x
+
+          | None ->
+              find_map f tail
+        end

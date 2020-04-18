@@ -480,12 +480,11 @@ and ground_exp : unit -> exp parser =
           )
 
       ; in_context CEHole
-          ( succeed (fun name -> EHole name)
-              |. symbol hole
-              |= one_of
-                   [ Bark.int ExpectingHoleName
-                   ; succeed Fresh.unused
-                   ]
+          ( ignore_with (EHole Fresh.unused)
+              (symbol hole)
+              (* Don't allow user hole names (so each hole name appears at most
+               * once in a program)
+               *)
           )
 
       ; in_context CELambda

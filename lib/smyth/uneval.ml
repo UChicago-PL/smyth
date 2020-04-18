@@ -104,10 +104,10 @@ module FuelLimited = struct
 
       | (RFix (env, f, x, body), ExInputOutput (input, output)) ->
           let fix_env_extension =
-            Pat.bind_var_opt f res
+            Pat.bind_rec_name_res f res
           in
           let* x_env_extension =
-            Pat.bind x (Res.from_value input)
+            Pat.bind_res x (Res.from_value input)
               |> Nondet.lift_option
           in
             check fuel delta sigma hf body
@@ -156,7 +156,7 @@ module FuelLimited = struct
                     begin match List.assoc_opt ctor_name branches with
                       | Some (arg_pattern, body) ->
                           let* arg_env_extension =
-                            Pat.bind arg_pattern r_arg
+                            Pat.bind_res arg_pattern r_arg
                               |> Nondet.lift_option
                           in
                           check fuel delta sigma hf' body @@
@@ -179,7 +179,7 @@ module FuelLimited = struct
                   (ExCtor (ctor_name, ExTop))
               in
               let* arg_env_extension =
-                Pat.bind arg_pattern (RCtorInverse (ctor_name, scrutinee))
+                Pat.bind_res arg_pattern (RCtorInverse (ctor_name, scrutinee))
                   |> Nondet.lift_option
               in
               let* k2 =

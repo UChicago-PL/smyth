@@ -58,5 +58,5 @@ let program : program -> exp * datatype_ctx =
                 main_opt
             )
         )
-    , datatypes
+    , List.rev datatypes
     )

@@ -68,10 +68,10 @@ module FuelLimited = struct
             begin match r1 with
               | RFix (f_env, f, x, body) ->
                   let f_env_extension =
-                      Pat.bind_var_opt f r1
+                      Pat.bind_rec_name_res f r1
                   in
                   let* x_env_extension =
-                    Pat.bind x r2
+                    Pat.bind_res x r2
                       |> Option.to_result ~none:"Pattern match failed"
                   in
                   let new_env =
@@ -123,7 +123,7 @@ module FuelLimited = struct
                   begin match List.assoc_opt ctor_name branches with
                     | Some (arg_pattern, body) ->
                         let* arg_env_extension =
-                          Pat.bind arg_pattern r_arg
+                          Pat.bind_res arg_pattern r_arg
                             |> Option.to_result ~none:"Pattern match failed"
                         in
                         Result2.map
@@ -234,10 +234,10 @@ module FuelLimited = struct
             begin match r1' with
               | RFix (f_env, f, x, body) ->
                   let f_env_extension =
-                      Pat.bind_var_opt f r1'
+                      Pat.bind_rec_name_res f r1'
                   in
                   let* x_env_extension =
-                    Pat.bind x r2'
+                    Pat.bind_res x r2'
                       |> Option.to_result ~none:"Pattern match failed"
                   in
                   let new_env =

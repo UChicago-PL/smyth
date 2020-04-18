@@ -30,3 +30,35 @@ val matches_dec :
   string option -> bind_spec -> bool
 
 val ignore_binding : string -> bool
+
+(* Type checking *)
+
+type error =
+  | VarNotFound of string
+  | CtorNotFound of string
+  | PatternMatchFailure of typ * pat
+
+  | GotFunctionButExpected of typ
+  | GotTupleButExpected of typ
+  | GotButExpected of typ * typ
+
+  | MismatchedBranch of typ * (string * typ)
+
+  | CannotInferFunctionType
+  | CannotInferCaseType
+  | CannotInferHoleType
+
+  | ExpectedArrowButGot of typ
+  | ExpectedTupleButGot of typ
+
+  | TupleLengthMismatch of typ
+  | ProjectionLengthMismatch of typ
+  | ProjectionOutOfBounds of int * int
+
+  | AssertionTypeMismatch of typ * typ
+
+val check :
+  datatype_ctx -> type_ctx -> exp -> typ -> (hole_ctx, exp * error) result
+
+val infer :
+  datatype_ctx -> type_ctx -> exp -> (typ * hole_ctx, exp * error) result

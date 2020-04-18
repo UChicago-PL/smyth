@@ -21,7 +21,7 @@ type pat =
   [@@deriving yojson]
 
 type exp =
-  | EFix of (string option) * pat * exp
+  | EFix of string option * pat * exp
   (* bool: special recursive call (used only for "recursive window" UI) *)
   | EApp of bool * exp * exp
   | EVar of string
