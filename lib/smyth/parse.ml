@@ -410,7 +410,7 @@ let rec binding' : unit -> (string * pat list * exp) parser =
       |. sspaces
       |= lazily exp'
 
-and exp' : unit -> exp parser =
+and ground_exp : unit -> exp parser =
   fun () ->
     let branches =
       loop []
@@ -431,89 +431,89 @@ and exp' : unit -> exp parser =
               ]
         )
     in
-    let rec ground_exp : unit -> exp parser =
-      fun () ->
-        one_of
-          [ in_context CELet
-              ( succeed
-                 ( fun (name, pats, body) rest ->
-                     Desugar.lett name (Desugar.func_args pats body) rest
-                 )
-                  |. keyword let_keyword
-                  |. sspaces
-                  |= lazily binding'
-                  |. lspaces
-                  |. keyword in_keyword
-                  |. lspaces
-                  |= lazily exp'
-              )
-
-          ; in_context CECase
-              ( succeed (fun scrutinee branches -> ECase (scrutinee, branches))
-                  |. keyword case_keyword
-                  |. sspaces
-                  |= lazily exp'
-                  |. lspaces
-                  |. keyword of_keyword
-                  |. sspaces
-                  |= branches
-              )
-
-            (* Constructors handled in post-processing *)
-          ; map (fun name -> EVar name)
-              ( one_of
-                  [ in_context CEVar variable_name
-                  ; in_context CECtor constructor_name
-                  ]
-              )
-
-          ; in_context CETuple
-              ( tuple (fun e -> e) (fun es -> ETuple es) (lazily exp')
-              )
-
-          ; in_context CEProj
-              ( succeed (fun n i arg -> EProj (n, i, arg))
-                  |. symbol pound
-                  |= Bark.int ExpectingTupleSize
-                  |. symbol dot
-                  |= Bark.int ExpectingTupleIndex
-                  |. sspaces
-                  |= lazily ground_exp
-              )
-
-          ; in_context CEHole
-              ( succeed (fun name -> EHole name)
-                  |. symbol hole
-                  |= one_of
-                       [ Bark.int ExpectingHoleName
-                       ; succeed Fresh.unused
-                       ]
-              )
-
-          ; in_context CELambda
-             ( succeed (fun param body -> EFix (None, param, body))
-                 |. symbol lambda
-                 |. sspaces
-                 |= pat
-                 |. sspaces
-                 |. symbol right_arrow
-                 |. sspaces
-                 |= lazily exp'
+    one_of
+      [ in_context CELet
+          ( succeed
+             ( fun (name, pats, body) rest ->
+                 Desugar.lett name (Desugar.func_args pats body) rest
              )
+              |. keyword let_keyword
+              |. sspaces
+              |= lazily binding'
+              |. lspaces
+              |. keyword in_keyword
+              |. lspaces
+              |= lazily exp'
+          )
 
-          ; in_context CEList
-              ( map Desugar.listt
-                  (listt (lazily exp'))
-              )
+      ; in_context CECase
+          ( succeed (fun scrutinee branches -> ECase (scrutinee, branches))
+              |. keyword case_keyword
+              |. sspaces
+              |= lazily exp'
+              |. lspaces
+              |. keyword of_keyword
+              |. sspaces
+              |= branches
+          )
 
-          ; in_context CENat
-              ( map Desugar.nat
-                  (Bark.int ExpectingNat)
-              )
-          ]
-    in
+        (* Constructors handled in post-processing *)
+      ; map (fun name -> EVar name)
+          ( one_of
+              [ in_context CEVar variable_name
+              ; in_context CECtor constructor_name
+              ]
+          )
+
+      ; in_context CETuple
+          ( tuple (fun e -> e) (fun es -> ETuple es) (lazily exp')
+          )
+
+      ; in_context CEProj
+          ( succeed (fun n i arg -> EProj (n, i, arg))
+              |. symbol pound
+              |= Bark.int ExpectingTupleSize
+              |. symbol dot
+              |= Bark.int ExpectingTupleIndex
+              |. sspaces
+              |= lazily ground_exp
+          )
+
+      ; in_context CEHole
+          ( succeed (fun name -> EHole name)
+              |. symbol hole
+              |= one_of
+                   [ Bark.int ExpectingHoleName
+                   ; succeed Fresh.unused
+                   ]
+          )
+
+      ; in_context CELambda
+         ( succeed (fun param body -> EFix (None, param, body))
+             |. symbol lambda
+             |. sspaces
+             |= pat
+             |. sspaces
+             |. symbol right_arrow
+             |. sspaces
+             |= lazily exp'
+         )
+
+      ; in_context CEList
+          ( map Desugar.listt
+              (listt (lazily exp'))
+          )
+
+      ; in_context CENat
+          ( map Desugar.nat
+              (Bark.int ExpectingNat)
+          )
+      ]
+
+and exp' : unit -> exp parser =
+  fun () ->
     with_current_indent
-      ( chainl1 CEApp (with_current_indent (ground_exp ()))
+      ( chainl1 CEApp (with_current_indent (lazily ground_exp))
           ( ignore_with (fun head arg -> EApp (false, head, arg))
               (backtrackable sspaces)
           )
@@ -657,7 +657,7 @@ let statement : statement parser =
                 succeed (fun n f -> (n, f))
                   |= specify_function_name
                   |. sspaces
-                  |= exp
+                  |= ground_exp ()
                   |. sspaces
               in
               let+ io_examples =
