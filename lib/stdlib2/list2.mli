@@ -23,3 +23,4 @@ val collapse_equal : 'a list -> 'a option
 val index_left : 'a list -> (int * 'a) list
 val index_right : 'a list -> ('a * int) list
 val find_map : ('a -> 'b option) -> 'a list -> 'b option
+val sum : int list -> int

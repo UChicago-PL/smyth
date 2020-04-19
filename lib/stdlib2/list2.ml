@@ -156,3 +156,6 @@ let rec find_map f xs =
           | None ->
               find_map f tail
         end
+
+let sum xs =
+  List.fold_left ((+)) 0 xs

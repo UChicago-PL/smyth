@@ -97,10 +97,10 @@ let () =
               print_endline "parse error"
 
           | Ok prog ->
-              let (_exp, _sigma) =
+              let (exp, _sigma) =
                 Desugar.program prog
               in
-              print_endline "parse complete"
+              print_endline (Pretty.exp 0 exp)
         end
 
 
