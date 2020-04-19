@@ -1,64 +1,121 @@
 open Smyth
 
-(* Make ('a, 'e) result yojson-compatible *)
+let exec_name =
+  Sys.argv.(0)
 
-type ('a, 'e) rresult = ('a, 'e) result =
-  | Ok of 'a
-  | Error of 'e
+let usage_prefix =
+  "Usage: " ^ exec_name
 
-type ('a, 'e) result = ('a, 'e) rresult =
-  | Ok of 'a
-  | Error of 'e
-  [@@deriving yojson]
+type command =
+  | Solve
+  | Test
 
-(* API *)
+let commands : command list =
+  [ Solve; Test ]
 
-type eval_request =
-  Lang.exp
-  [@@deriving yojson]
+let command_name : command -> string =
+  function
+    | Solve -> "forge"
+    | Test -> "test"
 
-type eval_response' =
-  { res : Lang.res
-  ; assertions: Lang.resumption_assertions
-  }
-  [@@deriving yojson]
+let command_from_name : string -> command option =
+  function
+    | "forge" -> Some Solve
+    | "test" -> Some Test
+    | _ -> None
 
-type eval_response =
-  (eval_response', string) result
-  [@@deriving yojson]
+let command_description : command -> string =
+  function
+    | Solve -> "Complete a program sketch"
+    | Test -> "Compare solutions for different input-output examples"
 
-type synthesis_request =
-  { delta : Lang.hole_ctx
-  ; sigma : Lang.datatype_ctx
-  ; assertions : Lang.resumption_assertions
-  }
-  [@@deriving yojson]
+let command_arguments : command -> (string * string) list =
+  function
+    | Solve ->
+        [ ( "sketch"
+          , "The path to the sketch to be completed"
+          )
+        ]
 
-type synthesis_response =
-  { time_taken : float
-  ; hole_fillings : (Lang.hole_name * Lang.exp) list list
-  ; timed_out : bool
-  }
-  [@@deriving yojson]
+    | Test ->
+        [ ( "definitions"
+          , "The path to the sketch to be completed WITHOUT any assertions"
+          )
+        ; ( "complete_assertions"
+          , "The path to the complete set of assertions"
+          )
+        ; ( "partial_assertions"
+          , "The path to the partial set of assertions"
+          )
+        ]
 
-(* Main *)
+let command_help : command -> string =
+  fun command ->
+    let arguments =
+      command_arguments command
+    in
+    usage_prefix ^ " " ^
+    command_name command ^ " " ^
+    String.concat " " (List.map (fun (name, _) -> "<" ^ name ^ ">") arguments) ^
+    "\n\nArguments:\n" ^
+    ( arguments
+        |> List.map (fun (name, desc) -> Printf.sprintf "  %-22s%s" name desc)
+        |> String.concat "\n"
+    )
 
 let synthesis_pipeline delta sigma assertions =
   assertions
     |> Uneval.simplify_assertions delta sigma
     |> Solve.solve_any delta sigma
 
-let usage n =
-  prerr_endline ("usage: " ^ Sys.argv.(0) ^ " eval|synthesize");
-  exit n
+let version_string =
+  "0.1.0"
 
-let read_all file =
+let title = "
+  -_-/                    ,  ,,
+ (_ /                    ||  ||
+(_ --_  \\\\/\\\\/\\\\ '\\\\/\\\\ =||= ||/\\\\
+  --_ ) || || ||  || ;'  ||  || ||
+ _/  )) || || ||  ||/    ||  || ||
+(_-_-   \\\\ \\\\ \\\\  |/     \\\\, \\\\ |/
+                 (             _/
+                  -_-
+"
+
+let name =
+  "Smyth"
+
+let description =
+  "Programming-by-example in a typed functional language with sketches."
+
+
+let available_commands =
+  "Available commands:\n\n" ^
+  ( commands
+      |> List.map (fun c -> Printf.sprintf "  %-8s%s" (command_name c) (command_description c))
+      |> String.concat "\n"
+  )
+
+let help =
+  title ^ "\n" ^
+  name ^ " v" ^ version_string ^ "\n" ^
+  description ^ "\n\n" ^
+  usage_prefix ^ " <command> <args>\n\n" ^
+  available_commands ^
+  "\n\nFor more specific information, run:\n\n  " ^
+  exec_name ^ " <command> --help"
+
+let command_not_found attempt =
+  "Could not find command '" ^ attempt ^ "'.\n\n" ^
+  available_commands
+
+let read_all channel =
   let acc =
     ref []
   in
     begin try
       while true do
-        acc := input_line file :: !acc
+        acc := input_line channel :: !acc
       done;
       !acc
     with
@@ -68,142 +125,88 @@ let read_all file =
       |> List.rev
       |> String.concat "\n"
 
+let read_file path =
+  let channel =
+    open_in path
+  in
+  try
+    read_all channel
+  with e ->
+    close_in_noerr channel;
+    raise e
+
 let () =
-  let () =
-    if Array.length Sys.argv <> 2 then
-      usage 1
+  let argv_length =
+    Array.length Sys.argv
+  in
+  begin
+    if argv_length < 2 then
+      begin
+        print_endline help;
+        exit 0
+      end
     else
       ()
-  in
+  end;
   let command =
-    Sys.argv.(1)
-  in
-  let user_input =
-    read_all stdin
-  in
-  let handle decode encode callback =
-    user_input
-      |> Yojson.Safe.from_string
-      |> decode
-      |> Result2.map callback
-      |> result_to_yojson encode (fun e -> `String e)
-      |> Yojson.Safe.to_string
-      |> print_endline
-  in
-  match command with
-    | "cli" ->
-        begin match Bark.run Parse.program user_input with
-          | Error _ ->
-              print_endline "parse error"
+    match command_from_name Sys.argv.(1) with
+      | Some cmd ->
+          cmd
 
-          | Ok prog ->
+      | None ->
+          begin
+            print_endline (command_not_found Sys.argv.(1));
+            exit 1
+          end
+  in
+  begin
+    if argv_length = 3 && Sys.argv.(2) = "--help" then
+      begin
+        print_endline (command_help command);
+        exit 0
+      end
+    else
+      ()
+  end;
+  begin
+    if argv_length - 2 <> List.length (command_arguments command) then
+      begin
+        print_endline (command_help command);
+        exit 1
+      end
+    else
+      ()
+  end;
+  begin match command with
+    | Solve ->
+        let sketch_path =
+          Sys.argv.(2)
+        in
+        let sketch_string =
+          read_file sketch_path
+        in
+        begin match Bark.run Parse.program sketch_string with
+          | Error _ ->
+              print_endline "Parse error.";
+              exit 1
+
+          | Ok program ->
               let (exp, _sigma) =
-                Desugar.program prog
+                Desugar.program program
               in
               print_endline (Pretty.exp 0 exp)
         end
 
-
-    | "eval" ->
-        handle eval_request_of_yojson eval_response_to_yojson @@
-          fun exp ->
-            let () =
-              Log.info "Evaluating..."
-            in
-            let () =
-              Timer.Single.start Timer.Single.Total
-            in
-            let response =
-              Result2.map (fun (res, assertions) -> {res; assertions}) @@
-                Eval.eval [] exp
-            in
-            let time_taken =
-              Timer.Single.elapsed Timer.Single.Total;
-            in
-            let () =
-              Log.info
-                ( "Completed in "
-                    ^ string_of_float time_taken
-                    ^ " seconds.\n"
-                )
-            in
-              response
-
-    | "synthesize" ->
-        handle synthesis_request_of_yojson synthesis_response_to_yojson @@
-          fun {delta; sigma; assertions} ->
-            let () =
-              Log.info "Synthesizing..."
-            in
-            let () =
-              Term_gen.clear_cache ()
-            in
-            let clean_delta =
-              List.map
-                ( Pair2.map_snd @@ fun (gamma, tau, dec, match_depth) ->
-                    ( List.filter
-                        (fst >> Type.ignore_binding >> not)
-                        gamma
-                    , tau
-                    , dec
-                    , match_depth
-                    )
-                )
-                delta
-            in
-            let () =
-              clean_delta
-                |> List.map fst
-                |> List2.maximum
-                |> Option2.with_default 0
-                |> Fresh.set_largest_hole
-            in
-            let () =
-              Uneval.minimal_uneval := true
-            in
-            let () =
-              Timer.Single.start Timer.Single.Total;
-            in
-            let minimal_synthesis_result =
-              synthesis_pipeline clean_delta sigma assertions
-            in
-            let synthesis_result =
-              if Nondet.is_empty minimal_synthesis_result then
-                let () =
-                  Uneval.minimal_uneval := false
-                in
-                  synthesis_pipeline clean_delta sigma assertions
-              else
-                minimal_synthesis_result
-            in
-            let time_taken =
-              Timer.Single.elapsed Timer.Single.Total;
-            in
-            let timed_out =
-              time_taken > Params.max_total_time
-            in
-            let () =
-              if not timed_out then
-                Log.info
-                  ( "Completed in "
-                      ^ string_of_float time_taken
-                      ^ " seconds.\n"
-                  )
-              else
-                Log.info
-                  ( "Timed out after "
-                      ^ string_of_float time_taken
-                      ^ " seconds.\n"
-                  )
-            in
-              { time_taken
-              ; hole_fillings =
-                  synthesis_result
-                    |> Nondet.map (fst >> Clean.clean clean_delta)
-                    |> Nondet.collapse_option
-                    |> Nondet.to_list
-              ; timed_out
-              }
-
-    | _ ->
-      usage 2
+    | Test ->
+        let _sketch_path =
+          Sys.argv.(2)
+        in
+        let _complete_assertions_path =
+          Sys.argv.(3)
+        in
+        let _partial_assertions_path =
+          Sys.argv.(4)
+        in
+        prerr_endline "Temporarily unsupported."
+  end;
+  exit 0
