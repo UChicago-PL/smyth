@@ -19,6 +19,9 @@ type problem =
   | ExpectingFuncSpec
 
   | ExpectingWildcard
+  | ExpectingLineComment
+  | ExpectingMultiCommentStart
+  | ExpectingMultiCommentEnd
 
   | ExpectingExactly of int * int
 

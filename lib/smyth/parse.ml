@@ -23,6 +23,9 @@ type problem =
   | ExpectingFuncSpec
 
   | ExpectingWildcard
+  | ExpectingLineComment
+  | ExpectingMultiCommentStart
+  | ExpectingMultiCommentEnd
 
   | ExpectingExactly of int * int
 
@@ -138,6 +141,15 @@ let colon =
 let wildcard =
   Token ("_", ExpectingWildcard)
 
+let line_comment_start =
+  Token ("--", ExpectingLineComment)
+
+let multi_comment_start =
+  Token ("{-", ExpectingMultiCommentStart)
+
+let multi_comment_end =
+  Token ("-}", ExpectingMultiCommentEnd)
+
 (* Keywords *)
 
 let let_keyword =
@@ -203,15 +215,41 @@ let with_current_indent : 'a parser -> 'a parser =
     in
     with_indent col p
 
+(* Spaces *)
+
+let if_progress : 'a parser -> int -> (int, unit) step parser =
+  fun p offset ->
+    let+ new_offset =
+      succeed (fun n -> n)
+        |. p
+        |= get_offset
+    in
+    if Int.equal offset new_offset then
+      Done ()
+    else
+      Loop new_offset
+
+let any_spaces : unit parser =
+  loop 0
+    ( if_progress
+        ( one_of
+            [ line_comment line_comment_start
+            ; multi_comment multi_comment_start multi_comment_end Nestable
+            ; spaces
+            ]
+        )
+    )
+
 (* Indented spaces *)
+
 let sspaces : unit parser =
   succeed ()
-    |. spaces
+    |. any_spaces
     |. check_indent Strict
 
 let lspaces : unit parser =
   succeed ()
-    |. spaces
+    |. any_spaces
     |. check_indent Lax
 
 let tuple : ('a -> 'b) -> ('a list -> 'b) -> 'a parser -> 'b parser =
@@ -344,13 +382,13 @@ let rec typ' : unit -> typ parser =
                  ( map (fun name -> TData name) constructor_name
                  )
              ]
-        |. spaces
+        |. any_spaces
     in
     chainr1 CTArr ground_typ
       ( ignore_with (fun domain codomain -> TArr (domain, codomain))
           ( succeed ()
               |. symbol right_arrow
-              |. spaces
+              |. any_spaces
           )
       )
 
@@ -414,7 +452,7 @@ and ground_exp : unit -> exp parser =
                   |. symbol right_arrow
                   |. sspaces
                   |= lazily exp'
-                  |. spaces
+                  |. any_spaces
               ; succeed (Done (List.rev rev_branches))
               ]
         )
@@ -617,9 +655,9 @@ let statement : statement parser =
             ( let* (name, the_typ) =
                 succeed Pair2.pair
                   |= backtrackable variable_name
-                  |. backtrackable spaces
+                  |. backtrackable any_spaces
                   |. symbol colon
-                  |. spaces
+                  |. any_spaces
                   |= typ
               in
               let* (name', pats, body) =
@@ -648,7 +686,7 @@ let program : Desugar.program parser =
             one_of
               [ succeed (fun stmt -> Loop (stmt :: rev_statements))
                   |= statement
-                  |. spaces
+                  |. any_spaces
 
               ; succeed
                  ( fun main_opt ->
@@ -681,7 +719,7 @@ let program : Desugar.program parser =
                        )
                  )
                   |= optional exp
-                  |. spaces
+                  |. any_spaces
                   |. endd ExpectingEnd
               ]
         )
