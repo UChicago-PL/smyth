@@ -624,6 +624,7 @@ let statement : statement parser =
                 |= constructor_name
                 |. sspaces
                 |. symbol equals
+                |. sspaces
                 |= chainr1 CSDatatypeCtors
                      ( succeed (fun ctor_name arg -> [(ctor_name, arg)])
                          |= constructor_name
