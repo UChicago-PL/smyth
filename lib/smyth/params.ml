@@ -1,5 +1,8 @@
 (* All timing units are in seconds. *)
 
+let version : string =
+  "0.1.0"
+
 let debug_mode : bool =
   false
 

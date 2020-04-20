@@ -119,9 +119,40 @@ let rec pat' : pat printer =
       | PTuple comps ->
           collection Round state pat' comps
 
-
       | PWildcard ->
           "_"
+
+(* Types *)
+
+let rec typ' : typ printer =
+  fun state ->
+    function
+      | TArr (input, output) ->
+          let inner =
+            typ'
+              { indent = state.indent
+              ; app_needs_parens = false
+              ; fancy_needs_parens = true
+              }
+              input
+              ^ " -> "
+              ^ typ'
+                  { indent = state.indent
+                  ; app_needs_parens = false
+                  ; fancy_needs_parens = false
+                  }
+                  output
+          in
+          if state.fancy_needs_parens then
+            "(" ^ inner ^ ")"
+          else
+            inner
+
+      | TTuple comps ->
+          collection Round state typ' comps
+
+      | TData name ->
+          name
 
 (* Expressions *)
 
@@ -260,10 +291,28 @@ and exp' : exp printer =
                 "??"
 
             | EAssert (_, _) ->
-                "__ASSERT_UNSUPPORTED__"
+                "{ASSERTION}"
 
-            | ETypeAnnotation (exp, _) ->
-                exp' state exp
+            | ETypeAnnotation (the_exp, the_typ) ->
+                let inner =
+                  exp'
+                    { indent = state.indent
+                    ; app_needs_parens = true
+                    ; fancy_needs_parens = true
+                    }
+                    the_exp
+                    ^ " : "
+                    ^ typ'
+                        { indent = state.indent
+                        ; app_needs_parens = false
+                        ; fancy_needs_parens = false
+                        }
+                        the_typ
+                in
+                if state.fancy_needs_parens then
+                  "(" ^ inner ^ ")"
+                else
+                  inner
           end
 
 let exp : int -> exp -> string =

@@ -1,8 +1,28 @@
 open Lang
 
-let lett : string -> exp -> exp -> exp =
-  fun name binding body ->
-    EApp (false, EFix (Some name, PVar name, body), binding)
+let annotate_rec_name : string -> exp -> exp =
+  fun rec_name exp ->
+    match exp with
+      | EFix (_, param, body) ->
+          EFix (Some rec_name, param, body)
+
+      | _ ->
+          exp
+
+let lett : (typ * typ) option -> string -> exp -> exp -> exp =
+  fun type_info_opt name binding body ->
+    let func_inner =
+      EFix (None, PVar name, body)
+    in
+    let func =
+      match type_info_opt with
+        | Some (binding_typ, body_typ) ->
+            ETypeAnnotation (func_inner, TArr (binding_typ, body_typ))
+
+        | None ->
+            func_inner
+    in
+    EApp (false, func, annotate_rec_name name binding)
 
 let func_args : pat list -> exp -> exp =
   List.fold_right
@@ -44,18 +64,20 @@ type program =
 
 let program : program -> exp * datatype_ctx =
   fun { datatypes; definitions; assertions; main_opt } ->
-    ( List.fold_right
-        ( fun (name, the_typ, the_exp) ->
-            lett name (ETypeAnnotation (the_exp, the_typ))
-        )
-        definitions
+    ( Post_parse.exp
         ( List.fold_right
-            ( fun (e1, e2) ->
-                lett "_" (EAssert (e1, e2))
+            ( fun (name, the_typ, the_exp) ->
+                lett (Some (the_typ, TTuple [])) name the_exp
             )
-            assertions
-            ( Option2.with_default (ETuple [])
-                main_opt
+            definitions
+            ( List.fold_right
+                ( fun (e1, e2) ->
+                  lett (Some (TTuple [], TTuple [])) "_" (EAssert (e1, e2))
+                )
+                assertions
+                ( Option2.with_default (ETuple [])
+                    main_opt
+                )
             )
         )
     , List.rev datatypes

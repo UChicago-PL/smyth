@@ -293,24 +293,12 @@ let ignore_with : 'a -> unit parser -> 'a parser =
 
 (* Character predicates *)
 
-let uppercase_char : char -> bool =
-  function
-    | 'A' .. 'Z' -> true
-    | _ -> false
-
-let lowercase_char : char -> bool =
-  function
-    | 'a' .. 'z' -> true
-    | _ -> false
-
-let digit_char : char -> bool =
-  function
-    | '0' .. '9' -> true
-    | _ -> false
-
 let inner_char : char -> bool =
   fun c ->
-    lowercase_char c || uppercase_char c || digit_char c || Char.equal c '_'
+    Char2.lowercase_char c
+      || Char2.uppercase_char c
+      || Char2.digit_char c
+      || Char.equal c '_'
 
 (* Names *)
 
@@ -329,14 +317,14 @@ let reserved_words =
 
 let constructor_name : string parser =
   variable
-    ~start:uppercase_char
+    ~start:Char2.uppercase_char
     ~inner:inner_char
     ~reserved:String_set.empty
     ~expecting:ExpectingConstructorName
 
 let variable_name : string parser =
   variable
-    ~start:lowercase_char
+    ~start:Char2.lowercase_char
     ~inner:inner_char
     ~reserved:reserved_words
     ~expecting:ExpectingVariableName
@@ -435,7 +423,7 @@ and ground_exp : unit -> exp parser =
       [ in_context CELet
           ( succeed
              ( fun (name, pats, body) rest ->
-                 Desugar.lett name (Desugar.func_args pats body) rest
+                 Desugar.lett None name (Desugar.func_args pats body) rest
              )
               |. keyword let_keyword
               |. sspaces
@@ -518,74 +506,8 @@ and exp' : unit -> exp parser =
           )
       )
 
-let post_exp : exp -> exp =
-  fun root ->
-    Fresh.set_largest_hole (Exp.largest_hole root);
-    let rec post_exp' exp =
-      match exp with
-        (* Main cases *)
-
-          (* Handle constructor applications *)
-        | EApp (special, e1, e2) ->
-            let default () =
-              EApp (special, post_exp' e1, post_exp' e2)
-            in
-            begin match e1 with
-              | EVar name ->
-                  if uppercase_char (String.get name 0) then
-                    ECtor (name, post_exp' e2)
-                  else
-                    default ()
-
-              | _ ->
-                  default ()
-            end
-
-          (* Handle syntactic sugar for unapplied constructors *)
-        | EVar name ->
-            if uppercase_char (String.get name 0) then
-              ECtor (name, ETuple [])
-            else
-              EVar name
-
-          (* Set proper hole names *)
-        | EHole hole_name ->
-            if Int.equal hole_name Fresh.unused then
-              EHole (Fresh.gen_hole ())
-            else
-              EHole hole_name
-
-        (* Other cases *)
-
-        | EFix (f, x, body) ->
-            EFix (f, x, post_exp' body)
-
-        | ETuple components ->
-            ETuple (List.map post_exp' components)
-
-        | EProj (n, i, arg) ->
-            EProj (n, i, post_exp' arg)
-
-        | ECtor (ctor_name, arg) ->
-            ECtor (ctor_name, post_exp' arg)
-
-        | ECase (scrutinee, branches) ->
-            ECase
-              ( post_exp' scrutinee
-              , List.map (Pair2.map_snd (Pair2.map_snd post_exp')) branches
-              )
-
-        | EAssert (e1, e2) ->
-            EAssert (post_exp' e1, post_exp' e2)
-
-        | ETypeAnnotation (e, tau) ->
-            ETypeAnnotation (post_exp' e, tau)
-    in
-      post_exp' root
-
 let exp : exp parser =
   in_context CExp (exp' ())
-    |> map post_exp
 
 let binding : (string * pat list * exp) parser =
   binding' ()

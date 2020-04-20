@@ -1,10 +1,25 @@
 open Smyth
 
-let exec_name =
-  Sys.argv.(0)
+(* Information *)
 
-let usage_prefix =
-  "Usage: " ^ exec_name
+let title = "
+  -_-/                    ,  ,,
+ (_ /                    ||  ||
+(_ --_  \\\\/\\\\/\\\\ '\\\\/\\\\ =||= ||/\\\\
+  --_ ) || || ||  || ;'  ||  || ||
+ _/  )) || || ||  ||/    ||  || ||
+(_-_-   \\\\ \\\\ \\\\  |/     \\\\, \\\\ |/
+                 (             _/
+                  -_-
+"
+
+let name =
+  "Smyth"
+
+let description =
+  "Programming-by-example in a typed functional language with sketches."
+
+(* Commands *)
 
 type command =
   | Solve
@@ -49,6 +64,14 @@ let command_arguments : command -> (string * string) list =
           )
         ]
 
+(* Help *)
+
+let exec_name =
+  Sys.argv.(0)
+
+let usage_prefix =
+  "Usage: " ^ exec_name
+
 let command_help : command -> string =
   fun command ->
     let arguments =
@@ -63,42 +86,23 @@ let command_help : command -> string =
         |> String.concat "\n"
     )
 
-let synthesis_pipeline delta sigma assertions =
-  assertions
-    |> Uneval.simplify_assertions delta sigma
-    |> Solve.solve_any delta sigma
-
-let version_string =
-  "0.1.0"
-
-let title = "
-  -_-/                    ,  ,,
- (_ /                    ||  ||
-(_ --_  \\\\/\\\\/\\\\ '\\\\/\\\\ =||= ||/\\\\
-  --_ ) || || ||  || ;'  ||  || ||
- _/  )) || || ||  ||/    ||  || ||
-(_-_-   \\\\ \\\\ \\\\  |/     \\\\, \\\\ |/
-                 (             _/
-                  -_-
-"
-
-let name =
-  "Smyth"
-
-let description =
-  "Programming-by-example in a typed functional language with sketches."
-
 
 let available_commands =
   "Available commands:\n\n" ^
   ( commands
-      |> List.map (fun c -> Printf.sprintf "  %-8s%s" (command_name c) (command_description c))
+      |> List.map
+           ( fun command ->
+               Printf.sprintf
+                 "  %-8s%s"
+                 (command_name command)
+                 (command_description command)
+           )
       |> String.concat "\n"
   )
 
 let help =
   title ^ "\n" ^
-  name ^ " v" ^ version_string ^ "\n" ^
+  name ^ " v" ^ Params.version ^ "\n" ^
   description ^ "\n\n" ^
   usage_prefix ^ " <command> <args>\n\n" ^
   available_commands ^
@@ -109,31 +113,7 @@ let command_not_found attempt =
   "Could not find command '" ^ attempt ^ "'.\n\n" ^
   available_commands
 
-let read_all channel =
-  let acc =
-    ref []
-  in
-    begin try
-      while true do
-        acc := input_line channel :: !acc
-      done;
-      !acc
-    with
-      End_of_file ->
-        !acc
-    end
-      |> List.rev
-      |> String.concat "\n"
-
-let read_file path =
-  let channel =
-    open_in path
-  in
-  try
-    read_all channel
-  with e ->
-    close_in_noerr channel;
-    raise e
+(* Main *)
 
 let () =
   let argv_length =
@@ -179,34 +159,42 @@ let () =
   end;
   begin match command with
     | Solve ->
-        let sketch_path =
-          Sys.argv.(2)
-        in
-        let sketch_string =
-          read_file sketch_path
-        in
-        begin match Bark.run Parse.program sketch_string with
-          | Error _ ->
-              print_endline "Parse error.";
+        begin match
+          Endpoint.solve
+            ~sketch:(Io.read_file Sys.argv.(2))
+        with
+          | Error e ->
+              begin match e with
+                | Endpoint.ParseError _ -> print_endline "Parse error."
+                | Endpoint.TypeError _ -> print_endline "Type error."
+                | Endpoint.EvalError _ -> print_endline "Eval error."
+              end;
               exit 1
 
-          | Ok program ->
-              let (exp, _sigma) =
-                Desugar.program program
-              in
-              print_endline (Pretty.exp 0 exp)
+          | Ok hole_fillings ->
+              hole_fillings
+                |> List.map
+                     ( fun hole_filling ->
+                         hole_filling
+                           |> List.map
+                                ( fun (hole_name, exp) ->
+                                    "??" ^ string_of_int hole_name ^ ": \n\n" ^
+                                    Pretty.exp 0 exp
+                                )
+                           |> String.concat "\n\n"
+                     )
+                |> String.concat
+                     "\n----------------------------------------\n\n"
+                |> print_endline
         end
 
     | Test ->
-        let _sketch_path =
-          Sys.argv.(2)
+        let _ =
+          Endpoint.test
+            ~definitions:(Io.read_file Sys.argv.(2))
+            ~complete_assertions:(Io.read_file Sys.argv.(3))
+            ~partial_assertions:(Io.read_file Sys.argv.(4))
         in
-        let _complete_assertions_path =
-          Sys.argv.(3)
-        in
-        let _partial_assertions_path =
-          Sys.argv.(4)
-        in
-        prerr_endline "Temporarily unsupported."
+        prerr_endline "Temporarily unsupported.";
   end;
   exit 0

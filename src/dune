@@ -7,7 +7,7 @@
       stdlib2 smyth
 
       ; opam libraries
-      unix cohttp yojson ppx_deriving_yojson.runtime bark
+      bark
   )
   ( flags
       ; (-open Pervasives2)

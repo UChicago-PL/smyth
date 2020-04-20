@@ -1,6 +1,6 @@
 open Lang
 
-val lett : string -> exp -> exp -> exp
+val lett : (typ * typ) option -> string -> exp -> exp -> exp
 
 val func_args : pat list -> exp -> exp
 
