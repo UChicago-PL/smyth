@@ -1,5 +1,3 @@
-open Smyth
-
 type error =
   | ParseError of (Parse.context, Parse.problem) Bark.dead_end list
   | TypeError of (Lang.exp * Type.error)

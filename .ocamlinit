@@ -2,4 +2,3 @@ open Pervasives2
 open Smyth
 
 #mod_use "src/io.ml"
-#mod_use "src/endpoint.ml"
