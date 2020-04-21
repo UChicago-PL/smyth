@@ -447,7 +447,10 @@ and ground_exp' : unit -> exp parser =
                   |. check_indent Strict
                   |= constructor_name
                   |. sspaces
-                  |= pat
+                  |= one_of
+                       [ pat
+                       ; succeed (PTuple [])
+                       ]
                   |. sspaces
                   |. symbol right_arrow
                   |. sspaces
