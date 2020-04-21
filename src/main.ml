@@ -161,7 +161,7 @@ let () =
     | Solve ->
         begin match
           Endpoint.solve
-            ~sketch:(Io.read_file Sys.argv.(2))
+            ~sketch:(Io2.read_file Sys.argv.(2))
         with
           | Error e ->
               begin match e with
@@ -191,9 +191,9 @@ let () =
     | Test ->
         let _ =
           Endpoint.test
-            ~definitions:(Io.read_file Sys.argv.(2))
-            ~complete_assertions:(Io.read_file Sys.argv.(3))
-            ~partial_assertions:(Io.read_file Sys.argv.(4))
+            ~definitions:(Io2.read_file Sys.argv.(2))
+            ~complete_assertions:(Io2.read_file Sys.argv.(3))
+            ~partial_assertions:(Io2.read_file Sys.argv.(4))
         in
         prerr_endline "Temporarily unsupported.";
   end;
