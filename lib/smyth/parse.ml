@@ -393,7 +393,7 @@ let rec typ' : unit -> typ parser =
       )
 
 let typ : typ parser =
-  in_context CType (typ' ())
+  in_context CType (lazily typ')
 
 (* Patterns *)
 
@@ -414,7 +414,7 @@ let rec pat' : unit -> pat parser =
       ]
 
 let pat : pat parser =
-  in_context CPat (pat' ())
+  in_context CPat (lazily pat')
 
 (* Expressions *)
 
@@ -436,7 +436,7 @@ let rec binding' : unit -> (string * pat list * exp) parser =
       |. sspaces
       |= lazily exp'
 
-and ground_exp : unit -> exp parser =
+and ground_exp' : unit -> exp parser =
   fun () ->
     let branches =
       loop []
@@ -502,7 +502,7 @@ and ground_exp : unit -> exp parser =
               |. symbol dot
               |= Bark.int ExpectingTupleIndex
               |. sspaces
-              |= lazily ground_exp
+              |= lazily ground_exp'
           )
 
       ; in_context CEHole
@@ -538,17 +538,20 @@ and ground_exp : unit -> exp parser =
 and exp' : unit -> exp parser =
   fun () ->
     with_current_indent
-      ( chainl1 CEApp (with_current_indent (lazily ground_exp))
+      ( chainl1 CEApp (with_current_indent (lazily ground_exp'))
           ( ignore_with (fun head arg -> EApp (false, head, arg))
               (backtrackable sspaces)
           )
       )
 
+let ground_exp : exp parser =
+  in_context CExp (lazily ground_exp')
+
 let exp : exp parser =
-  in_context CExp (exp' ())
+  in_context CExp (lazily exp')
 
 let binding : (string * pat list * exp) parser =
-  binding' ()
+  lazily binding'
 
 (* Programs *)
 
@@ -574,11 +577,11 @@ type statement =
   | Definition of (string * typ * exp)
   | Assertion of (exp * exp)
 
-let statement : statement parser =
+let statement_group : statement list parser =
   in_context CStatement
     ( one_of
         [ in_context CSDatatype
-            ( succeed (fun data_name ctors -> Datatype (data_name, ctors))
+            ( succeed (fun data_name ctors -> [Datatype (data_name, ctors)])
                 |. keyword type_keyword
                 |. sspaces
                 |= constructor_name
@@ -603,7 +606,7 @@ let statement : statement parser =
             )
 
         ; in_context CSAssertion
-            ( succeed (fun e1 e2 -> Assertion (e1, e2))
+            ( succeed (fun e1 e2 -> [Assertion (e1, e2)])
                 |. keyword assert_keyword
                 |= exp
                 |. sspaces
@@ -617,7 +620,7 @@ let statement : statement parser =
                 succeed (fun n f -> (n, f))
                   |= specify_function_name
                   |. sspaces
-                  |= ground_exp ()
+                  |= ground_exp
                   |. sspaces
               in
               let+ io_examples =
@@ -638,17 +641,14 @@ let statement : statement parser =
                       |. symbol right_paren
                   )
               in
-              let (left, right) =
+              List.map
+                ( fun (inputs, output) ->
+                    Assertion
+                      ( Desugar.app func inputs
+                      , output
+                      )
+                )
                 io_examples
-                  |> List.map
-                       ( fun (inputs, output) ->
-                           ( Desugar.app func inputs
-                           , output
-                           )
-                       )
-                  |> List.split
-              in
-              Assertion (ETuple left, ETuple right)
             )
 
         ; in_context CSDefinition
@@ -669,12 +669,12 @@ let statement : statement parser =
                   )
               else
                 succeed
-                  ( Definition
+                  [ Definition
                       ( name
                       , the_typ
                       , Desugar.func_args pats body
                       )
-                  )
+                  ]
             )
         ]
     )
@@ -684,8 +684,11 @@ let program : Desugar.program parser =
     ( loop []
         ( fun rev_statements ->
             one_of
-              [ succeed (fun stmt -> Loop (stmt :: rev_statements))
-                  |= statement
+              [ succeed
+                 ( fun stmts ->
+                     Loop (List.rev_append stmts rev_statements)
+                 )
+                  |= statement_group
                   |. any_spaces
 
               ; succeed
