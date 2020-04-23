@@ -15,7 +15,7 @@ inc n = S n
 listMap : (Nat -> Nat) -> NatList -> NatList
 listMap f =
   let
-    -- listMapFix : NatList -> NatList
+    listMapFix : NatList -> NatList
     listMapFix xs =
       ??
   in

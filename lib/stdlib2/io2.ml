@@ -26,6 +26,19 @@ let read_file : string -> string =
       close_in_noerr channel;
       raise e
 
+let path : string list -> string =
+  fun parts ->
+    parts
+      |> List2.concat_map (String.split_on_char '/')
+      |> List.filter (fun s -> not (String.equal s ""))
+      |> String.concat "/"
+
+let read_path : string list -> string =
+  fun parts ->
+    parts
+      |> path
+      |> read_file
+
 let visible_files : string -> string list =
   fun dir ->
     dir
@@ -33,7 +46,7 @@ let visible_files : string -> string list =
       |> Array.to_list
       |> List.filter
            ( fun file ->
-               not (Sys.is_directory file)
+               not (Sys.is_directory (path [dir; file]))
                  && String.length file > 0
                  && String.get file 0 <> '.'
            )

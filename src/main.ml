@@ -191,6 +191,7 @@ let () =
                 solve_result.Endpoint.hole_fillings
               in
               hole_fillings
+                |> Rank.sort
                 |> List.map
                      ( fun hole_filling ->
                          hole_filling
@@ -218,10 +219,39 @@ let () =
               exit 1
 
           | Ok test_result ->
-              print_endline (Show.test_result test_result)
+              test_result
+                |> Show.test_result
+                |> print_endline
         end
 
     | SuiteTest ->
-        prerr_endline "Temporarily unsupported.";
+        let spec_path =
+          Sys.argv.(2)
+        in
+        let suite_path =
+          Sys.argv.(3)
+        in
+        let benchmark_names =
+          Io2.visible_files suite_path
+        in
+        benchmark_names
+          |> List.map
+               ( fun name ->
+                   begin match
+                     Endpoint.test
+                       ~specification:(Io2.read_path [spec_path; name])
+                       ~sketch:(Io2.read_path [suite_path; name])
+                       ~assertions:(Io2.read_path [suite_path; "examples"; name])
+                   with
+                     | Error e ->
+                         "! error (" ^ name ^ "): " ^ Show.error e
+
+                     | Ok test_result ->
+                         name ^ "," ^ Show.test_result test_result
+                   end |> (fun s -> print_endline s; s)
+               )
+          |> String.concat "\n"
+          |> print_endline
+
   end;
   exit 0

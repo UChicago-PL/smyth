@@ -15,7 +15,7 @@ listNth xs n =
           Z ()
 
         Cons p ->
-          get_2_1 p
+          #2.1 p
 
     S n_ ->
       ??

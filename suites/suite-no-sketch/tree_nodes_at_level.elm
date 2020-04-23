@@ -7,8 +7,8 @@ type BooleanTree
   | Node (BooleanTree, Boolean, BooleanTree)
 
 type Nat
-= Z ()
-| S Nat
+  = Z ()
+  | S Nat
 
 sum : Nat -> Nat -> Nat
 sum n1 n2 =

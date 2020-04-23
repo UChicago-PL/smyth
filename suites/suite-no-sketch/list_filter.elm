@@ -28,7 +28,7 @@ isNonzero n =
 listFilter : (Nat -> Boolean) -> NatList -> NatList
 listFilter predicate =
   let
-    -- fixListFilter : NatList -> NatList
+    fixListFilter : NatList -> NatList
     fixListFilter xs =
       ??
   in

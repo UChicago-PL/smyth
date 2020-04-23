@@ -4,8 +4,8 @@ type Cmp
   | GT ()
 
 type Nat
-= Z ()
-| S Nat
+  = Z ()
+  | S Nat
 
 type NatTree
   = Leaf ()

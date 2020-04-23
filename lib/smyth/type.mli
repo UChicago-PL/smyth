@@ -56,6 +56,7 @@ type error =
   | ProjectionOutOfBounds of int * int
 
   | AssertionTypeMismatch of typ * typ
+  [@@deriving yojson]
 
 val check :
   datatype_ctx -> type_ctx -> exp -> typ -> (hole_ctx, exp * error) result

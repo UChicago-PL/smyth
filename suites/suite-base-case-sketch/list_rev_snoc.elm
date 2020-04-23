@@ -10,7 +10,7 @@ snoc : NatList -> Nat -> NatList
 snoc xs n =
   case xs of
     Nil _ -> Cons (n, Nil ())
-    Cons p -> Cons (get_2_1 p, snoc (get_2_2 p) n)
+    Cons p -> Cons (#2.1 p, snoc (#2.2 p) n)
 
 listRevSnoc : NatList -> NatList
 listRevSnoc xs =

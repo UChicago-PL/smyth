@@ -9,11 +9,11 @@ type NatList
 fold : (Nat -> Nat -> Nat) -> Nat -> NatList -> Nat
 fold f acc =
   let
-    -- fixFold : NatList -> Nat
+    fixFold : NatList -> Nat
     fixFold xs =
       case xs of
         Nil _ -> acc
-        Cons p -> f (fixFold (get_2_2 p)) (get_2_1 p)
+        Cons p -> f (fixFold (#2.2 p)) (#2.1 p)
   in
     fixFold
 

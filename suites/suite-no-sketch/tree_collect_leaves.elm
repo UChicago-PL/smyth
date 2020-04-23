@@ -16,7 +16,7 @@ append l1 l2 =
     Nil _ ->
       l2
     Cons p ->
-      Cons (get_2_1 p, append (get_2_2 p) l2)
+      Cons (#2.1 p, append (#2.2 p) l2)
 
 treeCollectLeaves : BooleanTree -> BooleanList
 treeCollectLeaves tree =

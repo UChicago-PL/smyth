@@ -112,6 +112,7 @@ type error =
   | ProjectionOutOfBounds of int * int
 
   | AssertionTypeMismatch of typ * typ
+  [@@deriving yojson]
 
 (* returns return type * arg type *)
 let ctor_info :
@@ -297,6 +298,12 @@ and infer :
                 Ok (tau', [])
 
             | None ->
+                print_endline
+                  (Yojson.Safe.to_string (Lang.type_ctx_to_yojson gamma));
+                print_endline
+                  (String.concat "," @@
+                    List.map fst gamma
+                  );
                 Error
                   ( exp
                   , VarNotFound name

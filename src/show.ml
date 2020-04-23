@@ -6,11 +6,14 @@ let error : error -> string =
     | ParseError _ ->
         "Parse error"
 
-    | TypeError _ ->
-        "Type error"
+    | TypeError (exp, te) ->
+        "Type error: "
+          ^ (Yojson.Safe.to_string @@ Type.error_to_yojson te)
+          ^ " in "
+          ^ (Pretty.exp 0 exp)
 
-    | EvalError _ ->
-        "Eval error"
+    | EvalError e ->
+        "Eval error: " ^ e
 
     | TimedOut _ ->
         "Timed out"

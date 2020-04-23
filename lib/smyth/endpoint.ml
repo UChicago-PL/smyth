@@ -140,8 +140,8 @@ let check :
 
       | Ok _ ->
           begin match Eval.eval [] exp with
-            | Error e ->
-                Error (EvalError e)
+            | Error _ ->
+                Ok false
 
             | Ok (_, assertions) ->
                 Ok (List2.is_empty assertions)

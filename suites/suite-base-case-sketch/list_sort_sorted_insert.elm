@@ -28,10 +28,10 @@ insert xs n =
   case xs of
     Nil _ -> Cons (n, Nil ())
     Cons p ->
-      case compare n (get_2_1 p) of
-        LT _ -> Cons (n, Cons (get_2_1 p, get_2_2 p))
+      case compare n (#2.1 p) of
+        LT _ -> Cons (n, Cons (#2.1 p, #2.2 p))
         EQ _ -> xs
-        GT _ -> Cons (get_2_1 p, insert (get_2_2 p) n)
+        GT _ -> Cons (#2.1 p, insert (#2.2 p) n)
 
 listSortSortedInsert : NatList -> NatList
 listSortSortedInsert xs =

@@ -54,7 +54,10 @@ type problem =
   | NegativeArity of int
   | ZeroArity
 
+  | UnannotatedTopLevelDefinition
+
   | ExpectingEnd
+  [@@deriving yojson]
 
 type context =
   | CType
@@ -90,6 +93,7 @@ type context =
   | CSFuncSpecOutput
 
   | CProgram
+  [@@deriving yojson]
 
 type 'a parser =
   (context, problem, 'a) Bark.parser
@@ -436,6 +440,43 @@ let rec binding' : unit -> (string * pat list * exp) parser =
       |. sspaces
       |= lazily exp'
 
+and definition' : unit -> (typ option * string * pat list * exp) parser =
+  fun () ->
+    let* annotation_info =
+      optional
+        ( succeed Pair2.pair
+            |= backtrackable variable_name
+            |. backtrackable any_spaces
+            |. symbol colon
+            |. any_spaces
+            |= typ
+        )
+    in
+    let* (name, pats, body) =
+      lazily binding'
+    in
+    match annotation_info with
+      | None ->
+          succeed
+            ( None
+            , name
+            , pats
+            , body
+            )
+
+      | Some (name', the_typ) ->
+          if not (String.equal name name') then
+            problem
+              ( ExpectingName (name, name')
+              )
+          else
+            succeed
+              ( Some the_typ
+              , name
+              , pats
+              , body
+              )
+
 and ground_exp' : unit -> exp parser =
   fun () ->
     let branches =
@@ -460,15 +501,24 @@ and ground_exp' : unit -> exp parser =
               ]
         )
     in
+    (* TODO Support more than just fix! *)
     one_of
       [ in_context CELet
           ( succeed
-             ( fun (name, pats, body) rest ->
-                 Desugar.lett None name (Desugar.func_args pats body) rest
+             ( fun (typ_opt, name, pats, body) rest ->
+                 let typ_info_opt =
+                   Option.map (fun t -> (t, t))
+                   typ_opt
+                  in
+                  Desugar.lett
+                    typ_info_opt
+                    name
+                    (Desugar.func_args pats body)
+                    rest
              )
               |. keyword let_keyword
               |. sspaces
-              |= lazily binding'
+              |= lazily definition'
               |. lspaces
               |. keyword in_keyword
               |. lspaces
@@ -553,8 +603,8 @@ let ground_exp : exp parser =
 let exp : exp parser =
   in_context CExp (lazily exp')
 
-let binding : (string * pat list * exp) parser =
-  lazily binding'
+let definition : (typ option * string * pat list * exp) parser =
+  lazily definition'
 
 (* Programs *)
 
@@ -655,29 +705,21 @@ let statement_group : statement list parser =
             )
 
         ; in_context CSDefinition
-            ( let* (name, the_typ) =
-                succeed Pair2.pair
-                  |= backtrackable variable_name
-                  |. backtrackable any_spaces
-                  |. symbol colon
-                  |. any_spaces
-                  |= typ
+            ( let* (typ_opt, name, pats, body) =
+                definition
               in
-              let* (name', pats, body) =
-                binding
-              in
-              if not (String.equal name name') then
-                problem
-                  ( ExpectingName (name, name')
-                  )
-              else
-                succeed
-                  [ Definition
-                      ( name
-                      , the_typ
-                      , Desugar.func_args pats body
-                      )
-                  ]
+              match typ_opt with
+                | Some typ ->
+                    succeed
+                      [ Definition
+                          ( name
+                          , typ
+                          , Desugar.func_args pats body
+                          )
+                      ]
+
+                | None ->
+                    problem UnannotatedTopLevelDefinition
             )
         ]
     )
@@ -698,8 +740,8 @@ let program : Desugar.program parser =
                  ( fun main_opt ->
                      Done
                        ( let open Desugar in
-                         List.fold_right
-                           ( fun stmt prog ->
+                         List.fold_left
+                           ( fun prog stmt ->
                                match stmt with
                                  | Datatype d ->
                                      { prog with
@@ -716,12 +758,12 @@ let program : Desugar.program parser =
                                          assertions = a :: prog.assertions
                                      }
                            )
-                           rev_statements
                            { datatypes = []
                            ; definitions = []
                            ; assertions = []
                            ; main_opt = main_opt
                            }
+                           rev_statements
                        )
                  )
                   |= optional exp
