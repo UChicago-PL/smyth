@@ -17,7 +17,7 @@ inc n =
 listMap : (Nat -> Nat) -> NatList -> NatList
 listMap f =
   let
-    -- listMapFix : NatList -> NatList
+    listMapFix : NatList -> NatList
     listMapFix xs =
       case xs of
         Nil _ ->

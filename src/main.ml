@@ -248,7 +248,7 @@ let () =
 
                      | Ok test_result ->
                          name ^ "," ^ Show.test_result test_result
-                   end |> (fun s -> print_endline s; s)
+                   end
                )
           |> String.concat "\n"
           |> print_endline

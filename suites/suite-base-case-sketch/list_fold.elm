@@ -34,7 +34,7 @@ countOdd n1 n2 =
 listFold : (Nat -> Nat -> Nat) -> Nat -> NatList -> Nat
 listFold f acc =
   let
-    -- fixListFold : NatList -> Nat
+    fixListFold : NatList -> Nat
     fixListFold xs =
       case xs of
         Nil _ ->
