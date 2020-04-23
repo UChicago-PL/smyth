@@ -1,4 +1,2 @@
 open Pervasives2
 open Smyth
-
-#mod_use "src/io.ml"
