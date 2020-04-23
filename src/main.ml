@@ -19,30 +19,40 @@ let name =
 let description =
   "Programming-by-example in a typed functional language with sketches."
 
+(* Helpers *)
+
+let arg_format : string -> string =
+  fun s ->
+    "<" ^ s ^ ">"
+
 (* Commands *)
 
 type command =
   | Solve
   | Test
+  | SuiteTest
 
 let commands : command list =
-  [ Solve; Test ]
+  [ Solve; Test; SuiteTest ]
 
 let command_name : command -> string =
   function
     | Solve -> "forge"
     | Test -> "test"
+    | SuiteTest -> "suite-test"
 
 let command_from_name : string -> command option =
   function
     | "forge" -> Some Solve
     | "test" -> Some Test
+    | "suite-test" -> Some SuiteTest
     | _ -> None
 
 let command_description : command -> string =
   function
     | Solve -> "Complete a program sketch"
-    | Test -> "Compare solutions for different input-output examples"
+    | Test -> "Test a solution against a specification"
+    | SuiteTest -> "Test multiple solutions against specifications."
 
 let command_arguments : command -> (string * string) list =
   function
@@ -53,14 +63,23 @@ let command_arguments : command -> (string * string) list =
         ]
 
     | Test ->
-        [ ( "definitions"
-          , "The path to the sketch to be completed WITHOUT any assertions"
+        [ ( "specification"
+          , "The path to the specification"
           )
-        ; ( "complete_assertions"
-          , "The path to the complete set of assertions"
+        ; ( "sketch"
+          , "The path to the sketch to be tested WITHOUT any assertions"
           )
-        ; ( "partial_assertions"
-          , "The path to the partial set of assertions"
+        ; ( "assertions"
+          , "The path to the assertions over " ^ arg_format "sketch"
+          )
+        ]
+
+    | SuiteTest ->
+        [ ( "specifications"
+          , "The path to the directory of specifications"
+          )
+        ; ( "suite"
+          , "The path to the suite to be tested"
           )
         ]
 
@@ -79,7 +98,7 @@ let command_help : command -> string =
     in
     usage_prefix ^ " " ^
     command_name command ^ " " ^
-    String.concat " " (List.map (fun (name, _) -> "<" ^ name ^ ">") arguments) ^
+    String.concat " " (List.map (fun (name, _) -> arg_format name) arguments) ^
     "\n\nArguments:\n" ^
     ( arguments
         |> List.map (fun (name, desc) -> Printf.sprintf "  %-22s%s" name desc)
@@ -164,14 +183,13 @@ let () =
             ~sketch:(Io2.read_file Sys.argv.(2))
         with
           | Error e ->
-              begin match e with
-                | Endpoint.ParseError _ -> print_endline "Parse error."
-                | Endpoint.TypeError _ -> print_endline "Type error."
-                | Endpoint.EvalError _ -> print_endline "Eval error."
-              end;
+              prerr_endline (Error.show e);
               exit 1
 
-          | Ok hole_fillings ->
+          | Ok solve_result ->
+              let hole_fillings =
+                solve_result.Endpoint.hole_fillings
+              in
               hole_fillings
                 |> List.map
                      ( fun hole_filling ->
@@ -191,10 +209,13 @@ let () =
     | Test ->
         let _ =
           Endpoint.test
-            ~definitions:(Io2.read_file Sys.argv.(2))
-            ~complete_assertions:(Io2.read_file Sys.argv.(3))
-            ~partial_assertions:(Io2.read_file Sys.argv.(4))
+            ~specification:(Io2.read_file Sys.argv.(2))
+            ~sketch:(Io2.read_file Sys.argv.(3))
+            ~assertions:(Io2.read_file Sys.argv.(4))
         in
+        prerr_endline "Temporarily unsupported.";
+
+    | SuiteTest ->
         prerr_endline "Temporarily unsupported.";
   end;
   exit 0

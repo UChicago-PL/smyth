@@ -6,6 +6,12 @@ let version : string =
 let debug_mode : bool =
   false
 
+type ranking_method =
+  | Size
+
+let ranking_method =
+  Size
+
 (* None = infinity *)
 let max_solution_count : int option =
   Some 30

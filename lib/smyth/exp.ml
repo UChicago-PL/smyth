@@ -103,3 +103,82 @@ let rec largest_hole : exp -> hole_name =
               |> Option2.with_default Fresh.unused
           in
           max (largest_hole scrutinee) branch_max
+
+let rec has_special_recursion : exp -> bool =
+  function
+    | EFix (_, _, body) ->
+        has_special_recursion body
+
+    | EApp (special, e1, e2) ->
+        special || has_special_recursion e1 || has_special_recursion e2
+
+    | EVar _ ->
+        false
+
+    | ETuple components ->
+        List.exists has_special_recursion components
+
+    | EProj (_, _, arg) ->
+        has_special_recursion arg
+
+    | ECtor (_, arg) ->
+        has_special_recursion arg
+
+    | ECase (scrutinee, branches) ->
+        has_special_recursion scrutinee
+          || List.exists (fun (_, (_, e)) -> has_special_recursion e) branches
+
+    | EHole _ ->
+        false
+
+    | EAssert (e1, e2) ->
+        has_special_recursion e1 || has_special_recursion e2
+
+    | ETypeAnnotation (e, _) ->
+        has_special_recursion e
+
+let fill_hole : (hole_name * exp) -> exp -> exp =
+  fun (hole_name, hole_exp) ->
+    let rec helper : exp -> exp =
+      function
+        (* Main case *)
+
+        | EHole hole_name' ->
+            if Int.equal hole_name hole_name' then
+              hole_exp
+            else
+              EHole hole_name'
+
+        (* Other cases *)
+
+        | EFix (f, x, body) ->
+            EFix (f, x, helper body)
+
+        | EApp (special, e1, e2) ->
+            EApp (special, helper e1, helper e2)
+
+        | EVar x ->
+            EVar x
+
+        | ETuple components ->
+            ETuple (List.map helper components)
+
+        | EProj (n, i, arg) ->
+            EProj (n, i, helper arg)
+
+        | ECtor (ctor_name, arg) ->
+            ECtor (ctor_name, helper arg)
+
+        | ECase (scrutinee, branches) ->
+            ECase
+              ( helper scrutinee
+              , List.map (Pair2.map_snd (Pair2.map_snd helper)) branches
+              )
+
+        | EAssert (e1, e2) ->
+            EAssert (helper e1, helper e2)
+
+        | ETypeAnnotation (e, tau) ->
+            ETypeAnnotation (helper e, tau)
+    in
+    helper
