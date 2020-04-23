@@ -183,7 +183,7 @@ let () =
             ~sketch:(Io2.read_file Sys.argv.(2))
         with
           | Error e ->
-              prerr_endline (Error.show e);
+              prerr_endline (Show.error e);
               exit 1
 
           | Ok solve_result ->
@@ -207,13 +207,19 @@ let () =
         end
 
     | Test ->
-        let _ =
+        begin match
           Endpoint.test
             ~specification:(Io2.read_file Sys.argv.(2))
             ~sketch:(Io2.read_file Sys.argv.(3))
             ~assertions:(Io2.read_file Sys.argv.(4))
-        in
-        prerr_endline "Temporarily unsupported.";
+        with
+          | Error e ->
+              prerr_endline (Show.error e);
+              exit 1
+
+          | Ok test_result ->
+              print_endline (Show.test_result test_result)
+        end
 
     | SuiteTest ->
         prerr_endline "Temporarily unsupported.";
