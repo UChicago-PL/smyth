@@ -26,7 +26,7 @@ inc n =
 treeMap : (Nat -> Nat) -> NatTree -> NatTree
 treeMap f =
   let
-    -- fixTreeMap : NatTree -> NatTree
+    fixTreeMap : NatTree -> NatTree
     fixTreeMap tree =
       ??
   in

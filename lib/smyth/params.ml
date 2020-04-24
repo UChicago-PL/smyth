@@ -20,7 +20,7 @@ let uneval_case_budget : int =
   10
 
 let max_total_time : float =
-  120.0
+  20.0
 
 let max_eval_time : float =
   0.1
