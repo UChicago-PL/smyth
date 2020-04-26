@@ -10,7 +10,7 @@ let error : error -> string =
         "Type error: "
           ^ (Yojson.Safe.to_string @@ Type.error_to_yojson te)
           ^ " in "
-          ^ (Pretty.exp 0 exp)
+          ^ Pretty.exp exp
 
     | EvalError e ->
         "Eval error: " ^ e

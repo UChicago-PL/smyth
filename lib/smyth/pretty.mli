@@ -1,3 +1,3 @@
 open Lang
 
-val exp : int -> exp -> string
+val exp : exp -> string

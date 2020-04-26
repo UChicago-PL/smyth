@@ -235,8 +235,8 @@ let () =
                                     ( fun (hole_name, exp) ->
                                         "??"
                                           ^ string_of_int hole_name
-                                          ^ ": \n\n" ^
-                                        Pretty.exp 0 exp
+                                          ^ ": \n\n"
+                                          ^ Pretty.exp exp
                                     )
                                |> String.concat "\n\n"
                            ]

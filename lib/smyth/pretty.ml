@@ -315,10 +315,9 @@ and exp' : exp printer =
                   inner
           end
 
-let exp : int -> exp -> string =
-  fun indent ->
-    exp'
-      { indent = indent
-      ; app_needs_parens = false
-      ; fancy_needs_parens = false
-      }
+let exp : exp -> string =
+  exp'
+    { indent = 0
+    ; app_needs_parens = false
+    ; fancy_needs_parens = false
+    }
