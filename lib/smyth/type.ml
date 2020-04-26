@@ -243,6 +243,16 @@ let rec check :
           (* TODO: handle function decrease requirement and match depth *)
           Ok [(name, (gamma, tau, None, 0))]
 
+      (* Nonstandard, but useful for let-bindings *)
+      | EApp (_, head, ETypeAnnotation (arg, arg_type)) ->
+          let* arg_delta =
+            check sigma gamma arg arg_type
+          in
+          let+ head_delta =
+            check sigma gamma head (TArr (arg_type, tau))
+          in
+            head_delta @ arg_delta
+
       | EApp (_, _, _)
       | EVar _
       | EProj (_, _, _)

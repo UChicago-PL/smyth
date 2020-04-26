@@ -50,8 +50,6 @@ type problem =
   | NegativeArity of int
   | ZeroArity
 
-  | UnannotatedTopLevelDefinition
-
   | ExpectingEnd
   [@@deriving yojson]
 

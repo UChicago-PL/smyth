@@ -159,3 +159,17 @@ let rec find_map f xs =
 
 let sum xs =
   List.fold_left ((+)) 0 xs
+
+let take n xs =
+  let rec helper acc n xs =
+    if n <= 0 then
+      List.rev acc
+    else
+      match xs with
+        | [] ->
+            List.rev acc
+
+        | head :: tail ->
+            helper (head :: acc) (n - 1) tail
+  in
+    helper [] n xs

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cat suites/suite-$1/$2.elm suites/suite-$1/examples/$2.elm > forge_temp_file
+
+./smyth forge forge_temp_file
+
+rm forge_temp_file

@@ -54,8 +54,6 @@ type problem =
   | NegativeArity of int
   | ZeroArity
 
-  | UnannotatedTopLevelDefinition
-
   | ExpectingEnd
   [@@deriving yojson]
 
@@ -440,42 +438,30 @@ let rec binding' : unit -> (string * pat list * exp) parser =
       |. sspaces
       |= lazily exp'
 
-and definition' : unit -> (typ option * string * pat list * exp) parser =
+and definition' : unit -> (typ * string * pat list * exp) parser =
   fun () ->
-    let* annotation_info =
-      optional
-        ( succeed Pair2.pair
-            |= backtrackable variable_name
-            |. backtrackable any_spaces
-            |. symbol colon
-            |. any_spaces
-            |= typ
-        )
+    let* (name, the_typ) =
+        succeed Pair2.pair
+          |= backtrackable variable_name
+          |. backtrackable any_spaces
+          |. symbol colon
+          |. any_spaces
+          |= typ
     in
-    let* (name, pats, body) =
+    let* (name', pats, body) =
       lazily binding'
     in
-    match annotation_info with
-      | None ->
-          succeed
-            ( None
-            , name
-            , pats
-            , body
-            )
-
-      | Some (name', the_typ) ->
-          if not (String.equal name name') then
-            problem
-              ( ExpectingName (name, name')
-              )
-          else
-            succeed
-              ( Some the_typ
-              , name
-              , pats
-              , body
-              )
+    if not (String.equal name name') then
+      problem
+        ( ExpectingName (name, name')
+        )
+    else
+      succeed
+        ( the_typ
+        , name
+        , pats
+        , body
+        )
 
 and ground_exp' : unit -> exp parser =
   fun () ->
@@ -505,13 +491,9 @@ and ground_exp' : unit -> exp parser =
     one_of
       [ in_context CELet
           ( succeed
-             ( fun (typ_opt, name, pats, body) rest ->
-                 let typ_info_opt =
-                   Option.map (fun t -> (t, t))
-                   typ_opt
-                  in
+             ( fun (typ, name, pats, body) rest ->
                   Desugar.lett
-                    typ_info_opt
+                    typ
                     name
                     (Desugar.func_args pats body)
                     rest
@@ -603,7 +585,7 @@ let ground_exp : exp parser =
 let exp : exp parser =
   in_context CExp (lazily exp')
 
-let definition : (typ option * string * pat list * exp) parser =
+let definition : (typ * string * pat list * exp) parser =
   lazily definition'
 
 (* Programs *)
@@ -705,21 +687,15 @@ let statement_group : statement list parser =
             )
 
         ; in_context CSDefinition
-            ( let* (typ_opt, name, pats, body) =
+            ( let+ (typ, name, pats, body) =
                 definition
               in
-              match typ_opt with
-                | Some typ ->
-                    succeed
-                      [ Definition
-                          ( name
-                          , typ
-                          , Desugar.func_args pats body
-                          )
-                      ]
-
-                | None ->
-                    problem UnannotatedTopLevelDefinition
+              [ Definition
+                  ( name
+                  , typ
+                  , Desugar.func_args pats body
+                  )
+              ]
             )
         ]
     )

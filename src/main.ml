@@ -1,5 +1,10 @@
 open Smyth
 
+(* Parameters *)
+
+let forge_solution_count : int =
+  3
+
 (* Information *)
 
 let title = "
@@ -112,7 +117,7 @@ let available_commands =
       |> List.map
            ( fun command ->
                Printf.sprintf
-                 "  %-8s%s"
+                 "  %-12s%s"
                  (command_name command)
                  (command_description command)
            )
@@ -192,18 +197,22 @@ let () =
               in
               hole_fillings
                 |> Rank.sort
+                |> List2.take forge_solution_count
                 |> List.map
                      ( fun hole_filling ->
-                         hole_filling
-                           |> List.map
-                                ( fun (hole_name, exp) ->
-                                    "??" ^ string_of_int hole_name ^ ": \n\n" ^
-                                    Pretty.exp 0 exp
-                                )
-                           |> String.concat "\n\n"
+                         String.concat "\n\n"
+                           [ "rank: " ^ string_of_int (Rank.rank hole_filling)
+                           ; hole_filling
+                               |> List.map
+                                    ( fun (hole_name, exp) ->
+                                        "??" ^ string_of_int hole_name ^ ": \n\n" ^
+                                        Pretty.exp 0 exp
+                                    )
+                               |> String.concat "\n\n"
+                           ]
                      )
                 |> String.concat
-                     "\n----------------------------------------\n\n"
+                     "\n----------------------------------------\n"
                 |> print_endline
         end
 
@@ -235,23 +244,36 @@ let () =
           Io2.visible_files suite_path
         in
         benchmark_names
-          |> List.map
+          |> List.iter
                ( fun name ->
-                   begin match
-                     Endpoint.test
-                       ~specification:(Io2.read_path [spec_path; name])
-                       ~sketch:(Io2.read_path [suite_path; name])
-                       ~assertions:(Io2.read_path [suite_path; "examples"; name])
-                   with
-                     | Error e ->
-                         "! error (" ^ name ^ "): " ^ Show.error e
+                   let output =
+                     begin match
+                       Endpoint.test
+                         ~specification:(Io2.read_path [spec_path; name])
+                         ~sketch:(Io2.read_path [suite_path; name])
+                         ~assertions:(Io2.read_path [suite_path; "examples"; name])
+                     with
+                       | Error e ->
+                           "? error (" ^ name ^ "): " ^ Show.error e
 
-                     | Ok test_result ->
-                         name ^ "," ^ Show.test_result test_result
-                   end
+                       | Ok test_result ->
+                           let prefix =
+                             if
+                               not test_result.Endpoint.top_success
+                                 && not test_result.Endpoint.top_recursive_success
+                             then
+                               "! failure:"
+                             else
+                               ""
+                           in
+                           prefix
+                            ^ name
+                            ^ ","
+                            ^ Show.test_result test_result
+                     end
+                   in
+                   print_endline output
                )
-          |> String.concat "\n"
-          |> print_endline
 
   end;
   exit 0

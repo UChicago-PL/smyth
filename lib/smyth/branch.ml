@@ -71,6 +71,10 @@ let distribute
             )
 
       | _ ->
+          Log.warn
+            ( "Scrutinee did not evaluate to a constructor or indeterminate "
+            ^ "result"
+            );
           Nondet.none
 
 let branch

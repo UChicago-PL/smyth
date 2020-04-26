@@ -9,20 +9,16 @@ let annotate_rec_name : string -> exp -> exp =
       | _ ->
           exp
 
-let lett : (typ * typ) option -> string -> exp -> exp -> exp =
-  fun type_info_opt name binding body ->
-    let func_inner =
-      EFix (None, PVar name, body)
-    in
-    let func =
-      match type_info_opt with
-        | Some (binding_typ, body_typ) ->
-            ETypeAnnotation (func_inner, TArr (binding_typ, body_typ))
-
-        | None ->
-            func_inner
-    in
-    EApp (false, func, annotate_rec_name name binding)
+let lett : typ -> string -> exp -> exp -> exp =
+  fun the_typ name binding body ->
+    EApp
+      ( false
+      , EFix (None, PVar name, body)
+      , ETypeAnnotation
+          ( annotate_rec_name name binding
+          , the_typ
+          )
+      )
 
 let func_args : pat list -> exp -> exp =
   List.fold_right
@@ -67,12 +63,12 @@ let program : program -> exp * datatype_ctx =
     ( Post_parse.exp
         ( List.fold_right
             ( fun (name, the_typ, the_exp) ->
-                lett (Some (the_typ, TTuple [])) name the_exp
+                lett the_typ name the_exp
             )
             definitions
             ( List.fold_right
                 ( fun (e1, e2) ->
-                  lett (Some (TTuple [], TTuple [])) "_" (EAssert (e1, e2))
+                  lett (TTuple []) "_" (EAssert (e1, e2))
                 )
                 assertions
                 ( Option2.with_default (ETuple [])
