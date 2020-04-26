@@ -228,11 +228,14 @@ let () =
                 |> List.map
                      ( fun hole_filling ->
                          String.concat "\n\n"
-                           [ "rank: " ^ string_of_int (Rank.rank hole_filling)
+                           [ "rank: "
+                               ^ string_of_int (Rank.rank hole_filling)
                            ; hole_filling
                                |> List.map
                                     ( fun (hole_name, exp) ->
-                                        "??" ^ string_of_int hole_name ^ ": \n\n" ^
+                                        "??"
+                                          ^ string_of_int hole_name
+                                          ^ ": \n\n" ^
                                         Pretty.exp 0 exp
                                     )
                                |> String.concat "\n\n"
