@@ -5,6 +5,9 @@ open Smyth
 let forge_solution_count : int =
   3
 
+let suite_test_n : int =
+  5
+
 (* Information *)
 
 let title = "
@@ -29,6 +32,30 @@ let description =
 let arg_format : string -> string =
   fun s ->
     "<" ^ s ^ ">"
+
+let summarize : Endpoint.test_result list -> Endpoint.test_result option =
+  fun test_results ->
+    let open Option2.Syntax in
+    let open Endpoint in
+    let* head =
+      List2.hd_opt test_results
+    in
+    let* _ =
+      Option2.guard @@
+        List.for_all
+          ( fun (tr : test_result) ->
+              { tr with time_taken = 0.0 } = { head with time_taken = 0.0 }
+          )
+          test_results
+    in
+    let+ average_time_taken =
+      test_results
+        |> List.map (fun (tr : test_result) -> tr.time_taken)
+        |> List2.average
+    in
+    { head with
+        time_taken = average_time_taken
+    }
 
 (* Commands *)
 
@@ -243,33 +270,52 @@ let () =
         let benchmark_names =
           Io2.visible_files suite_path
         in
+        print_endline ("% N = " ^ string_of_int suite_test_n);
         benchmark_names
           |> List.iter
                ( fun name ->
                    let output =
                      begin match
-                       Endpoint.test
-                         ~specification:(Io2.read_path [spec_path; name])
-                         ~sketch:(Io2.read_path [suite_path; name])
-                         ~assertions:(Io2.read_path [suite_path; "examples"; name])
+                       Result2.sequence @@
+                         List.init suite_test_n
+                           ( fun _ ->
+                               Endpoint.test
+                                 ~specification:
+                                   ( Io2.read_path
+                                       [spec_path; name]
+                                   )
+                                 ~sketch:
+                                   ( Io2.read_path
+                                       [suite_path; name]
+                                   )
+                                 ~assertions:
+                                   ( Io2.read_path
+                                       [suite_path; "examples"; name]
+                                   )
+                           )
                      with
                        | Error e ->
                            "? error (" ^ name ^ "): " ^ Show.error e
 
-                       | Ok test_result ->
-                           let prefix =
-                             if
-                               not test_result.Endpoint.top_success
-                                 && not test_result.Endpoint.top_recursive_success
-                             then
-                               "! failure:"
-                             else
-                               ""
-                           in
-                           prefix
-                            ^ name
-                            ^ ","
-                            ^ Show.test_result test_result
+                       | Ok test_results ->
+                           match summarize test_results with
+                             | Some test_result ->
+                                 let prefix =
+                                   if
+                                     not test_result.Endpoint.top_success &&
+                                     not test_result.Endpoint.top_recursive_success
+                                   then
+                                     "! failure: "
+                                   else
+                                     ""
+                                 in
+                                 prefix
+                                  ^ name
+                                  ^ ","
+                                  ^ Show.test_result test_result
+
+                             | None ->
+                                 "? inconsistent test: " ^ name
                      end
                    in
                    print_endline output

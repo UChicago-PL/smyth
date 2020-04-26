@@ -24,4 +24,6 @@ val index_left : 'a list -> (int * 'a) list
 val index_right : 'a list -> ('a * int) list
 val find_map : ('a -> 'b option) -> 'a list -> 'b option
 val sum : int list -> int
+val fsum : float list -> float
+val average : float list -> float option
 val take : int -> 'a list -> 'a list

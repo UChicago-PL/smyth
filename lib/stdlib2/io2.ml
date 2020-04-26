@@ -10,6 +10,7 @@ let read_all : in_channel -> string =
         !acc
       with
         End_of_file ->
+          close_in channel;
           !acc
       end
         |> List.rev
@@ -17,14 +18,7 @@ let read_all : in_channel -> string =
 
 let read_file : string -> string =
   fun path ->
-    let channel =
-      open_in path
-    in
-    try
-      read_all channel
-    with e ->
-      close_in_noerr channel;
-      raise e
+    read_all (open_in path)
 
 let path : string list -> string =
   fun parts ->

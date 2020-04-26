@@ -160,6 +160,18 @@ let rec find_map f xs =
 let sum xs =
   List.fold_left ((+)) 0 xs
 
+let fsum xs =
+  List.fold_left ((+.)) 0.0 xs
+
+let average xs =
+  let len =
+    List.length xs
+  in
+  if Int.equal len 0 then
+    None
+  else
+    Some (fsum xs /. float_of_int len)
+
 let take n xs =
   let rec helper acc n xs =
     if n <= 0 then
