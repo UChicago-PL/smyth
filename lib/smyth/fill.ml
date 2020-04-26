@@ -5,13 +5,7 @@ let refine_or_branch
  params delta sigma hf (hole_name, synthesis_goal) =
   let* (additional_depth, ((exp, subgoals), choice_constraints)) =
     Nondet.union
-      [ Nondet.map (fun x -> (0, (x, Constraints.empty))) @@
-          Nondet.lift_option @@
-            Refine.refine
-              delta
-              sigma
-              synthesis_goal
-      ; if params.max_match_depth > 0 then
+      [ if params.max_match_depth > 0 then
           Nondet.map (Pair2.pair 1) @@
             Branch.branch
               params.max_scrutinee_size
@@ -21,6 +15,12 @@ let refine_or_branch
               synthesis_goal
         else
           Nondet.none
+      ; Nondet.map (fun x -> (0, (x, Constraints.empty))) @@
+          Nondet.lift_option @@
+            Refine.refine
+              delta
+              sigma
+              synthesis_goal
       ]
   in
   let* (_, _, _, parent_depth) =
