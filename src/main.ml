@@ -304,9 +304,10 @@ let () =
                            match summarize test_results with
                              | Some test_result ->
                                  let prefix =
+                                   let open Endpoint in
                                    if
-                                     not test_result.Endpoint.top_success &&
-                                     not test_result.Endpoint.top_recursive_success
+                                     not test_result.top_success &&
+                                     not test_result.top_recursive_success
                                    then
                                      "! failure: "
                                    else
