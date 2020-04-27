@@ -134,13 +134,19 @@ let ctor_info :
           sigma
       )
 
-let rec check :
+type state =
+  { function_decrease_requirement : string option (* TODO: currently unused *)
+  ; match_depth : int
+  }
+
+let rec check' :
+ state ->
  datatype_ctx ->
  type_ctx ->
  exp ->
  typ ->
  (hole_ctx, exp * error) result =
-  fun sigma gamma exp tau ->
+  fun state sigma gamma exp tau ->
     let open Result2.Syntax in
     match exp with
       | EFix (func_name_opt, param_pat, body) ->
@@ -162,7 +168,8 @@ let rec check :
                            , PatternMatchFailure (arg_type, param_pat)
                            )
                 in
-                check
+                check'
+                  state
                   sigma
                   (param_gamma @ func_name_gamma @ gamma)
                   body
@@ -179,7 +186,7 @@ let rec check :
           begin match tau with
             | TTuple taus ->
                 if Int.equal (List.length exps) (List.length taus) then
-                  List.map2 (check sigma gamma) exps taus
+                  List.map2 (check' state sigma gamma) exps taus
                     |> Result2.sequence
                     |> Result.map List.concat
                 else
@@ -197,7 +204,7 @@ let rec check :
 
       | ECase (scrutinee, branches) ->
           let* (scrutinee_type, scrutinee_delta) =
-            infer sigma gamma scrutinee
+            infer' state sigma gamma scrutinee
           in
           let dec_bind_spec =
             scrutinee
@@ -220,7 +227,10 @@ let rec check :
                                     , PatternMatchFailure (arg_type, param_pat)
                                     )
                          in
-                         check
+                         check'
+                           { state with
+                               match_depth = state.match_depth + 1
+                           }
                            sigma
                            (param_gamma @ gamma)
                            body
@@ -240,18 +250,25 @@ let rec check :
             scrutinee_delta @ branch_deltas
 
       | EHole name ->
-          (* TODO: handle function decrease requirement and match depth *)
-          Ok [(name, (gamma, tau, None, 0))]
+          Ok
+            [ ( name
+              , ( gamma
+                , tau
+                , state.function_decrease_requirement
+                , state.match_depth
+                )
+              )
+            ]
 
       (* Nonstandard, but useful for let-bindings *)
       | EApp (_, head, ETypeAnnotation (arg, arg_type)) ->
           let* arg_delta =
-            check sigma gamma arg arg_type
+            check' state sigma gamma arg arg_type
           in
           let+ head_delta =
-            check sigma gamma head (TArr (arg_type, tau))
+            check' state sigma gamma head (TArr (arg_type, tau))
           in
-            head_delta @ arg_delta
+          head_delta @ arg_delta
 
       | EApp (_, _, _)
       | EVar _
@@ -260,7 +277,7 @@ let rec check :
       | EAssert (_, _)
       | ETypeAnnotation (_, _) ->
           let* (tau', delta) =
-            infer sigma gamma exp
+            infer' state sigma gamma exp
           in
           if equal tau tau' then
             Ok delta
@@ -270,12 +287,13 @@ let rec check :
               , GotButExpected (tau', tau)
               )
 
-and infer :
+and infer' :
+ state ->
  datatype_ctx ->
  type_ctx ->
  exp ->
  (typ * hole_ctx, exp * error) result =
-  fun sigma gamma exp ->
+  fun state sigma gamma exp ->
     let open Result2.Syntax in
     match exp with
       | EFix (_, _, _) ->
@@ -286,12 +304,12 @@ and infer :
 
       | EApp (_, head, arg) ->
           let* (head_type, head_delta) =
-            infer sigma gamma head
+            infer' state sigma gamma head
           in
           begin match head_type with
             | TArr (arg_type, return_type) ->
                 let+ arg_delta =
-                  check sigma gamma arg arg_type
+                  check' state sigma gamma arg arg_type
                 in
                 (return_type, head_delta @ arg_delta)
 
@@ -308,12 +326,6 @@ and infer :
                 Ok (tau', [])
 
             | None ->
-                print_endline
-                  (Yojson.Safe.to_string (Lang.type_ctx_to_yojson gamma));
-                print_endline
-                  (String.concat "," @@
-                    List.map fst gamma
-                  );
                 Error
                   ( exp
                   , VarNotFound name
@@ -322,7 +334,7 @@ and infer :
 
       | ETuple exps ->
           exps
-            |> List.map (infer sigma gamma)
+            |> List.map (infer' state sigma gamma)
             |> Result2.sequence
             |> Result.map List.split
             |> Result.map
@@ -334,7 +346,7 @@ and infer :
 
       | EProj (n, i, arg) ->
           let* (arg_type, arg_delta) =
-            infer sigma gamma arg
+            infer' state sigma gamma arg
           in
           begin match arg_type with
             | TTuple components ->
@@ -364,11 +376,11 @@ and infer :
             ctor_info exp sigma ctor_name
           in
           let+ arg_delta =
-            check sigma gamma arg arg_type
+            check' state sigma gamma arg arg_type
           in
           (return_type, arg_delta)
 
-      | ECase (_scrutinee, _branches) ->
+      | ECase (_, _) ->
           Error
             ( exp
             , CannotInferCaseType
@@ -382,10 +394,10 @@ and infer :
 
       | EAssert (left, right) ->
           let* (left_type, left_delta) =
-            infer sigma gamma left
+            infer' state sigma gamma left
           in
           let* (right_type, right_delta) =
-            infer sigma gamma right
+            infer' state sigma gamma right
           in
           if equal left_type right_type then
             Ok (TTuple [], left_delta @ right_delta)
@@ -397,6 +409,18 @@ and infer :
 
       | ETypeAnnotation (exp', tau') ->
           let+ delta =
-            check sigma gamma exp' tau'
+            check' state sigma gamma exp' tau'
           in
           (tau', delta)
+
+let check =
+  check'
+    { function_decrease_requirement = None
+    ; match_depth = 0
+    }
+
+let infer =
+  infer'
+    { function_decrease_requirement = None
+    ; match_depth = 0
+    }
