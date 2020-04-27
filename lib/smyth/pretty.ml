@@ -280,7 +280,6 @@ and exp' : exp printer =
                         scrutinee
                     ^ " of\n"
                     ^ String.concat "\n\n" (List.map print_branch branches)
-                    ^ "\n"
                 in
                 if state.fancy_needs_parens then
                   "(" ^ inner ^ ")"
