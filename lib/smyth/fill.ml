@@ -4,6 +4,7 @@ open Nondet.Syntax
 let refine_or_branch
  params delta sigma hf (hole_name, synthesis_goal) =
   let* (additional_depth, ((exp, subgoals), choice_constraints)) =
+    (* Note: Try to branch FIRST! This results in more idiomatic solutions. *)
     Nondet.union
       [ if params.max_match_depth > 0 then
           Nondet.map (Pair2.pair 1) @@
