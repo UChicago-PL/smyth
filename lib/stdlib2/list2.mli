@@ -27,3 +27,4 @@ val sum : int list -> int
 val fsum : float list -> float
 val average : float list -> float option
 val take : int -> 'a list -> 'a list
+val cartesian_product : 'a list -> 'b list -> ('a * 'b) list

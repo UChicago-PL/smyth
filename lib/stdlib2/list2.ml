@@ -185,3 +185,6 @@ let take n xs =
             helper (head :: acc) (n - 1) tail
   in
     helper [] n xs
+
+let cartesian_product xs ys =
+  concat_map (fun x -> List.map (fun y -> (x, y)) ys) xs

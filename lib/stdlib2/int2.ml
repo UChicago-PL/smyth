@@ -18,3 +18,18 @@ let rec partition ~n ~k =
 let partition_permutations ~n ~k =
 	partition ~n ~k
 		|> List2.concat_map List2.permutations
+
+(* Source: https://stackoverflow.com/a/16950740/ *)
+let rec pow a =
+	function
+		| 0 ->
+        1
+
+		| 1 ->
+        a
+
+		| n ->
+        let b =
+          pow a (n / 2)
+        in
+        b * b * (if n mod 2 = 0 then 1 else a)
