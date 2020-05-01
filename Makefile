@@ -19,3 +19,9 @@ loc:
 
 loci:
 	find lib src -name "*.ml*" | xargs wc -l
+
+smythloc:
+	find lib/smyth -name "*.ml" | xargs wc -l
+
+smythloci:
+	find lib/smyth -name "*.ml*" | xargs wc -l
