@@ -405,6 +405,8 @@ let () =
           "% N = "
             ^ string_of_int Random_experiment.trial_count
             ^ "\n"
+            ^ "example count,top success percent,top recursive success percent"
+            ^ "\n"
             ^ String.concat "\n"
                 ( List.mapi
                     ( fun k_ (top_successes, top_recursive_successes) ->
