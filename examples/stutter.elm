@@ -7,7 +7,8 @@ type NatList
   | Cons (Nat, NatList)
 
 listStutter : NatList -> NatList
-listStutter xs = ??
+listStutter xs =
+  ??
 
 specifyFunction listStutter
   [ ([], [])
