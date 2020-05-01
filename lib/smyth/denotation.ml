@@ -57,4 +57,4 @@ let rec tree : 'a t -> 'a Tree2.t t =
 
 let args2 : 'a1 t -> 'a2 t -> ('a1 * 'a2) t =
   fun da1 da2 (x1, x2) ->
-    ETuple [da1 x1; da2 x2]
+    ECtor ("args", ETuple [da1 x1; da2 x2])

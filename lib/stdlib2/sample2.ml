@@ -49,6 +49,14 @@ let all :
 				(List2.range ~low:1 ~high:max_size)
 		)
 
+let constant : 'a -> 'a gen =
+  fun x () ->
+    x
+
+let pair : 'a gen -> 'b gen -> ('a * 'b) gen =
+  fun x y () ->
+    (x (), y ())
+
 (* Semi-Generic *)
 
 type list_shape
@@ -152,7 +160,7 @@ let nested_nat_list : int list list gen =
 let bool_list : bool list gen =
   list max_bool_list_length 2 bool
 
-let net_tree : int Tree2.t gen =
+let nat_tree : int Tree2.t gen =
   tree max_nat_tree_size (max_nat + 1) nat
 
 let bool_tree : bool Tree2.t gen =
@@ -169,7 +177,7 @@ let io : ('a -> 'b) -> 'a gen -> ('a * 'b) gen =
     in
     (x, f x)
 
-let trial :
+let io_trial :
  int ->
  int ->
  ('a -> 'b) ->

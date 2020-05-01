@@ -32,3 +32,9 @@ val test :
   sketch:string ->
   assertions:string ->
   test_result response
+
+val test_assertions :
+  specification:string ->
+  sketch:string ->
+  assertions:((Lang.exp * Lang.exp) list) ->
+  test_result response

@@ -147,16 +147,11 @@ let check :
                 Ok (List2.is_empty assertions)
           end
 
-let test ~specification ~sketch ~assertions =
+let test_assertions ~specification ~sketch ~assertions =
   let open Desugar in
   let open Result2.Syntax in
   let* full_assertions =
     specification
-      |> parse_program
-      |> Result.map (fun prog -> prog.assertions)
-  in
-  let* partial_assertions =
-    assertions
       |> parse_program
       |> Result.map (fun prog -> prog.assertions)
   in
@@ -165,7 +160,7 @@ let test ~specification ~sketch ~assertions =
   in
   let* { hole_fillings; time_taken } =
     solve_program
-      { sketch_program with assertions = partial_assertions }
+      { sketch_program with assertions = assertions }
   in
   let ranked_hole_fillings =
     Rank.sort hole_fillings
@@ -188,8 +183,16 @@ let test ~specification ~sketch ~assertions =
   ; specification_assertion_count =
       List.length full_assertions
   ; assertion_count =
-      List.length partial_assertions
+      List.length assertions
   ; top_success
   ; top_recursive_success
   }
 
+let test ~specification ~sketch ~assertions =
+  let open Desugar in
+  assertions
+    |> parse_program
+    |> Result.map
+         (fun prog -> prog.assertions)
+    |> Result2.and_then
+         (fun a -> test_assertions ~specification ~sketch ~assertions:a)

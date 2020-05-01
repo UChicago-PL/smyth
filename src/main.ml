@@ -57,34 +57,50 @@ let summarize : Endpoint.test_result list -> Endpoint.test_result option =
         time_taken = average_time_taken
     }
 
+let ratio : int -> int -> float =
+  fun x y ->
+    (float_of_int x) /. (float_of_int y)
+
 (* Commands *)
 
 type command =
   | Solve
   | Test
   | SuiteTest
+  | Fuzz
 
 let commands : command list =
-  [ Solve; Test; SuiteTest ]
+  [ Solve; Test; SuiteTest; Fuzz ]
 
 let command_name : command -> string =
   function
     | Solve -> "forge"
     | Test -> "test"
     | SuiteTest -> "suite-test"
+    | Fuzz -> "fuzz"
 
 let command_from_name : string -> command option =
   function
     | "forge" -> Some Solve
     | "test" -> Some Test
     | "suite-test" -> Some SuiteTest
+    | "fuzz" -> Some Fuzz
     | _ -> None
 
 let command_description : command -> string =
   function
-    | Solve -> "Complete a program sketch"
-    | Test -> "Test a solution against a specification"
-    | SuiteTest -> "Test multiple solutions against specifications."
+    | Solve ->
+        "Complete a program sketch"
+
+    | Test ->
+        "Test a solution against a specification"
+
+    | SuiteTest ->
+        "Test multiple solutions against specifications."
+
+    | Fuzz ->
+        "Stress-test a program sketch with assertions fuzzed from a built-in"
+          ^ "function."
 
 let command_arguments : command -> (string * string) list =
   function
@@ -112,6 +128,18 @@ let command_arguments : command -> (string * string) list =
           )
         ; ( "suite"
           , "The path to the suite to be tested"
+          )
+        ]
+
+    | Fuzz ->
+        [ ( "built-in-func"
+          , "The identifier of the built-in function to use as a reference"
+          )
+        ; ( "specification"
+          , "The path to the specification"
+          )
+        ; ( "sketch"
+          , "The path to the sketch to be tested WITHOUT any assertions"
           )
         ]
 
@@ -325,5 +353,78 @@ let () =
                    print_endline output
                )
 
+    | Fuzz ->
+        let builtin =
+          Sys.argv.(2)
+        in
+        let spec_path =
+          Sys.argv.(3)
+        in
+        let sketch_path =
+          Sys.argv.(4)
+        in
+        let benchmark : (Lang.exp * Lang.exp) list list list =
+          match List.assoc_opt builtin Random_experiment.benchmarks with
+            | Some benchmark_thunk ->
+                benchmark_thunk ()
+
+            | None ->
+                prerr_endline ("Unknown built-in function '" ^ builtin ^ "'.");
+                exit 1
+        in
+        let results : (int * int) list =
+          List.map
+            ( fun trials ->
+                let (top_successes, top_recursive_successes) =
+                  trials
+                    |> List.map
+                         ( fun assertions ->
+                             let open Endpoint in
+                             match
+                               Endpoint.test_assertions
+                                 ~specification:(Io2.read_path [spec_path])
+                                 ~sketch:(Io2.read_path [sketch_path])
+                                 ~assertions:assertions
+                             with
+                               | Ok { top_success; top_recursive_success; _ } ->
+                                   (top_success, top_recursive_success)
+
+                               | Error e ->
+                                   prerr_endline (Show.error e);
+                                   exit 1
+                         )
+                    |> List.split
+                in
+                ( List2.count identity top_successes
+                , List2.count identity top_recursive_successes
+                )
+            )
+          benchmark
+        in
+        let result_string =
+          "% N = "
+            ^ string_of_int Random_experiment.trial_count
+            ^ "\n"
+            ^ String.concat "\n"
+                ( List.mapi
+                    ( fun k_ (top_successes, top_recursive_successes) ->
+                        string_of_int (k_ + 1)
+                          ^ ","
+                          ^ ( string_of_float @@
+                                ratio
+                                  top_successes
+                                  Random_experiment.trial_count
+                            )
+                          ^ ","
+                          ^ ( string_of_float @@
+                                ratio
+                                  top_recursive_successes
+                                  Random_experiment.trial_count
+                            )
+                    )
+                    results
+                )
+        in
+        print_endline result_string
   end;
   exit 0

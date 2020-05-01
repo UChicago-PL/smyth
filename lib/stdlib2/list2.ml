@@ -186,5 +186,27 @@ let take n xs =
   in
     helper [] n xs
 
+let rec drop n xs =
+  if n <= 0 then
+    xs
+  else
+    match xs with
+      | [] ->
+          []
+
+      | _ :: tail ->
+          drop (n - 1) tail
+
 let cartesian_product xs ys =
   concat_map (fun x -> List.map (fun y -> (x, y)) ys) xs
+
+let count pred xs =
+  let rec helper acc =
+    function
+      | [] ->
+          acc
+
+      | head :: tail ->
+          helper (if pred head then acc + 1 else acc) tail
+  in
+  helper 0 xs
