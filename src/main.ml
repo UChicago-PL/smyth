@@ -99,7 +99,7 @@ let command_description : command -> string =
         "Test multiple solutions against specifications."
 
     | Fuzz ->
-        "Stress-test a program sketch with assertions fuzzed from a built-in"
+        "Stress-test a program sketch with assertions fuzzed from a built-in "
           ^ "function."
 
 let command_arguments : command -> (string * string) list =
@@ -410,19 +410,17 @@ let () =
             ^ String.concat "\n"
                 ( List.mapi
                     ( fun k_ (top_successes, top_recursive_successes) ->
-                        string_of_int (k_ + 1)
-                          ^ ","
-                          ^ ( string_of_float @@
-                                ratio
-                                  top_successes
-                                  Random_experiment.trial_count
+                        ( Printf.sprintf "%2d,%.4f,%.4f"
+                            (k_ + 1)
+                            ( ratio
+                                top_successes
+                                Random_experiment.trial_count
                             )
-                          ^ ","
-                          ^ ( string_of_float @@
-                                ratio
-                                  top_recursive_successes
-                                  Random_experiment.trial_count
+                            ( ratio
+                                top_recursive_successes
+                                Random_experiment.trial_count
                             )
+                        )
                     )
                     results
                 )
