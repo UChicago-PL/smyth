@@ -16,3 +16,6 @@ deps:
 
 loc:
 	find lib src -name "*.ml" | xargs wc -l
+
+loci:
+	find lib src -name "*.ml*" | xargs wc -l
