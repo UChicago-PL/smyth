@@ -139,7 +139,7 @@ let command_arguments : command -> (string * string) list =
           , "The path to the specification"
           )
         ; ( "sketch"
-          , "The path to the sketch to be tested WITHOUT any assertions"
+          , "The path to the sketch to be fuzzed WITHOUT any assertions"
           )
         ]
 
