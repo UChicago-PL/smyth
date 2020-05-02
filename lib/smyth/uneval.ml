@@ -216,10 +216,10 @@ module FuelLimited = struct
 end
 
 let check delta sigma hf exp worlds =
-  FuelLimited.check Params.uneval_case_budget delta sigma hf exp worlds
+  FuelLimited.check !Params.uneval_case_budget delta sigma hf exp worlds
 
 let uneval delta sigma hf res ex =
-  FuelLimited.uneval Params.uneval_case_budget delta sigma hf res ex
+  FuelLimited.uneval !Params.uneval_case_budget delta sigma hf res ex
 
 let simplify_assertions delta sigma rcs =
-  FuelLimited.simplify_assertions Params.uneval_case_budget delta sigma rcs
+  FuelLimited.simplify_assertions !Params.uneval_case_budget delta sigma rcs

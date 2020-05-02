@@ -48,7 +48,7 @@ let current_solution_count =
   ref 0
 
 let should_continue () =
-  match Params.max_solution_count with
+  match !Params.max_solution_count with
     | Some n ->
         !current_solution_count < n
 

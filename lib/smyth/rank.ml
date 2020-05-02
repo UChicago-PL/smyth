@@ -37,7 +37,7 @@ let rec exp_size_rank : exp -> int =
         exp_size_rank e
 
 let exp_rank : exp -> int =
-  match Params.ranking_method with
+  match !Params.ranking_method with
     | Params.Size -> exp_size_rank
 
 let rank : (hole_name * exp) list -> int =

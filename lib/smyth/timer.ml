@@ -11,8 +11,8 @@ module Single = struct
 
   let info timer =
     match timer with
-      | Total -> (total, Params.max_total_time)
-      | Eval -> (eval, Params.max_eval_time)
+      | Total -> (total, !Params.max_total_time)
+      | Eval -> (eval, !Params.max_eval_time)
 
   let start timer =
     let (initial, _) =
@@ -42,7 +42,7 @@ module Multi = struct
 
   let info timer =
     match timer with
-      | Guess -> (guess, Params.max_guess_time)
+      | Guess -> (guess, !Params.max_guess_time)
 
   let reset timer =
     let (time_taken, _) =

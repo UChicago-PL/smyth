@@ -345,9 +345,9 @@ end
 
 let eval env exp =
   Timer.with_timeout_ "eval"
-    Params.max_eval_time
-    (FuelLimited.eval Params.initial_fuel env) exp
+    !Params.max_eval_time
+    (FuelLimited.eval !Params.initial_fuel env) exp
     (Error "Evaluation time exceeded")
 
 let resume hf res =
-  FuelLimited.resume Params.initial_fuel hf res
+  FuelLimited.resume !Params.initial_fuel hf res
