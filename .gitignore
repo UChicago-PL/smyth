@@ -1,3 +1,6 @@
 _build/
 *.merlin
 data-backup/
+
+data/*
+summaries/*

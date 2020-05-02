@@ -554,6 +554,8 @@ let () =
         in
         let result_string =
           builtin
+            ^ "\nt = "
+            ^ Float2.to_string !Params.max_total_time
             ^ "\nN = "
             ^ string_of_int trial_count
             ^ "\n"

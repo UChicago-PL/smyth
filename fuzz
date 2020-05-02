@@ -3,6 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 $DIR/smyth fuzz 50 \
-  $2 \
-  $DIR/suites/specifications/$2.elm \
-  $DIR/suites/suite-$1/$2.elm
+  $3 \
+  $DIR/suites/specifications/$3.elm \
+  $DIR/suites/suite-$2/$3.elm \
+  --timeout=$1
