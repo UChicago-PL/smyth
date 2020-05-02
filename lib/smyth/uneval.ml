@@ -75,10 +75,6 @@ module FuelLimited = struct
     let* _ =
       Nondet.guard (fuel > 0)
     in
-    let* _ =
-      Nondet.guard @@
-        Timer.Single.check Timer.Single.Total
-    in
     match (res, ex) with
       | (_, ExTop) ->
           Nondet.pure Constraints.empty

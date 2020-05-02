@@ -67,26 +67,30 @@ let solve_program : Desugar.program -> solve_result response =
                 let () =
                   Uneval.minimal_uneval := true
                 in
-                let () =
-                  Timer.Single.start Timer.Single.Total
+                let
+                 ( minimal_synthesis_result
+                 , minimal_time_taken
+                 , minimal_timed_out
+                 ) =
+                  Timer.with_timeout "minimal_synthesis_result"
+                    Params.max_total_time
+                    (synthesis_pipeline clean_delta sigma) assertions
+                    Nondet.none
                 in
-                let minimal_synthesis_result =
-                  synthesis_pipeline clean_delta sigma assertions
-                in
-                let synthesis_result =
+                let (synthesis_result, time_taken, timed_out) =
                   if Nondet.is_empty minimal_synthesis_result then
                     let () =
                       Uneval.minimal_uneval := false
                     in
-                      synthesis_pipeline clean_delta sigma assertions
+                    Timer.with_timeout "synthesis_result"
+                      Params.max_total_time
+                      (synthesis_pipeline clean_delta sigma) assertions
+                      Nondet.none
                   else
-                    minimal_synthesis_result
-                in
-                let time_taken =
-                  Timer.Single.elapsed Timer.Single.Total;
-                in
-                let timed_out =
-                  time_taken > Params.max_total_time
+                    ( minimal_synthesis_result
+                    , minimal_time_taken
+                    , minimal_timed_out
+                    )
                 in
                 if timed_out then
                   Error (TimedOut time_taken)

@@ -18,3 +18,19 @@ module Multi : sig
   val accumulate : t -> (unit -> 'a) -> 'a
   val check : t -> bool
 end
+
+val with_timeout :
+  string ->
+  float ->
+  ('a -> 'b) ->
+  'a ->
+  'b ->
+  'b * float * bool
+
+val with_timeout_ :
+  string ->
+  float ->
+  ('a -> 'b) ->
+  'a ->
+  'b ->
+  'b

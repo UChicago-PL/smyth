@@ -48,18 +48,12 @@ let current_solution_count =
   ref 0
 
 let should_continue () =
-  let timer_check =
-    Timer.Single.check Timer.Single.Total
-  in
-  let count_check =
-    match Params.max_solution_count with
-      | Some n ->
-          !current_solution_count < n
+  match Params.max_solution_count with
+    | Some n ->
+        !current_solution_count < n
 
-      | None ->
-          true
-  in
-    timer_check && count_check
+    | None ->
+        true
 
 let rec iter_solve params delta sigma (hf, us_all) =
   let* _ =

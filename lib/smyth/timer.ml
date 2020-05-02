@@ -72,3 +72,51 @@ module Multi = struct
     in
       !time_taken < max_time
 end
+
+exception Timeout of string
+
+let with_timeout unique_id cutoff f arg default_value =
+  let old_behavior =
+    Sys.signal Sys.sigalrm
+      ( Sys.Signal_handle
+          ( fun _ ->
+              raise (Timeout unique_id)
+          )
+      )
+  in
+  let reset () =
+    ignore
+      ( Unix.setitimer
+          Unix.ITIMER_REAL
+          Unix.{ it_value = 0.0; it_interval = 0.0 }
+      );
+    Sys.set_signal Sys.sigalrm old_behavior
+  in
+  ignore
+    ( Unix.setitimer
+        Unix.ITIMER_REAL
+        Unix.{ it_value = cutoff; it_interval = 0.001 }
+    );
+  try
+    let res =
+      f arg
+    in
+    let time_elapsed =
+      Unix.((getitimer ITIMER_REAL).it_value)
+    in
+    reset ();
+    (res, time_elapsed, true)
+  with
+    ex ->
+      let time_elapsed =
+        Unix.((getitimer ITIMER_REAL).it_value)
+      in
+      reset ();
+      if ex = Timeout unique_id then
+        (default_value, time_elapsed, false)
+      else
+        raise ex
+
+let with_timeout_ unique_id cutoff f arg default_value =
+  with_timeout unique_id cutoff f arg default_value
+    |> fun (y, _, _) -> y
