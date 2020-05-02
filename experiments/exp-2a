@@ -1,4 +1,4 @@
 #!/bin/bash
 
 echo "Experiment 2a"
-./suite-test no-sketch
+../suite-test no-sketch

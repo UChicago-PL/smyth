@@ -1,6 +1,8 @@
 #!/bin/bash
 
-./smyth fuzz 50 \
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+$DIR/smyth fuzz 50 \
   $2 \
-  suites/specifications/$2.elm \
-  suites/suite-$1/$2.elm
+  $DIR/suites/specifications/$2.elm \
+  $DIR/suites/suite-$1/$2.elm

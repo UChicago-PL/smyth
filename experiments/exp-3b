@@ -1,12 +1,12 @@
 #!/bin/bash
 
-mkdir -p data/exp-2b
-mkdir -p data-backup/exp-2b
-mv data/exp-2b/*.csv data-backup/exp-2b 2> /dev/null
+mkdir -p data/exp-3b
+mkdir -p data-backup/exp-3b
+mv data/exp-3b/*.csv data-backup/exp-3b 2> /dev/null
 
 run() {
-  echo -n "(2b) Running $1... "
-  ./fuzz no-sketch $1 > data/exp-2b/$1.csv
+  echo -n "(3b) Running $1... "
+  ../fuzz base-case-sketch $1 > data/exp-3b/$1.csv
   if [ $? -eq 0 ]; then
     echo "completed."
   else
@@ -14,11 +14,11 @@ run() {
   fi
 }
 
-run bool_band
-run bool_bor
-run bool_impl
-run bool_neg
-run bool_xor
+# run bool_band
+# run bool_bor
+# run bool_impl
+# run bool_neg
+# run bool_xor
 
 run list_append
 # run list_compress
@@ -27,8 +27,8 @@ run list_drop
 run list_even_parity
 # run list_filter
 # run list_fold
-run list_hd
-run list_inc
+# run list_hd
+# run list_inc
 run list_last
 run list_length
 # run list_map
@@ -36,16 +36,16 @@ run list_nth
 run list_pairwise_swap
 run list_rev_append
 run list_rev_fold
-run list_rev_snoc
+# run list_rev_snoc
 run list_rev_tailcall
 run list_snoc
 run list_sort_sorted_insert
 run list_sorted_insert
 run list_stutter
 
-run list_sum
+# run list_sum
 run list_take
-run list_tl
+# run list_tl
 run nat_iseven
 
 run nat_max
