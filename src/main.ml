@@ -532,6 +532,7 @@ let () =
                                | Ok { top_success; top_recursive_success; _ } ->
                                    (top_success, top_recursive_success)
 
+                               | Error Endpoint.TimedOut _
                                | Error Endpoint.NoSolutions ->
                                    (false, false)
 
@@ -554,18 +555,18 @@ let () =
         in
         let result_string =
           builtin
-            ^ "\nt = "
+            ^ "\ntimeout,"
             ^ Float2.to_string !Params.max_total_time
-            ^ "\nN = "
+            ^ "\ntrial count,"
             ^ string_of_int trial_count
             ^ "\n"
             ^ "example count,top success percent,top recursive success percent"
             ^ "\n"
             ^ String.concat "\n"
                 ( List.mapi
-                    ( fun k_ (top_successes, top_recursive_successes) ->
-                        ( Printf.sprintf "%2d,%.4f,%.4f"
-                            (k_ + 1)
+                    ( fun k (top_successes, top_recursive_successes) ->
+                        ( Printf.sprintf "%d,%.4f,%.4f"
+                            k
                             ( ratio
                                 top_successes
                                 trial_count

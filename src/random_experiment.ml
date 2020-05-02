@@ -80,7 +80,7 @@ let make_benchmark :
             ( Sample2.io_trial n k func input base_case
             )
       )
-      ( List2.range ~low:1 ~high:k_max
+      ( List2.range ~low:0 ~high:k_max
       )
 
 let benchmarks :
