@@ -1,5 +1,5 @@
 #!/bin/bash
 
 ./smyth suite-test \
-  suites/complete-examples \
+  suites/specifications \
   suites/suite-$1

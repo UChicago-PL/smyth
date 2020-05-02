@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "Experiment 3a"
+./suite-test base-case-sketch

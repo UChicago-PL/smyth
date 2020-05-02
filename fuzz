@@ -1,0 +1,6 @@
+#!/bin/bash
+
+./smyth fuzz 50 \
+  $2 \
+  suites/specifications/$2.elm \
+  suites/suite-$1/$2.elm

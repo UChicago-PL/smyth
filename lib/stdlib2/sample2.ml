@@ -196,7 +196,7 @@ let io_trial :
                     [ (1, io ref base_case)
                     ]
             ) @
-            [ (k - 1, io ref input)
+            [ (k, io ref input)
             ]
           in
           Random2.sample_unique amounts

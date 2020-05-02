@@ -33,7 +33,7 @@ let rec sample_unique_helper :
           acc
 
       | (size, gen) :: rest_info ->
-          if size <= 0 then
+          if List.length acc >= size then
             sample_unique_helper acc rest_info
           else
             let x =
@@ -42,7 +42,7 @@ let rec sample_unique_helper :
             if Option.is_some (List.find_opt ((=) x) acc) then
               sample_unique_helper acc info
             else
-              sample_unique_helper (x :: acc) ((size - 1, gen) :: rest_info)
+              sample_unique_helper (x :: acc) info
 
 let sample_unique : (int * (unit -> 'a)) list -> 'a list =
   fun info ->

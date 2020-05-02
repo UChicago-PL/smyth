@@ -132,7 +132,10 @@ let command_arguments : command -> (string * string) list =
         ]
 
     | Fuzz ->
-        [ ( "built-in-func"
+        [ ( "trial-count"
+          , "The number of trials to run for each size of example set"
+          )
+        ; ( "built-in-func"
           , "The identifier of the built-in function to use as a reference"
           )
         ; ( "specification"
@@ -195,6 +198,7 @@ let command_not_found attempt =
 (* Main *)
 
 let () =
+  Random.self_init ();
   let argv_length =
     Array.length Sys.argv
   in
@@ -230,7 +234,7 @@ let () =
   begin
     if argv_length - 2 <> List.length (command_arguments command) then
       begin
-        print_endline (command_help command);
+        prerr_endline (command_help command);
         exit 1
       end
     else
@@ -354,17 +358,31 @@ let () =
                )
 
     | Fuzz ->
-        let builtin =
-          Sys.argv.(2)
+        let trial_count =
+          match int_of_string_opt Sys.argv.(2) with
+            | Some n when n > 0 ->
+                n
+
+            | _ ->
+                prerr_endline "Trial count must be a positive integer.\n";
+                prerr_endline (command_help command);
+                exit 1
         in
-        let spec_path =
+        let builtin =
           Sys.argv.(3)
         in
-        let sketch_path =
+        let spec_path =
           Sys.argv.(4)
         in
+        let sketch_path =
+          Sys.argv.(5)
+        in
         let benchmark : (Lang.exp * Lang.exp) list list list =
-          match List.assoc_opt builtin Random_experiment.benchmarks with
+          match
+            List.assoc_opt
+              builtin
+              (Random_experiment.benchmarks trial_count)
+          with
             | Some benchmark_thunk ->
                 benchmark_thunk ()
 
@@ -389,8 +407,16 @@ let () =
                                | Ok { top_success; top_recursive_success; _ } ->
                                    (top_success, top_recursive_success)
 
+                               | Error Endpoint.NoSolutions ->
+                                   (false, false)
+
                                | Error e ->
-                                   prerr_endline (Show.error e);
+                                   prerr_endline
+                                     ( "error for '"
+                                         ^ sketch_path
+                                         ^ "': "
+                                         ^ Show.error e
+                                     );
                                    exit 1
                          )
                     |> List.split
@@ -403,7 +429,7 @@ let () =
         in
         let result_string =
           "% N = "
-            ^ string_of_int Random_experiment.trial_count
+            ^ string_of_int trial_count
             ^ "\n"
             ^ "example count,top success percent,top recursive success percent"
             ^ "\n"
@@ -414,11 +440,11 @@ let () =
                             (k_ + 1)
                             ( ratio
                                 top_successes
-                                Random_experiment.trial_count
+                                trial_count
                             )
                             ( ratio
                                 top_recursive_successes
-                                Random_experiment.trial_count
+                                trial_count
                             )
                         )
                     )
