@@ -428,7 +428,8 @@ let () =
           benchmark
         in
         let result_string =
-          "% N = "
+          builtin
+            ^ "\nN = "
             ^ string_of_int trial_count
             ^ "\n"
             ^ "example count,top success percent,top recursive success percent"
