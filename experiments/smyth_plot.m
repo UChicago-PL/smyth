@@ -1,14 +1,17 @@
-name = argv(){1};
-trials = argv(){2};
-timeout = argv(){3};
-kind = argv(){4};
+experiment = argv(){1};
+name = argv(){2};
 
-data = csvread(['csv/' name '.csv']);
+data = csvread(['data/' experiment '/csv/' name '.csv']);
+
+timeout = data(2, 2);
+trials = data(3, 2);
+
+data = data(5:end,:)
 
 figure('visible', 'off')
 plot(data(:, 1), data(:, 2), 'LineWidth', 3);
 
-title([name ' (' kind ', N = ' trials ', timeout = ' timeout 's)'], 'Interpreter', 'none');
+title([name ' (' experiment ', N = ' num2str(trials) ', timeout = ' num2str(timeout) 's)'], 'Interpreter', 'none');
 
 xlim([0 inf])
 xlabel('Example Set Size');
@@ -16,4 +19,4 @@ xlabel('Example Set Size');
 ylim([0 1])
 ylabel('Success Percent');
 
-saveas(gcf, ['png/' name '.png']);
+saveas(gcf, ['data/' experiment '/png/' name '.png']);

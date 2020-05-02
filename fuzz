@@ -2,7 +2,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-$DIR/smyth fuzz 50 \
+$DIR/smyth fuzz 5 \
   $3 \
   $DIR/suites/specifications/$3.elm \
   $DIR/suites/suite-$2/$3.elm \

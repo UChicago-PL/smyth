@@ -1,12 +1,12 @@
 #!/bin/bash
 
-mkdir -p data/exp-2b
-mkdir -p data-backup/exp-2b
-mv data/exp-2b/*.csv data-backup/exp-2b 2> /dev/null
+mkdir -p data/exp-2b/csv
+mkdir -p data-backup/exp-2b/csv
+mv data/exp-2b/csv/*.csv data-backup/exp-2b/csv 2> /dev/null
 
 run() {
   echo -n "(2b; t=$1) Running $2... "
-  ../fuzz $1 no-sketch $2 > data/exp-2b/$2.csv
+  ../fuzz $1 no-sketch $2 > data/exp-2b/csv/$2.csv
   if [ $? -eq 0 ]; then
     echo "completed."
   else
