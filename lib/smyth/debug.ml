@@ -87,7 +87,7 @@ let print_int n = debug @@ fun _ ->
   println (string_of_int n)
 
 let print_float f = debug @@ fun _ ->
-  println (string_of_float f)
+  println (Float2.to_string f)
 
 let print_nondet_len nd = debug @@ fun _ ->
   nd

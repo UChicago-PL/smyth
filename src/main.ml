@@ -146,6 +146,56 @@ let command_arguments : command -> (string * string) list =
           )
         ]
 
+(* Options *)
+
+type prog_option =
+  | Debug
+  | MaxTotalTime
+
+let prog_options : prog_option list =
+  [ Debug; MaxTotalTime ]
+
+let prog_option_name : prog_option -> string =
+  function
+    | Debug -> "debug"
+    | MaxTotalTime -> "timeout"
+
+let prog_option_from_name : string -> prog_option option =
+  function
+    | "debug" -> Some Debug
+    | "timeout" -> Some MaxTotalTime
+    | _ -> None
+
+let prog_option_info : prog_option -> string * string * string list =
+  function
+    | Debug ->
+        ( "Include debug logging"
+        , "off"
+        , ["off"; "on"]
+        )
+
+    | MaxTotalTime ->
+        ( "Set maximum total time allowed per synthesis request"
+        , Float2.to_string !Params.max_total_time
+        , ["<positive-number>"]
+        )
+
+let prog_option_action : prog_option -> string -> bool =
+  fun prog_option value ->
+    match prog_option with
+      | Debug ->
+          begin match value with
+            | "off" -> (Params.debug_mode := false; true)
+            | "on" -> (Params.debug_mode := true; true)
+            | _ -> false
+          end
+
+      | MaxTotalTime ->
+          begin match float_of_string_opt value with
+            | Some timeout -> (Params.max_total_time := timeout; true)
+            | None -> false
+          end
+
 (* Help *)
 
 let exec_name =
@@ -153,6 +203,9 @@ let exec_name =
 
 let usage_prefix =
   "Usage: " ^ exec_name
+
+let option_schema =
+  "[--option=value]*"
 
 let command_help : command -> string =
   fun command ->
@@ -162,6 +215,7 @@ let command_help : command -> string =
     usage_prefix ^ " " ^
     command_name command ^ " " ^
     String.concat " " (List.map (fun (name, _) -> arg_format name) arguments) ^
+    " " ^ option_schema ^
     "\n\nArguments:\n" ^
     ( arguments
         |> List.map (fun (name, desc) -> Printf.sprintf "  %-22s%s" name desc)
@@ -182,18 +236,85 @@ let available_commands =
       |> String.concat "\n"
   )
 
+let available_options =
+  "Available options:\n\n" ^
+  ( prog_options
+      |> List.map
+           ( fun prog_option ->
+               let name =
+                 prog_option_name prog_option
+               in
+               let (description, default, possibles) =
+                 prog_option_info prog_option
+               in
+               let possible_string =
+                 String.concat "|" possibles
+               in
+               Printf.sprintf
+                 "  %-12s(%s) %s. Default: %s"
+                 name
+                 possible_string
+                 description
+                 default
+           )
+      |> String.concat "\n"
+  )
+
 let help =
   title ^ "\n" ^
   name ^ " v" ^ Params.version ^ "\n" ^
   description ^ "\n\n" ^
-  usage_prefix ^ " <command> <args>\n\n" ^
+  usage_prefix ^ " <command> <args> " ^ option_schema ^ "\n\n" ^
   available_commands ^
+  "\n\n" ^
+  available_options ^
   "\n\nFor more specific information, run:\n\n  " ^
   exec_name ^ " <command> --help"
 
 let command_not_found attempt =
   "Could not find command '" ^ attempt ^ "'.\n\n" ^
   available_commands
+
+(* Option handling *)
+
+let handle_prog_option : string -> bool =
+  fun arg ->
+    let len =
+      String.length arg
+    in
+    if len < 2 || arg.[0] <> '-' || arg.[1] <> '-' then
+      false
+    else
+      match
+        String.sub arg 2 (len - 2)
+          |> String.split_on_char '='
+      with
+        | [name; value] ->
+            begin match prog_option_from_name name with
+              | Some prog_option ->
+                  prog_option_action prog_option value
+
+              | None ->
+                  false
+            end
+
+        | _ ->
+            false
+
+let rec handle_prog_options : int -> string array -> unit =
+  fun n prog_options ->
+    if n >= Array.length prog_options then
+      ()
+    else
+      begin
+        if handle_prog_option prog_options.(n) then
+          handle_prog_options (n + 1) prog_options
+        else
+          begin
+            prerr_endline help;
+            exit 1
+          end
+      end
 
 (* Main *)
 
@@ -218,7 +339,7 @@ let () =
 
       | None ->
           begin
-            print_endline (command_not_found Sys.argv.(1));
+            prerr_endline (command_not_found Sys.argv.(1));
             exit 1
           end
   in
@@ -231,8 +352,11 @@ let () =
     else
       ()
   end;
+  let correct_arg_count =
+    List.length (command_arguments command)
+  in
   begin
-    if argv_length - 2 <> List.length (command_arguments command) then
+    if argv_length - 2 < correct_arg_count then
       begin
         prerr_endline (command_help command);
         exit 1
@@ -240,6 +364,7 @@ let () =
     else
       ()
   end;
+  handle_prog_options (correct_arg_count + 2) Sys.argv;
   begin match command with
     | Solve ->
         begin match

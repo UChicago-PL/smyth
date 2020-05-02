@@ -107,7 +107,7 @@ let error : error -> string =
 let test_result : test_result -> string =
   fun tr ->
     String.concat ","
-      [ string_of_float tr.time_taken
+      [ Float2.to_string tr.time_taken
       ; string_of_int tr.specification_assertion_count
       ; string_of_int tr.assertion_count
       ; string_of_bool tr.top_success

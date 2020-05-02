@@ -105,7 +105,7 @@ let with_timeout unique_id cutoff f arg default_value =
       Unix.((getitimer ITIMER_REAL).it_value)
     in
     reset ();
-    (res, time_elapsed, true)
+    (res, time_elapsed, false)
   with
     ex ->
       let time_elapsed =
@@ -113,7 +113,7 @@ let with_timeout unique_id cutoff f arg default_value =
       in
       reset ();
       if ex = Timeout unique_id then
-        (default_value, time_elapsed, false)
+        (default_value, time_elapsed, true)
       else
         raise ex
 
