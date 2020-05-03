@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ $# -ne 2 ]]; then
+  echo "usage:" $0 "<suite-name> <sketch-name>"
+  exit 1
+fi
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 $DIR/smyth test \

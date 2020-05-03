@@ -5,5 +5,4 @@ if [[ $# -ne 0 ]]; then
   exit 1
 fi
 
-echo "Experiment 3a"
-../suite-test base-case-sketch
+./collect-all-data 5

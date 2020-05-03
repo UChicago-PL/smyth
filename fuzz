@@ -1,9 +1,14 @@
 #!/bin/bash
 
+if [[ $# -ne 4 ]]; then
+  echo "usage:" $0 "<trial-count> <timeout> <suite-name> <sketch-name>"
+  exit 1
+fi
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-$DIR/smyth fuzz 5 \
-  $3 \
-  $DIR/suites/specifications/$3.elm \
-  $DIR/suites/suite-$2/$3.elm \
-  --timeout=$1
+$DIR/smyth fuzz $1 \
+  $4 \
+  $DIR/suites/specifications/$4.elm \
+  $DIR/suites/suite-$3/$4.elm \
+  --timeout=$2

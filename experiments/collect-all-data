@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# usage: ./collect-all-data <trial-count>
+
+if [[ $# -ne 1 ]]; then
+  echo "usage:" $0 "<trial-count>"
+  exit 1
+fi
+
 mkdir -p summaries
 
 rm -f summaries/2a.txt
@@ -8,6 +15,6 @@ rm -f summaries/3a.txt
 rm -f summaries/3b.txt
 
 ./exp-2a | tee summaries/2a.txt
-./exp-2b | tee summaries/2b.txt
+./exp-2b $1 | tee summaries/2b.txt
 ./exp-3a | tee summaries/3a.txt
-./exp-3b | tee summaries/3b.txt
+./exp-3b $1 | tee summaries/3b.txt
