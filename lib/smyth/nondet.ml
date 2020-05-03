@@ -60,6 +60,9 @@ let dedup xs =
 let collapse_option =
   List2.filter_somes
 
+let take =
+  List2.take
+
 (* Lifting *)
 
 let lift_option op =

@@ -34,6 +34,7 @@ val is_empty : 'a t -> bool
 val filter : ('a -> bool) -> 'a t -> 'a t
 val dedup : 'a t -> 'a t
 val collapse_option : ('a option) t -> 'a t
+val take : int -> 'a t -> 'a t
 
 (* Lifting *)
 

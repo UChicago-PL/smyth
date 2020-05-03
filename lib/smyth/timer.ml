@@ -76,60 +76,63 @@ end
 exception Timeout of string
 
 let with_timeout unique_id cutoff f arg default_value =
-  let old_signal =
-    Sys.signal Sys.sigalrm
-      ( Sys.Signal_handle
-          ( fun _ ->
-              raise (Timeout unique_id)
-          )
-      )
-  in
-  let old_timer =
-    Unix.setitimer
-      Unix.ITIMER_REAL
-      Unix.{ it_value = cutoff; it_interval = 0.0 }
-  in
-  let reset time_elapsed =
-    let new_it_value =
-      if old_timer.Unix.it_value = 0.0 then
-        0.0
-      else
-        let acc =
-          old_timer.Unix.it_value -. time_elapsed
-        in
-        if acc < 0.0 then
-          0.0000001
+  if cutoff <= 0.0 then
+    (default_value, 0.0, true)
+  else
+    let old_signal =
+      Sys.signal Sys.sigalrm
+        ( Sys.Signal_handle
+            ( fun _ ->
+                raise (Timeout unique_id)
+            )
+        )
+    in
+    let old_timer =
+      Unix.setitimer
+        Unix.ITIMER_REAL
+        Unix.{ it_value = cutoff; it_interval = 0.0 }
+    in
+    let reset time_elapsed =
+      let new_it_value =
+        if old_timer.Unix.it_value = 0.0 then
+          0.0
         else
-          acc
+          let acc =
+            old_timer.Unix.it_value -. time_elapsed
+          in
+          if acc < 0.0 then
+            0.0000001
+          else
+            acc
+      in
+      Sys.set_signal Sys.sigalrm old_signal;
+      ignore
+        ( Unix.setitimer
+            Unix.ITIMER_REAL
+            Unix.{ it_value = new_it_value
+                 ; it_interval = 0.0
+                 }
+        )
     in
-    Sys.set_signal Sys.sigalrm old_signal;
-    ignore
-      ( Unix.setitimer
-          Unix.ITIMER_REAL
-          Unix.{ it_value = new_it_value
-               ; it_interval = 0.0
-               }
-      )
-  in
-  try
-    let res =
-      f arg
-    in
-    let time_elapsed =
-      cutoff -. Unix.((getitimer ITIMER_REAL).it_value)
-    in
-    reset time_elapsed;
-    (res, time_elapsed, false)
-  with
-    ex ->
+    try
+      let res =
+        f arg
+      in
       let time_elapsed =
         cutoff -. Unix.((getitimer ITIMER_REAL).it_value)
       in
       reset time_elapsed;
-      if ex = Timeout unique_id then
-        (default_value, time_elapsed, true)
-      else
-        raise ex
+      (res, time_elapsed, false)
+    with
+      exc ->
+        let time_elapsed =
+          cutoff -. Unix.((getitimer ITIMER_REAL).it_value)
+        in
+        reset time_elapsed;
+        if exc = Timeout unique_id then
+          (default_value, time_elapsed, true)
+        else
+          raise exc
 
 let with_timeout_ unique_id cutoff f arg default_value =
   with_timeout unique_id cutoff f arg default_value

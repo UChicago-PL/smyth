@@ -68,29 +68,46 @@ let solve_program : Desugar.program -> solve_result response =
                   Uneval.minimal_uneval := true
                 in
                 let
-                 ( minimal_synthesis_result
-                 , minimal_time_taken
-                 , minimal_timed_out
+                 ( synthesis_result
+                 , time_taken
+                 , timed_out
                  ) =
-                  Timer.with_timeout "minimal_synthesis_result"
-                    !Params.max_total_time
-                    (synthesis_pipeline clean_delta sigma) assertions
-                    Nondet.none
-                in
-                let (synthesis_result, time_taken, timed_out) =
-                  if Nondet.is_empty minimal_synthesis_result then
-                    let () =
-                      Uneval.minimal_uneval := false
-                    in
-                    Timer.with_timeout "synthesis_result"
+                  let
+                   ( minimal_synthesis_result
+                   , minimal_time_taken
+                   , minimal_timed_out
+                   ) =
+                    Timer.with_timeout "minimal_synthesis_result"
                       !Params.max_total_time
                       (synthesis_pipeline clean_delta sigma) assertions
                       Nondet.none
-                  else
+                  in
+                  if
+                    minimal_timed_out
+                      || not (Nondet.is_empty minimal_synthesis_result)
+                  then
                     ( minimal_synthesis_result
                     , minimal_time_taken
                     , minimal_timed_out
                     )
+                  else
+                    let
+                     ( non_minimal_synthesis_result
+                     , non_minimal_time_taken
+                     , non_minimal_timed_out
+                     ) =
+                      let () =
+                        Uneval.minimal_uneval := false
+                      in
+                      Timer.with_timeout "synthesis_result"
+                        (!Params.max_total_time -. minimal_time_taken)
+                        (synthesis_pipeline clean_delta sigma) assertions
+                        Nondet.none
+                    in
+                      ( non_minimal_synthesis_result
+                      , minimal_time_taken +. non_minimal_time_taken
+                      , non_minimal_timed_out
+                      )
                 in
                 if timed_out then
                   Error (TimedOut time_taken)

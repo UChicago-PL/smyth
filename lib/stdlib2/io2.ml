@@ -1,20 +1,10 @@
 let read_all : in_channel -> string =
   fun channel ->
-    let acc =
-      ref []
+    let contents =
+      really_input_string channel (in_channel_length channel)
     in
-      begin try
-        while true do
-          acc := input_line channel :: !acc
-        done;
-        !acc
-      with
-        End_of_file ->
-          close_in channel;
-          !acc
-      end
-        |> List.rev
-        |> String.concat "\n"
+    close_in channel;
+    contents
 
 let read_file : string -> string =
   fun path ->
