@@ -204,7 +204,7 @@ let benchmarks :
     ; ( "list_drop"
       , make_benchmark trial_count
           { function_name = "listDrop"
-          ; k_max = 40
+          ; k_max = 20
           ; d_in =
               Denotation.args2 (Denotation.list Denotation.int) Denotation.int
           ; d_out = Denotation.list Denotation.int
@@ -314,7 +314,7 @@ let benchmarks :
     ; ( "list_nth"
       , make_benchmark trial_count
           { function_name = "listNth"
-          ; k_max = 40
+          ; k_max = 20
           ; d_in =
               Denotation.args2 (Denotation.list Denotation.int) Denotation.int
           ; d_out = Denotation.int
@@ -465,7 +465,7 @@ let benchmarks :
     ; ( "list_sorted_insert"
       , make_benchmark trial_count
           { function_name = "listSortedInsert"
-          ; k_max = 40
+          ; k_max = 20
           ; d_in =
               Denotation.args2 (Denotation.list Denotation.int) Denotation.int
           ; d_out = Denotation.list Denotation.int
@@ -519,7 +519,7 @@ let benchmarks :
     ; ( "list_take"
       , make_benchmark trial_count
           { function_name = "listTake"
-          ; k_max = 40
+          ; k_max = 20
           ; d_in =
               Denotation.args2 Denotation.int (Denotation.list Denotation.int)
           ; d_out = Denotation.list Denotation.int
@@ -632,7 +632,7 @@ let benchmarks :
     ; ( "tree_binsert"
       , make_benchmark trial_count
           { function_name = "treeBInsert"
-          ; k_max = 40
+          ; k_max = 20
           ; d_in =
               Denotation.args2 Denotation.int (Denotation.tree Denotation.int)
           ; d_out = Denotation.tree Denotation.int
