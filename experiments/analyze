@@ -6,13 +6,13 @@ import os
 import csv
 
 if len(sys.argv) != 2:
-    print("usage:", sys.argv[0], "suite")
+    print("usage:", sys.argv[0], "<experiment-name>")
     sys.exit(1)
 
-suite = sys.argv[1]
+experiment = sys.argv[1]
 
 prefix = ""
-if suite.startswith("sketch"):
+if experiment == "exp-3b":
     prefix = "1+"
 
 def show_k(k):
@@ -22,12 +22,14 @@ def show_k(k):
         return "---"
 
 print("task,k50,k90")
-for filename in glob.glob(suite + "/csv/*.csv"):
+for filename in glob.glob("data/" + experiment + "/csv/*.csv"):
     k90 = None
     k50 = None
     with open(filename) as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
-        # Skip first two rows
+        # Skip first four rows
+        next(reader)
+        next(reader)
         next(reader)
         next(reader)
         k50 = 0

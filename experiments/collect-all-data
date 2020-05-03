@@ -1,18 +1,13 @@
 #!/bin/bash
 
-# usage: ./collect-all-data <trial-count>
-
 if [[ $# -ne 1 ]]; then
   echo "usage:" $0 "<trial-count>"
   exit 1
 fi
 
 mkdir -p summaries
-
-rm -f summaries/2a.txt
-rm -f summaries/2b.txt
-rm -f summaries/3a.txt
-rm -f summaries/3b.txt
+mkdir -p summaries-backup
+mv summaries/*.txt summaries-backup 2> /dev/null
 
 ./exp-2a | tee summaries/2a.txt
 ./exp-2b $1 | tee summaries/2b.txt
