@@ -6,7 +6,7 @@ data = csvread(['data/' experiment '/csv/' name '.csv']);
 timeout = data(2, 2);
 trials = data(3, 2);
 
-data = data(5:end,:)
+data = data(5:end,:);
 
 figure('visible', 'off')
 plot(data(:, 1), data(:, 2), 'LineWidth', 3);

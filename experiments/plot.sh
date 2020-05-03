@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ $# -ne 1 ]]; then
+  echo "usage:" $0 "<experiment-name>"
+  exit 1
+fi
+
 mkdir -p data/$1/png
 mv data/$1/png/*.png data-backup/$1/png 2> /dev/null
 
