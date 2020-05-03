@@ -11,6 +11,10 @@ module FuelLimited = struct
   let rec eval fuel env exp =
     let open Result2.Syntax in
     let* _ =
+      Result2.guard "Evaluation time exceeded" @@
+        Timer.Single.check Timer.Single.Eval
+    in
+    let* _ =
       Result2.guard "Ran out of fuel" (fuel > 0)
     in
     match exp with
@@ -174,15 +178,18 @@ module FuelLimited = struct
       | RHole (env, name) ->
           begin match Hole_map.find_opt name hf with
             | Some binding ->
-                let* (r, ks) =
-                  eval fuel env binding
-                in
-                let+ (r', ks') =
-                  resume fuel hf r
-                in
-                  ( r'
-                  , ks @ ks'
-                  )
+                if binding = EHole name then
+                  Ok (res, [])
+                else
+                  let* (r, ks) =
+                    eval fuel env binding
+                  in
+                  let+ (r', ks') =
+                    resume fuel hf r
+                  in
+                    ( r'
+                    , ks @ ks'
+                    )
 
             | None ->
                 let+ (env', ks) =
@@ -344,10 +351,9 @@ module FuelLimited = struct
 end
 
 let eval env exp =
-  Timer.with_timeout_ "eval"
-    !Params.max_eval_time
-    (FuelLimited.eval !Params.initial_fuel env) exp
-    (Error "Evaluation time exceeded")
+  Timer.Single.start Timer.Single.Eval;
+  FuelLimited.eval !Params.initial_fuel env exp
 
 let resume hf res =
+  Timer.Single.start Timer.Single.Eval;
   FuelLimited.resume !Params.initial_fuel hf res

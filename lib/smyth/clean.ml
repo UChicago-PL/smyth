@@ -8,7 +8,10 @@ let propagate (hf : hole_filling) : hole_filling =
       | EHole hole_name ->
           begin match Hole_map.find_opt hole_name hf with
             | Some hole_exp ->
-                propagate_exp hole_exp
+                if Exp.syntactically_equal exp hole_exp then
+                  EHole hole_name
+                else
+                  propagate_exp hole_exp
 
             | None ->
                 EHole hole_name

@@ -87,7 +87,6 @@ let rec iter_solve params delta sigma (hf, us_all) =
           Constraints.merge [(hf, us); k_new]
             |> Nondet.lift_option
             |> Nondet.and_then (simplify_constraints delta_merged sigma)
-            |> Nondet.take 10
         in
           iter_solve
             params

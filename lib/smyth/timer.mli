@@ -19,18 +19,10 @@ module Multi : sig
   val check : t -> bool
 end
 
-val with_timeout :
+val itimer_timeout :
   string ->
   float ->
   ('a -> 'b) ->
   'a ->
   'b ->
   'b * float * bool
-
-val with_timeout_ :
-  string ->
-  float ->
-  ('a -> 'b) ->
-  'a ->
-  'b ->
-  'b

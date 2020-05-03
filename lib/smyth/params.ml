@@ -29,7 +29,7 @@ let max_guess_time : float ref =
   ref 0.25
 
 let initial_fuel : int ref =
-  ref 2500
+  ref 100
 
 let log_info : bool ref =
   ref true
