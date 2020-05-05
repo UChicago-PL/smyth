@@ -58,6 +58,8 @@ type context =
   | CTTuple
   | CTData
   | CTArr
+  | CTForall
+  | CTVar
 
   | CPat
   | CPTuple

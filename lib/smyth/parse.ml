@@ -62,6 +62,8 @@ type context =
   | CTTuple
   | CTData
   | CTArr
+  | CTForall
+  | CTVar
 
   | CPat
   | CPTuple
@@ -153,6 +155,9 @@ let multi_comment_end =
   Token ("-}", ExpectingMultiCommentEnd)
 
 (* Keywords *)
+
+let forall_keyword =
+  Token ("forall", ExpectingLet)
 
 let let_keyword =
   Token ("let", ExpectingLet)
@@ -344,7 +349,8 @@ let inner_char : char -> bool =
 
 let reserved_words =
   String_set.of_list
-    [ "if"; "then"; "else"
+    [ "forall"
+    ; "if"; "then"; "else"
     ; "case"; "of"
     ; "let"; "in"
     ; "type"
@@ -373,26 +379,50 @@ let variable_name : string parser =
 
 let rec typ' : unit -> typ parser =
   fun () ->
-    let ground_typ : typ parser =
-      succeed (fun t -> t)
-        |= one_of
-             [ in_context CTTuple
-                 ( tuple (fun t -> t) (fun ts -> TTuple ts) (lazily typ')
-                 )
+    let monotype' : unit -> typ parser =
+      fun () ->
+        let ground_typ : typ parser =
+          succeed (fun t -> t)
+            |= one_of
+                 [ in_context CTTuple
+                     ( tuple (fun t -> t) (fun ts -> TTuple ts) (lazily typ')
+                     )
 
-             ; in_context CTData
-                 ( map (fun name -> TData name) constructor_name
-                 )
-             ]
-        |. any_spaces
-    in
-    chainr1 CTArr ground_typ
-      ( ignore_with (fun domain codomain -> TArr (domain, codomain))
-          ( succeed ()
-              |. symbol right_arrow
-              |. any_spaces
+                 ; in_context CTData
+                     ( map (fun name -> TData name) constructor_name
+                     )
+
+                 ; in_context CTVar
+                     ( map (fun name -> TVar name) variable_name
+                     )
+                 ]
+            |. any_spaces
+        in
+        chainr1 CTArr ground_typ
+          ( ignore_with (fun domain codomain -> TArr (domain, codomain))
+              ( succeed ()
+                  |. symbol right_arrow
+                  |. any_spaces
+              )
           )
-      )
+    in
+    let polytype' : unit -> typ parser =
+      fun () ->
+        in_context CTForall
+          ( succeed (fun a bound_type -> TForall (a, bound_type))
+              |. keyword forall_keyword
+              |. any_spaces
+              |= variable_name
+              |. any_spaces
+              |. symbol dot
+              |. any_spaces
+              |= lazily typ'
+          )
+    in
+      one_of
+        [ lazily polytype'
+        ; lazily monotype'
+        ]
 
 let typ : typ parser =
   in_context CType (lazily typ')
