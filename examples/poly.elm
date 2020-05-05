@@ -6,15 +6,12 @@ type Boolean
   = F ()
   | T ()
 
-id : forall a . a -> a
-id <a> x =
-  x
+choose : forall a . a -> a -> a
+choose <a> x y =
+  ??
 
-const : forall b . b -> (forall a . a -> a) -> b
-const <b> x f =
-  f <b> x
-
-specifyFunction3 const
-  [ (<Nat>, 2, id, 2)
-  , (<Boolean>, T (), id, T ())
+specifyFunction3 choose
+  [ (<Nat>, 1, 0, 1)
+  -- Won't work if added:
+  -- , (<Nat>, 0, 1, 1)
   ]
