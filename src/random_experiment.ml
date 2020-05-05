@@ -72,7 +72,9 @@ let make_benchmark :
                       | arg ->
                           [arg]
                     in
-                    ( Desugar.app (Lang.EVar function_name) args
+                    ( Desugar.app
+                        (Lang.EVar function_name)
+                        (List.map (fun e -> Desugar.ExpArg e) args)
                     , d_out output
                     )
                 )

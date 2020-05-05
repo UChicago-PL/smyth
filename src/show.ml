@@ -20,6 +20,8 @@ let parse_problem : Parse.problem -> string =
       | ExpectingRightBracket -> expecting_symbol "]"
       | ExpectingComma -> expecting_symbol ","
       | ExpectingRightArrow -> expecting_symbol "->"
+      | ExpectingLAngle -> expecting_symbol "<"
+      | ExpectingRAngle -> expecting_symbol ">"
       | ExpectingSpace -> expecting "spaces"
       | ExpectingPound -> expecting_symbol "#"
       | ExpectingDot -> expecting_symbol "."

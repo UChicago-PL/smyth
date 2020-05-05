@@ -11,6 +11,8 @@ type problem =
   | ExpectingRightBracket
   | ExpectingComma
   | ExpectingRightArrow
+  | ExpectingLAngle
+  | ExpectingRAngle
   | ExpectingSpace
   | ExpectingPound
   | ExpectingDot
@@ -65,6 +67,9 @@ type context =
   | CTForall
   | CTVar
 
+  | CTypeParam
+  | CTypeArg
+
   | CPat
   | CPTuple
   | CPVar
@@ -117,6 +122,12 @@ let comma =
 
 let right_arrow =
   Token ("->", ExpectingRightArrow)
+
+let langle =
+  Token ("<", ExpectingLAngle)
+
+let rangle =
+  Token (">", ExpectingRAngle)
 
 let pound =
   Token ("#", ExpectingPound)
@@ -289,6 +300,16 @@ let listt : 'a parser -> 'a list parser =
       ~item:item
       ~trailing:Forbidden
 
+let wrapped_poly : 'a parser -> 'a list parser =
+  fun item ->
+    sequence
+      ~start:langle
+      ~separator:comma
+      ~endd:rangle
+      ~spaces:lspaces
+      ~item:item
+      ~trailing:Forbidden
+
 let exactly : int -> 'a parser -> 'a list parser =
   fun n p ->
     loop (n, [])
@@ -302,20 +323,21 @@ let exactly : int -> 'a parser -> 'a list parser =
               ]
       )
 
-let chainl1 : context -> 'a parser -> ('a -> 'a -> 'a) parser -> 'a parser =
-  fun chain_context p op ->
+let chainl1 :
+ context -> 'a parser -> 'b parser -> ('a -> 'b -> 'a) parser -> 'a parser =
+  fun chain_context p_head p_arg op ->
     let rec next acc =
       one_of
         [ in_context chain_context
             ( let* combiner =
                 op
               in
-              p |> and_then (combiner acc >> next)
+              p_arg |> and_then (combiner acc >> next)
             )
         ; succeed acc
         ]
     in
-    p |> and_then next
+    p_head |> and_then next
 
 let chainr1 : context -> 'a parser -> ('a -> 'a -> 'a) parser -> 'a parser =
   fun chain_context p op ->
@@ -450,25 +472,41 @@ let pat : pat parser =
 
 (* Expressions *)
 
-let rec binding' : unit -> (string * pat list * exp) parser =
+let params : Desugar.param list parser =
+  loop []
+    ( fun rev_params ->
+        one_of
+          [ succeed (fun p -> Loop (p @ rev_params))
+              |= one_of
+                   [ in_context CTypeParam
+                       ( map
+                           ( fun taus ->
+                               taus
+                                 |> List.rev
+                                 |> List.map (fun tau -> Desugar.TypeParam tau)
+                           )
+                           (wrapped_poly variable_name)
+                       )
+                   ; map
+                       (fun p -> [Desugar.PatParam p])
+                       pat
+                   ]
+              |. sspaces
+          ; succeed (Done (List.rev rev_params))
+          ]
+    )
+
+let rec binding' : unit -> (string * Desugar.param list * exp) parser =
   fun () ->
-    succeed (fun name pats body -> (name, pats, body))
+    succeed (fun name ps body -> (name, ps, body))
       |= variable_name
       |. sspaces
-      |= loop []
-           ( fun rev_patterns ->
-               one_of
-                 [ succeed (fun p -> Loop (p :: rev_patterns))
-                     |= pat
-                     |. sspaces
-                 ; succeed (Done (List.rev rev_patterns))
-                 ]
-           )
+      |= params
       |. symbol equals
       |. sspaces
       |= lazily exp'
 
-and definition' : unit -> (typ * string * pat list * exp) parser =
+and definition' : unit -> (typ * string * Desugar.param list * exp) parser =
   fun () ->
     let* (name, the_typ) =
         succeed Pair2.pair
@@ -520,11 +558,11 @@ and ground_exp' : unit -> exp parser =
     one_of
       [ in_context CELet
           ( succeed
-             ( fun (typ, name, pats, body) rest ->
+             ( fun (typ, name, ps, body) rest ->
                   Desugar.lett
                     typ
                     name
-                    (Desugar.func_args pats body)
+                    (Desugar.func_params ps body)
                     rest
              )
               |. keyword let_keyword
@@ -547,7 +585,7 @@ and ground_exp' : unit -> exp parser =
               |= branches
           )
 
-        (* Constructors handled in post-processing *)
+      (* Constructors handled in post-processing *)
       ; map (fun name -> EVar name)
           ( one_of
               [ in_context CEVar variable_name
@@ -578,11 +616,10 @@ and ground_exp' : unit -> exp parser =
           )
 
       ; in_context CELambda
-         ( succeed (fun param body -> EFix (None, param, body))
+         ( succeed Desugar.func_params
              |. symbol lambda
              |. sspaces
-             |= pat
-             |. sspaces
+             |= params
              |. symbol right_arrow
              |. sspaces
              |= lazily exp'
@@ -599,11 +636,32 @@ and ground_exp' : unit -> exp parser =
           )
       ]
 
+and arg' : unit -> Desugar.arg list parser =
+  fun () ->
+    one_of
+      [ in_context CTypeArg
+          ( map
+              (List.map (fun tau -> Desugar.TypeArg tau))
+              (wrapped_poly typ)
+          )
+      ; map
+          (fun e -> [Desugar.ExpArg e])
+          (lazily ground_exp')
+      ]
+
 and exp' : unit -> exp parser =
   fun () ->
     with_current_indent
-      ( chainl1 CEApp (with_current_indent (lazily ground_exp'))
-          ( ignore_with (fun head arg -> EApp (false, head, arg))
+      ( chainl1
+          CEApp
+          ( with_current_indent
+              (lazily ground_exp')
+          )
+          ( with_current_indent
+              (lazily arg')
+          )
+          ( ignore_with
+              Desugar.app
               (backtrackable sspaces)
           )
       )
@@ -614,7 +672,7 @@ let ground_exp : exp parser =
 let exp : exp parser =
   in_context CExp (lazily exp')
 
-let definition : (typ * string * pat list * exp) parser =
+let definition : (typ * string * Desugar.param list * exp) parser =
   lazily definition'
 
 (* Programs *)
@@ -708,7 +766,9 @@ let statement_group : statement list parser =
               List.map
                 ( fun (inputs, output) ->
                     Assertion
-                      ( Desugar.app func inputs
+                      ( Desugar.app
+                          func
+                          (List.map (fun i -> Desugar.ExpArg i) inputs)
                       , output
                       )
                 )
@@ -716,13 +776,13 @@ let statement_group : statement list parser =
             )
 
         ; in_context CSDefinition
-            ( let+ (typ, name, pats, body) =
+            ( let+ (typ, name, ps, body) =
                 definition
               in
               [ Definition
                   ( name
                   , typ
-                  , Desugar.func_args pats body
+                  , Desugar.func_params ps body
                   )
               ]
             )

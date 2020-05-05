@@ -7,6 +7,8 @@ type problem =
   | ExpectingRightBracket
   | ExpectingComma
   | ExpectingRightArrow
+  | ExpectingLAngle
+  | ExpectingRAngle
   | ExpectingSpace
   | ExpectingPound
   | ExpectingDot
@@ -60,6 +62,9 @@ type context =
   | CTArr
   | CTForall
   | CTVar
+
+  | CTypeParam
+  | CTypeArg
 
   | CPat
   | CPTuple

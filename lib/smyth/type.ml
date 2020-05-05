@@ -14,6 +14,13 @@ let rec equal tau1 tau2 =
     | (TData d1, TData d2) ->
         String.equal d1 d2
 
+    | (TForall (a1, bound_type1), TForall (a2, bound_type2)) ->
+        String.equal a1 a2
+          && equal bound_type1 bound_type2
+
+    | (TVar x1, TVar x2) ->
+        String.equal x1 x2
+
     | _ ->
         false
 

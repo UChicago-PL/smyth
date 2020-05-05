@@ -160,7 +160,7 @@ let rec typ' : typ printer =
       | TVar x ->
           x
 
-let wrap_poly : string -> string =
+let wrapped_type : string -> string =
   fun s ->
     "<" ^ s ^ ">"
 
@@ -324,14 +324,14 @@ and exp' : exp printer =
                   inner
 
             | ETAbs (x, body) ->
-                exp' state (EFix (None, PVar (wrap_poly x), body))
+                exp' state (EFix (None, PVar (wrapped_type x), body))
 
             | ETApp (head, arg) ->
                 application
                   state
                   exp'
                   head
-                  (fun state s -> wrap_poly (typ' state s))
+                  (fun state s -> wrapped_type (typ' state s))
                   arg
           end
 
