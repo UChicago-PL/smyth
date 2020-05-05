@@ -310,6 +310,15 @@ let wrapped_poly : 'a parser -> 'a list parser =
       ~item:item
       ~trailing:Forbidden
 
+let single_wrapped_poly : 'a parser -> 'a parser =
+  fun item ->
+    succeed (fun x -> x)
+      |. symbol langle
+      |. sspaces
+      |= item
+      |. sspaces
+      |. symbol rangle
+
 let exactly : int -> 'a parser -> 'a list parser =
   fun n p ->
     loop (n, [])
@@ -636,7 +645,7 @@ and ground_exp' : unit -> exp parser =
           )
       ]
 
-and arg' : unit -> Desugar.arg list parser =
+and ground_args' : unit -> Desugar.arg list parser =
   fun () ->
     one_of
       [ in_context CTypeArg
@@ -658,7 +667,7 @@ and exp' : unit -> exp parser =
               (lazily ground_exp')
           )
           ( with_current_indent
-              (lazily arg')
+              (lazily ground_args')
           )
           ( ignore_with
               Desugar.app
@@ -674,6 +683,18 @@ let exp : exp parser =
 
 let definition : (typ * string * Desugar.param list * exp) parser =
   lazily definition'
+
+let arg : Desugar.arg parser =
+  one_of
+    [ in_context CTypeArg
+        ( map
+            (fun tau -> Desugar.TypeArg tau)
+            (single_wrapped_poly typ)
+        )
+    ; map
+        (fun e -> Desugar.ExpArg e)
+        exp
+    ]
 
 (* Programs *)
 
@@ -753,7 +774,7 @@ let statement_group : statement list parser =
                            ( in_context CSFuncSpecInput
                                ( succeed (fun e -> e)
                                    |. lspaces
-                                   |= exp
+                                   |= arg
                                    |. lspaces
                                    |. symbol comma
                                )
@@ -766,9 +787,7 @@ let statement_group : statement list parser =
               List.map
                 ( fun (inputs, output) ->
                     Assertion
-                      ( Desugar.app
-                          func
-                          (List.map (fun i -> Desugar.ExpArg i) inputs)
+                      ( Desugar.app func inputs
                       , output
                       )
                 )

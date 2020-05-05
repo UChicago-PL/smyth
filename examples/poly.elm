@@ -10,10 +10,11 @@ id : forall a . a -> a
 id <a> x =
   x
 
-const : forall a . forall b . a -> b -> a
-const <a, b> x y =
-  x
+const : forall b . b -> (forall a . a -> a) -> b
+const <b> x f =
+  f <b> x
 
-specifyFunction2 (const <Nat, Boolean>)
-  [ (2, F (), 2)
+specifyFunction3 const
+  [ (<Nat>, 2, id, 2)
+  , (<Boolean>, T (), id, T ())
   ]
