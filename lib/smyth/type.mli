@@ -42,7 +42,7 @@ type error =
 
   | GotFunctionButExpected of typ
   | GotTupleButExpected of typ
-  | GotTypeOperatorButExpected of typ
+  | GotTypeAbstractionButExpected of typ
   | GotButExpected of typ * typ
 
   | BranchMismatch of typ * (string * typ)
@@ -50,7 +50,7 @@ type error =
   | CannotInferFunctionType
   | CannotInferCaseType
   | CannotInferHoleType
-  | CannotInferTypeOperatorType
+  | CannotInferTypeAbstractionType
 
   | ExpectedArrowButGot of typ
   | ExpectedTupleButGot of typ
@@ -60,7 +60,7 @@ type error =
   | ProjectionLengthMismatch of typ
   | ProjectionOutOfBounds of int * int
 
-  | TypeOperatorParameterNameMismatch of string * string
+  | TypeAbstractionParameterNameMismatch of string * string
 
   | AssertionTypeMismatch of typ * typ
   [@@deriving yojson]

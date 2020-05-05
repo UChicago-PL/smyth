@@ -142,7 +142,7 @@ type error =
 
   | GotFunctionButExpected of typ
   | GotTupleButExpected of typ
-  | GotTypeOperatorButExpected of typ
+  | GotTypeAbstractionButExpected of typ
   | GotButExpected of typ * typ
 
   | BranchMismatch of typ * (string * typ)
@@ -150,7 +150,7 @@ type error =
   | CannotInferFunctionType
   | CannotInferCaseType
   | CannotInferHoleType
-  | CannotInferTypeOperatorType
+  | CannotInferTypeAbstractionType
 
   | ExpectedArrowButGot of typ
   | ExpectedTupleButGot of typ
@@ -160,7 +160,7 @@ type error =
   | ProjectionLengthMismatch of typ
   | ProjectionOutOfBounds of int * int
 
-  | TypeOperatorParameterNameMismatch of string * string
+  | TypeAbstractionParameterNameMismatch of string * string
 
   | AssertionTypeMismatch of typ * typ
   [@@deriving yojson]
@@ -327,7 +327,7 @@ let rec check' :
                 if not (String.equal a a') then
                   Error
                     ( exp
-                    , TypeOperatorParameterNameMismatch (a, a')
+                    , TypeAbstractionParameterNameMismatch (a, a')
                     )
                 else
                   let param_gamma =
@@ -343,7 +343,7 @@ let rec check' :
             | _ ->
                 Error
                   ( exp
-                  , GotTypeOperatorButExpected tau
+                  , GotTypeAbstractionButExpected tau
                   )
           end
 
@@ -494,7 +494,7 @@ and infer' :
       | ETAbs (_, _) ->
           Error
             ( exp
-            , CannotInferTypeOperatorType
+            , CannotInferTypeAbstractionType
             )
 
       | ETApp (head, type_arg) ->
