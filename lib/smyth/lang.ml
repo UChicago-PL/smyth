@@ -3,7 +3,11 @@ type hole_name =
   [@@deriving yojson]
 
 module Hole_map =
-  Map.Make(struct type t = hole_name let compare = compare end)
+  Map.Make
+    ( struct
+        type t = hole_name
+        let compare = Int.compare end
+    )
 
 type 'a hole_map =
   'a Hole_map.t
