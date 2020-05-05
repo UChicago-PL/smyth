@@ -517,7 +517,6 @@ and ground_exp' : unit -> exp parser =
               ]
         )
     in
-    (* TODO Support more than just fix! *)
     one_of
       [ in_context CELet
           ( succeed
