@@ -7,7 +7,7 @@ let exp : exp -> exp =
       function
         (* Main cases *)
 
-          (* Handle constructor applications *)
+        (* Handle constructor applications *)
         | EApp (special, e1, e2) ->
             let default () =
               EApp (special, helper e1, helper e2)
@@ -23,14 +23,14 @@ let exp : exp -> exp =
                   default ()
             end
 
-          (* Handle syntactic sugar for unapplied constructors *)
+        (* Handle syntactic sugar for unapplied constructors *)
         | EVar name ->
             if Char2.uppercase_char (String.get name 0) then
               ECtor (name, ETuple [])
             else
               EVar name
 
-          (* Set proper hole names *)
+        (* Set proper hole names *)
         | EHole hole_name ->
             if Int.equal hole_name Fresh.unused then
               EHole (Fresh.gen_hole ())
@@ -62,6 +62,12 @@ let exp : exp -> exp =
 
         | ETypeAnnotation (e, tau) ->
             ETypeAnnotation (helper e, tau)
+
+        | ETAbs (x, body) ->
+            ETAbs (x, helper body)
+
+        | ETApp (head, type_arg) ->
+            ETApp (head, type_arg)
     in
       helper root
 

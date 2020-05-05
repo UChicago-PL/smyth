@@ -36,6 +36,12 @@ let rec exp_size_rank : exp -> int =
         (* Do not penalize for type annotations *)
         exp_size_rank e
 
+    | ETAbs (_, body) ->
+        1 + exp_size_rank body
+
+    | ETApp (head, _) ->
+        1 + exp_size_rank head
+
 let exp_rank : exp -> int =
   match !Params.ranking_method with
     | Params.Size -> exp_size_rank

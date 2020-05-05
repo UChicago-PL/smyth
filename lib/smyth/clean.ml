@@ -48,6 +48,12 @@ let propagate (hf : hole_filling) : hole_filling =
 
       | ETypeAnnotation (e, tau) ->
           ETypeAnnotation (propagate_exp e, tau)
+
+      | ETAbs (x, body) ->
+          ETAbs (x, propagate_exp body)
+
+      | ETApp (head, type_arg) ->
+          ETApp (propagate_exp head, type_arg)
   in
     Hole_map.map propagate_exp hf
 

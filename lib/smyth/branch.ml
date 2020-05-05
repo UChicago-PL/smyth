@@ -47,7 +47,7 @@ let distribute
       | Ok (RCtor (ctor_name, arg), []) ->
           Nondet.pure
             ( ( ctor_name
-              , ((arg_name, arg) :: env, ex)
+              , (Env.add_res (arg_name, arg) env, ex)
               )
             , Constraints.empty
             )
@@ -65,7 +65,11 @@ let distribute
               (ExCtor (ctor_name, ExTop))
           in
             ( ( ctor_name
-              , ((arg_name, RCtorInverse (ctor_name, r)) :: env, ex)
+              , ( Env.add_res
+                    (arg_name, RCtorInverse (ctor_name, r))
+                    env
+                , ex
+                )
               )
             , ks
             )
@@ -110,7 +114,7 @@ let branch
   in
   let top_worlds =
     data_ctors
-      |> List.map (Pair2.map_snd @@ fun _ -> ([], ExTop))
+      |> List.map (Pair2.map_snd @@ fun _ -> (Env.empty, ExTop))
       |> Ctor_map.from_assoc_many
   in
   let* (distributed_worldss, ks) =
@@ -161,7 +165,9 @@ let branch
             in
             let goal =
               ( hole_name
-              , ( ( (arg_name, (arg_type, arg_bind_spec)) :: gamma
+              , ( ( Type_ctx.add_type
+                      (arg_name, (arg_type, arg_bind_spec))
+                      gamma
                   , goal_type
                   , None
                   )

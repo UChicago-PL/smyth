@@ -12,6 +12,8 @@ type typ =
   | TArr of typ * typ
   | TTuple of typ list
   | TData of string
+  | TForall of string * typ
+  | TVar of string
   [@@deriving yojson]
 
 type pat =
@@ -33,6 +35,8 @@ type exp =
   | EHole of hole_name
   | EAssert of exp * exp
   | ETypeAnnotation of exp * typ
+  | ETAbs of string * exp
+  | ETApp of exp * typ
   [@@deriving yojson]
 
 type res =
@@ -46,10 +50,12 @@ type res =
   | RProj of int * int * res
   | RCase of env * res * (string * (pat * exp)) list
   | RCtorInverse of string * res
+  | RTAbs of env * string * exp
+  | RTApp of res * typ
   [@@deriving yojson]
 
 and env =
-  (string * res) list
+  (string * res) list * (string * typ) list
   [@@deriving yojson]
 
 type bind_spec =
@@ -63,8 +69,12 @@ type type_binding =
   string * (typ * bind_spec)
   [@@deriving yojson]
 
+type poly_binding =
+  string
+  [@@deriving yojson]
+
 type type_ctx =
-  type_binding list
+  type_binding list * poly_binding list
   [@@deriving yojson]
 
 type datatype_ctx =
@@ -86,6 +96,7 @@ type example =
   | ExTuple of example list
   | ExCtor of string * example
   | ExInputOutput of value * example
+  | ExTInputOutput of typ * example
   | ExTop
   [@@deriving yojson]
 

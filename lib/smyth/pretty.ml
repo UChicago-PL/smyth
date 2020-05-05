@@ -154,6 +154,16 @@ let rec typ' : typ printer =
       | TData name ->
           name
 
+      | TForall (x, t) ->
+          "forall " ^ x ^ ". " ^ typ' state t
+
+      | TVar x ->
+          x
+
+let wrap_poly : string -> string =
+  fun s ->
+    "<" ^ s ^ ">"
+
 (* Expressions *)
 
 let rec try_sugar : state -> exp -> string option =
@@ -312,6 +322,17 @@ and exp' : exp printer =
                   "(" ^ inner ^ ")"
                 else
                   inner
+
+            | ETAbs (x, body) ->
+                exp' state (EFix (None, PVar (wrap_poly x), body))
+
+            | ETApp (head, arg) ->
+                application
+                  state
+                  exp'
+                  head
+                  (fun state s -> wrap_poly (typ' state s))
+                  arg
           end
 
 let exp : exp -> string =

@@ -35,7 +35,8 @@ module FuelLimited = struct
 
         | RFix (_, _, _, _)
         | RTuple _
-        | RCtor (_, _) ->
+        | RCtor (_, _)
+        | RTAbs (_, _, _) ->
             None
 
         (* Indeterminate results *)
@@ -54,6 +55,9 @@ module FuelLimited = struct
 
         | RCtorInverse (_, arg) ->
             blocking_hole arg
+
+        | RTApp (head, _) ->
+            blocking_hole head
     in
     let guesses
       (delta : hole_ctx)
@@ -107,7 +111,10 @@ module FuelLimited = struct
               |> Nondet.lift_option
           in
             check fuel delta sigma hf body
-              [(x_env_extension @ fix_env_extension @ env, output)]
+              [ ( Env.concat [x_env_extension; fix_env_extension; env]
+                , output
+                )
+              ]
 
       | (RApp (r1, r2), _) ->
           begin match Res.to_value r2 with
@@ -156,7 +163,7 @@ module FuelLimited = struct
                               |> Nondet.lift_option
                           in
                           check fuel delta sigma hf' body @@
-                            [(arg_env_extension @ env, ex)]
+                            [(Env.concat [arg_env_extension; env], ex)]
 
                       | None ->
                           Nondet.none
@@ -180,7 +187,7 @@ module FuelLimited = struct
               in
               let* k2 =
                 check (fuel - 1) delta sigma hf body @@
-                  [(arg_env_extension @ env, ex)]
+                  [(Env.concat [arg_env_extension; env], ex)]
               in
                 Nondet.lift_option @@
                   Constraints.merge [k1; k2]

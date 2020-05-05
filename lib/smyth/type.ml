@@ -1,5 +1,7 @@
 open Lang
 
+(* Types *)
+
 let rec equal tau1 tau2 =
   match (tau1, tau2) with
     | (TArr (tau11, tau12), TArr (tau21, tau22)) ->
@@ -24,6 +26,12 @@ let is_base tau =
         false
 
     | TData _ ->
+        true
+
+    | TForall (_, _) ->
+        false
+
+    | TVar _ ->
         true
 
 let rec domain_of_codomain ~codomain tau =
@@ -51,7 +59,7 @@ let rec bind_spec gamma exp =
         sub_bind_spec (bind_spec gamma arg)
 
     | EVar x ->
-        List.assoc_opt x gamma
+        List.assoc_opt x (Type_ctx.all_type gamma)
           |> Option2.map snd
           |> Option2.with_default NoSpec
 
@@ -89,6 +97,37 @@ let ignore_binding (s : string) : bool =
 
 (* Type checking *)
 
+let rec substitute : before:string -> after:typ -> typ -> typ =
+  fun ~before ~after tau ->
+    match tau with
+      | TArr (arg, ret) ->
+          TArr
+            ( substitute ~before ~after arg
+            , substitute ~before ~after ret
+            )
+
+      | TTuple components ->
+          TTuple
+            ( List.map
+                (substitute ~before ~after)
+                components
+            )
+
+      | TData name ->
+          TData name
+
+      | TForall (a, bound_type) ->
+          if String.equal before a then
+            tau
+          else
+            TForall (a, substitute ~before ~after bound_type)
+
+      | TVar x ->
+          if String.equal before x then
+            after
+          else
+            tau
+
 type error =
   | VarNotFound of string
   | CtorNotFound of string
@@ -96,20 +135,25 @@ type error =
 
   | GotFunctionButExpected of typ
   | GotTupleButExpected of typ
+  | GotTypeOperatorButExpected of typ
   | GotButExpected of typ * typ
 
-  | MismatchedBranch of typ * (string * typ)
+  | BranchMismatch of typ * (string * typ)
 
   | CannotInferFunctionType
   | CannotInferCaseType
   | CannotInferHoleType
+  | CannotInferTypeOperatorType
 
   | ExpectedArrowButGot of typ
   | ExpectedTupleButGot of typ
+  | ExpectedForallButGot of typ
 
   | TupleLengthMismatch of typ
   | ProjectionLengthMismatch of typ
   | ProjectionOutOfBounds of int * int
+
+  | TypeOperatorParameterNameMismatch of string * string
 
   | AssertionTypeMismatch of typ * typ
   [@@deriving yojson]
@@ -171,7 +215,7 @@ let rec check' :
                 check'
                   state
                   sigma
-                  (param_gamma @ func_name_gamma @ gamma)
+                  (Type_ctx.concat [param_gamma; func_name_gamma; gamma])
                   body
                   return_type
 
@@ -232,13 +276,13 @@ let rec check' :
                                match_depth = state.match_depth + 1
                            }
                            sigma
-                           (param_gamma @ gamma)
+                           (Type_ctx.concat [param_gamma; gamma])
                            body
                            tau
                        else
                          Error
                            ( exp
-                           , MismatchedBranch
+                           , BranchMismatch
                                ( scrutinee_type
                                , (ctor_name, return_type)
                                )
@@ -270,12 +314,39 @@ let rec check' :
           in
           head_delta @ arg_delta
 
+      | ETAbs (a, body) ->
+          begin match tau with
+            | TForall (a', bound_type) ->
+                if not (String.equal a a') then
+                  Error
+                    ( exp
+                    , TypeOperatorParameterNameMismatch (a, a')
+                    )
+                else
+                  let param_gamma =
+                    Type_ctx.add_poly a Type_ctx.empty
+                  in
+                  check'
+                    state
+                    sigma
+                    (Type_ctx.concat [param_gamma; gamma])
+                    body
+                    bound_type
+
+            | _ ->
+                Error
+                  ( exp
+                  , GotTypeOperatorButExpected tau
+                  )
+          end
+
       | EApp (_, _, _)
       | EVar _
       | EProj (_, _, _)
       | ECtor (_, _)
       | EAssert (_, _)
-      | ETypeAnnotation (_, _) ->
+      | ETypeAnnotation (_, _)
+      | ETApp (_, _) ->
           let* (tau', delta) =
             infer' state sigma gamma exp
           in
@@ -321,7 +392,7 @@ and infer' :
           end
 
       | EVar name ->
-          begin match List.assoc_opt name gamma with
+          begin match List.assoc_opt name (Type_ctx.all_type gamma) with
             | Some (tau', _) ->
                 Ok (tau', [])
 
@@ -412,6 +483,30 @@ and infer' :
             check' state sigma gamma exp' tau'
           in
           (tau', delta)
+
+      | ETAbs (_, _) ->
+          Error
+            ( exp
+            , CannotInferTypeOperatorType
+            )
+
+      | ETApp (head, type_arg) ->
+          let* (head_type, head_delta) =
+            infer' state sigma gamma head
+          in
+          begin match head_type with
+            | TForall (a, bound_type) ->
+                Ok
+                  ( substitute ~before:a ~after:type_arg bound_type
+                  , head_delta
+                  )
+
+            | _ ->
+                Error
+                  ( exp
+                  , ExpectedForallButGot head_type
+                  )
+          end
 
 let check =
   check'

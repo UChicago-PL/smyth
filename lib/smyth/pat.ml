@@ -20,7 +20,7 @@ let rec bind_res : pat -> res -> env option =
   fun p r ->
     match p with
       | PVar x ->
-          Some [(x, r)]
+          Some (Env.add_res (x, r) Env.empty)
 
       | PTuple ps ->
           begin match r with
@@ -28,7 +28,7 @@ let rec bind_res : pat -> res -> env option =
                 if Int.equal (List.length ps) (List.length rs) then
                   List.map2 bind_res ps rs
                     |> Option2.sequence
-                    |> Option2.map List.concat
+                    |> Option2.map Env.concat
                 else
                   None
 
@@ -37,22 +37,22 @@ let rec bind_res : pat -> res -> env option =
           end
 
       | PWildcard ->
-          Some []
+          Some Env.empty
 
 let bind_rec_name_res : string option -> res -> env =
   fun rec_name_opt r ->
     match rec_name_opt with
       | Some rec_name ->
-          [(rec_name, r)]
+          Env.add_res (rec_name, r) Env.empty
 
       | None ->
-          []
+          Env.empty
 
 let rec bind_typ : bind_spec -> pat -> typ -> type_ctx option =
   fun bind_spec p tau ->
     match p with
       | PVar x ->
-          Some [(x, (tau, bind_spec))]
+          Some (Type_ctx.add_type (x, (tau, bind_spec)) Type_ctx.empty)
 
       | PTuple ps ->
           begin match tau with
@@ -60,7 +60,7 @@ let rec bind_typ : bind_spec -> pat -> typ -> type_ctx option =
                 if Int.equal (List.length ps) (List.length taus) then
                   List.map2 (bind_typ bind_spec) ps taus
                     |> Option2.sequence
-                    |> Option2.map List.concat
+                    |> Option2.map Type_ctx.concat
                 else
                   None
 
@@ -69,13 +69,15 @@ let rec bind_typ : bind_spec -> pat -> typ -> type_ctx option =
           end
 
       | PWildcard ->
-          Some []
+          Some Type_ctx.empty
 
 let bind_rec_name_typ : string option -> typ -> type_ctx =
   fun rec_name_opt tau ->
     match rec_name_opt with
       | Some rec_name ->
-          [(rec_name, (tau, Rec rec_name))]
+          Type_ctx.add_type
+            (rec_name, (tau, Rec rec_name))
+            Type_ctx.empty
 
       | None ->
-          []
+          Type_ctx.empty

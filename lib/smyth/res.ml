@@ -4,7 +4,9 @@ let rec final r =
   determinate r || indeterminate r
 
 and final_env (env : env) : bool =
-  List.for_all (fun (_x, e) -> final e) env
+  env
+    |> Env.all_res
+    |> List.for_all (fun (_x, e) -> final e)
 
 and determinate r =
   match r with
@@ -16,6 +18,9 @@ and determinate r =
 
     | RCtor (_, arg) ->
         final arg
+
+    | RTAbs (env, _, _) ->
+        final_env env
 
     | _ ->
         false
@@ -33,6 +38,9 @@ and indeterminate r =
 
     | RCase (env, scrutinee, _) ->
         final_env env && indeterminate scrutinee
+
+    | RTApp (head, _) ->
+        indeterminate head
 
     | _ ->
         false

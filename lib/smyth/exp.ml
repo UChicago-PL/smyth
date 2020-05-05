@@ -63,6 +63,14 @@ let rec syntactically_equal e1 e2 =
         Type.equal tau1 tau2
           && syntactically_equal e1 e2
 
+    | (ETAbs (x1, body1), ETAbs (x2, body2)) ->
+        String.equal x1 x2
+          && syntactically_equal body1 body2
+
+    | (ETApp (e1, t1), ETApp (e2, t2)) ->
+        syntactically_equal e1 e2
+          && Type.equal t1 t2
+
     | _ ->
         false
 
@@ -83,7 +91,9 @@ let rec largest_hole : exp -> hole_name =
       | EFix (_, _, e)
       | EProj (_, _, e)
       | ECtor (_, e)
-      | ETypeAnnotation (e, _) ->
+      | ETypeAnnotation (e, _)
+      | ETAbs (_, e)
+      | ETApp (e, _) ->
           largest_hole e
 
       | EVar _ ->
@@ -137,6 +147,12 @@ let rec has_special_recursion : exp -> bool =
     | ETypeAnnotation (e, _) ->
         has_special_recursion e
 
+    | ETAbs (_, body) ->
+        has_special_recursion body
+
+    | ETApp (head, _) ->
+        has_special_recursion head
+
 let fill_hole : (hole_name * exp) -> exp -> exp =
   fun (hole_name, hole_exp) ->
     let rec helper : exp -> exp =
@@ -180,5 +196,11 @@ let fill_hole : (hole_name * exp) -> exp -> exp =
 
         | ETypeAnnotation (e, tau) ->
             ETypeAnnotation (helper e, tau)
+
+        | ETAbs (x, body) ->
+            ETAbs (x, helper body)
+
+        | ETApp (head, type_arg) ->
+            ETApp (helper head, type_arg)
     in
     helper

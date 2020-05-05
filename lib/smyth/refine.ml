@@ -36,16 +36,20 @@ let refine _delta sigma ((gamma, goal_type, goal_dec), worlds) =
                        match io_ex with
                          | ExInputOutput (v, ex) ->
                              Some
-                               ( (x_name, Res.from_value v)
-                                   :: ( f_name
-                                      , RFix
-                                          ( env
-                                          , Some f_name
-                                          , PVar x_name
-                                          , EHole hole_name
-                                          )
-                                      )
-                                   :: env
+                               ( Env.concat_res
+                                   [ ( x_name
+                                     , Res.from_value v
+                                     )
+                                   ; ( f_name
+                                     , RFix
+                                         ( env
+                                         , Some f_name
+                                         , PVar x_name
+                                         , EHole hole_name
+                                         )
+                                     )
+                                   ]
+                                   env
                                , ex
                                )
 
@@ -56,9 +60,11 @@ let refine _delta sigma ((gamma, goal_type, goal_dec), worlds) =
           in
           let new_goal =
             ( hole_name
-            , ( ( (f_name, (TArr (tau1, tau2), Rec f_name))
-                    :: (x_name, (tau1, Arg f_name))
-                    :: gamma
+            , ( ( Type_ctx.concat_type
+                    [ (f_name, (TArr (tau1, tau2), Rec f_name))
+                    ; (x_name, (tau1, Arg f_name))
+                    ]
+                    gamma
                 , tau2
                 , None
                 )
@@ -152,3 +158,51 @@ let refine _delta sigma ((gamma, goal_type, goal_dec), worlds) =
               )
           in
             (exp, [new_goal])
+
+      (* Refine-TAbs *)
+
+      | TForall (a, bound_type) ->
+          let hole_name =
+            Fresh.gen_hole ()
+          in
+          let+ refined_worlds =
+            filtered_worlds
+              |> List.map
+                   ( fun (env, io_ex) ->
+                       match io_ex with
+                         | ExTInputOutput (tau, ex) ->
+                             Some
+                               ( Env.add_type
+                                   ( a
+                                   , tau
+                                   )
+                                   env
+                               , ex
+                               )
+
+                         | _ ->
+                             None
+                   )
+              |> Option2.sequence
+          in
+          let new_goal =
+            ( hole_name
+            , ( ( Type_ctx.add_poly
+                    a
+                    gamma
+                , bound_type
+                , None
+                )
+              , refined_worlds
+              )
+            )
+          in
+          let exp =
+            ETAbs (a, EHole hole_name)
+          in
+            (exp, [new_goal])
+
+      (* Cannot refine a type variable *)
+
+      | TVar _ ->
+          None

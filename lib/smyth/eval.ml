@@ -25,7 +25,7 @@ module FuelLimited = struct
             )
 
       | EVar x ->
-          begin match List.assoc_opt x env with
+          begin match List.assoc_opt x (Env.all_res env) with
             | None ->
                 Error ("Variable not found: " ^ x)
 
@@ -75,7 +75,11 @@ module FuelLimited = struct
                       |> Option.to_result ~none:"Pattern match failed"
                   in
                   let new_env =
-                    x_env_extension @ f_env_extension @ f_env
+                    Env.concat
+                      [ x_env_extension
+                      ; f_env_extension
+                      ; f_env
+                      ]
                   in
                     Result2.map
                       (Pair2.map_snd @@ fun ks3 -> ks1 @ ks2 @ ks3)
@@ -131,7 +135,7 @@ module FuelLimited = struct
                               fun ks_body -> ks0 @ ks_body
                           )
                           ( eval fuel
-                              (arg_env_extension @ env)
+                              (Env.concat [arg_env_extension; env])
                               body
                           )
 
@@ -171,6 +175,34 @@ module FuelLimited = struct
 
       | ETypeAnnotation (e, _) ->
           eval fuel env e
+
+      | ETAbs (type_var, body) ->
+          Ok
+            ( RTAbs (env, type_var, body)
+            , []
+            )
+
+      | ETApp (head, type_arg) ->
+          let* (r_head, ks1) =
+            eval fuel env head
+          in
+          begin match r_head with
+            | RTAbs (f_env, type_param, body) ->
+                let new_env =
+                  Env.add_type
+                    (type_param, type_arg)
+                    f_env
+                in
+                  Result2.map
+                    (Pair2.map_snd @@ fun ks2 -> ks1 @ ks2)
+                    (eval fuel new_env body)
+
+            | _ ->
+                Ok
+                  ( RTApp (r_head, type_arg)
+                  , ks1
+                  )
+          end
 
   let rec resume fuel hf res =
     let open Result2.Syntax in
@@ -237,14 +269,18 @@ module FuelLimited = struct
             begin match r1' with
               | RFix (f_env, f, x, body) ->
                   let f_env_extension =
-                      Pat.bind_rec_name_res f r1'
+                    Pat.bind_rec_name_res f r1'
                   in
                   let* x_env_extension =
                     Pat.bind_res x r2'
                       |> Option.to_result ~none:"Pattern match failed"
                   in
                   let new_env =
-                    x_env_extension @ f_env_extension @ f_env
+                    Env.concat
+                      [ x_env_extension
+                      ; f_env_extension
+                      ; f_env
+                      ]
                   in
                   let* (r, ks) =
                     eval (fuel - 1) new_env body
@@ -334,20 +370,65 @@ module FuelLimited = struct
             , ks
             )
 
+      | RTAbs (env, type_param, body) ->
+          let+ (env', ks) =
+            resume_env fuel hf env
+          in
+          ( RTAbs (env', type_param, body)
+          , ks
+          )
+
+      | RTApp (r_head, type_arg) ->
+          let* (r_head', ks_head) =
+            resume fuel hf r_head
+          in
+          begin match r_head' with
+            | RTAbs (f_env, type_param, body) ->
+                let new_env =
+                  Env.add_type
+                    (type_param, type_arg)
+                    f_env
+                in
+                let* (r, ks) =
+                  eval (fuel - 1) new_env body
+                in
+                let+ (r', ks') =
+                  resume (fuel - 1) hf r
+                in
+                  ( r'
+                  , ks_head @ ks @ ks'
+                  )
+
+            | _ ->
+                Ok
+                  ( RTApp (r_head', type_arg)
+                  , ks_head
+                  )
+          end
+
   and resume_env fuel hf env : eval_env_result =
-    env
-      |> List.map
-           begin fun binding -> binding
-             |> Pair2.map_snd (resume fuel hf)
-             |> Pair2.lift_snd_result
-           end
-      |> Result2.sequence
-      |> Result2.map
-           begin fun binding -> binding
-             |> List.map (fun (x, (r, ks)) -> ((x, r), ks))
-             |> List.split
-             |> Pair2.map_snd List.concat
-           end
+    let open Result2.Syntax in
+    let+ (new_res_env, ks) =
+      env
+        |> Env.all_res
+        |> List.map
+             begin fun binding -> binding
+               |> Pair2.map_snd (resume fuel hf)
+               |> Pair2.lift_snd_result
+             end
+        |> Result2.sequence
+        |> Result2.map
+             begin fun binding -> binding
+               |> List.map (fun (x, (r, ks)) -> ((x, r), ks))
+               |> List.split
+               |> Pair2.map_snd List.concat
+             end
+    in
+    ( ( new_res_env
+      , Env.all_type env
+      )
+      , ks
+    )
 end
 
 let eval env exp =

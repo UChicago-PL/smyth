@@ -1,5 +1,7 @@
 open Lang
 
+(* Types *)
+
 val equal : typ -> typ -> bool
 
 val is_base : typ -> bool
@@ -40,20 +42,25 @@ type error =
 
   | GotFunctionButExpected of typ
   | GotTupleButExpected of typ
+  | GotTypeOperatorButExpected of typ
   | GotButExpected of typ * typ
 
-  | MismatchedBranch of typ * (string * typ)
+  | BranchMismatch of typ * (string * typ)
 
   | CannotInferFunctionType
   | CannotInferCaseType
   | CannotInferHoleType
+  | CannotInferTypeOperatorType
 
   | ExpectedArrowButGot of typ
   | ExpectedTupleButGot of typ
+  | ExpectedForallButGot of typ
 
   | TupleLengthMismatch of typ
   | ProjectionLengthMismatch of typ
   | ProjectionOutOfBounds of int * int
+
+  | TypeOperatorParameterNameMismatch of string * string
 
   | AssertionTypeMismatch of typ * typ
   [@@deriving yojson]

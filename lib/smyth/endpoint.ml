@@ -31,12 +31,12 @@ let solve_program : Desugar.program -> solve_result response =
     let (exp, sigma) =
       Desugar.program program
     in
-    begin match Type.check sigma [] exp (Lang.TTuple []) with
+    begin match Type.check sigma Type_ctx.empty exp (Lang.TTuple []) with
       | Error e ->
           Error (TypeError e)
 
       | Ok delta ->
-          begin match Eval.eval [] exp with
+          begin match Eval.eval Env.empty exp with
             | Error e ->
                 Error (EvalError e)
 
@@ -44,21 +44,8 @@ let solve_program : Desugar.program -> solve_result response =
                 let () =
                   Term_gen.clear_cache ()
                 in
-                let clean_delta =
-                  List.map
-                    ( Pair2.map_snd @@ fun (gamma, tau, dec, match_depth) ->
-                        ( List.filter
-                            (fst >> Type.ignore_binding >> not)
-                            gamma
-                        , tau
-                        , dec
-                        , match_depth
-                        )
-                    )
-                    delta
-                in
                 let () =
-                  clean_delta
+                  delta
                     |> List.map fst
                     |> List2.maximum
                     |> Option2.with_default 0
@@ -79,7 +66,7 @@ let solve_program : Desugar.program -> solve_result response =
                    ) =
                     Timer.itimer_timeout "minimal_synthesis_result"
                       !Params.max_total_time
-                      (synthesis_pipeline clean_delta sigma) assertions
+                      (synthesis_pipeline delta sigma) assertions
                       Nondet.none
                   in
                   if
@@ -101,7 +88,7 @@ let solve_program : Desugar.program -> solve_result response =
                       in
                       Timer.itimer_timeout "synthesis_result"
                         (!Params.max_total_time -. minimal_time_taken)
-                        (synthesis_pipeline clean_delta sigma) assertions
+                        (synthesis_pipeline delta sigma) assertions
                         Nondet.none
                     in
                       ( non_minimal_synthesis_result
@@ -115,7 +102,7 @@ let solve_program : Desugar.program -> solve_result response =
                   Ok
                     { hole_fillings =
                         synthesis_result
-                          |> Nondet.map (fst >> Clean.clean clean_delta)
+                          |> Nondet.map (fst >> Clean.clean delta)
                           |> Nondet.collapse_option
                           |> Nondet.to_list
                     ; time_taken
@@ -155,12 +142,12 @@ let check :
         exp_with_holes
         hole_filling
     in
-    match Type.check sigma [] exp (Lang.TTuple []) with
+    match Type.check sigma Type_ctx.empty exp (Lang.TTuple []) with
       | Error e ->
           Error (TypeError e)
 
       | Ok _ ->
-          begin match Eval.eval [] exp with
+          begin match Eval.eval Env.empty exp with
             | Error _ ->
                 Ok false
 

@@ -30,6 +30,15 @@ let rec res_satisfies hf res ex =
               false
         end
 
+    | (_, ExTInputOutput (input_type, output)) ->
+        begin match Eval.resume hf (RTApp (res, input_type)) with
+          | Ok (r_out, []) ->
+              res_satisfies hf r_out output
+
+          | _ ->
+              false
+        end
+
     | _ ->
         false
 
