@@ -14,7 +14,7 @@ val is_base : typ -> bool
  *
  * Also:
  *   domain_of_codomain ~codomain:a a = None
- *   domain_of_codomain ~codomain:a (() -> a) = ()
+ *   domain_of_codomain ~codomain:a (() -> a) = Some ()
  *)
 val domain_of_codomain : codomain:typ -> typ -> typ option
 
@@ -31,7 +31,7 @@ val structurally_decreasing :
 val matches_dec :
   string option -> bind_spec -> bool
 
-val ignore_binding : string -> bool
+val match_schema : schema:typ -> typ -> (string * typ) list option
 
 (* Type checking *)
 
