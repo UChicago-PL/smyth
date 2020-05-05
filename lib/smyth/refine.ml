@@ -118,8 +118,8 @@ let refine _delta sigma ((gamma, goal_type, goal_dec), worlds) =
 
       (* Refine-Ctor *)
 
-      | TData datatype_name ->
-          let* datatype_ctors =
+      | TData (datatype_name, datatype_args) ->
+          let* (_, datatype_ctors) =
             List.assoc_opt datatype_name sigma
           in
           let* (ctor_name, refined_worlds) =
@@ -154,6 +154,7 @@ let refine _delta sigma ((gamma, goal_type, goal_dec), worlds) =
           let exp =
             ECtor
               ( ctor_name
+              , datatype_args
               , EHole hole_name
               )
           in

@@ -50,7 +50,8 @@ module FuelLimited = struct
                    |> Pair2.map_snd List.concat
                  end
 
-      | ECtor (name, arg) ->
+      (* Ctor types are erased at runtime *)
+      | ECtor (name, _, arg) ->
           let+ (r, ks) =
             eval fuel env arg
           in

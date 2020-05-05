@@ -420,7 +420,13 @@ let rec typ' : unit -> typ parser =
                      )
 
                  ; in_context CTData
-                     ( map (fun name -> TData name) constructor_name
+                     ( succeed (fun name args -> TData (name, args))
+                         |= constructor_name
+                         |. any_spaces
+                         |= one_of
+                              [ wrapped_poly (lazily typ')
+                              ; succeed []
+                              ]
                      )
 
                  ; in_context CTVar
@@ -716,7 +722,7 @@ let specify_function_name : int parser =
     succeed arity
 
 type statement =
-  | Datatype of (string * (string * typ) list)
+  | Datatype of (string * (string list * (string * typ) list))
   | Definition of (string * typ * exp)
   | Assertion of (exp * exp)
 
@@ -724,10 +730,23 @@ let statement_group : statement list parser =
   in_context CStatement
     ( one_of
         [ in_context CSDatatype
-            ( succeed (fun data_name ctors -> [Datatype (data_name, ctors)])
+            ( succeed
+               ( fun data_name type_params ctors ->
+                   [Datatype (data_name, (type_params, ctors))]
+               )
                 |. keyword type_keyword
                 |. sspaces
                 |= constructor_name
+                |. sspaces
+                |= loop []
+                     ( fun rev_params ->
+                         one_of
+                           [ succeed (fun p -> Loop (p :: rev_params))
+                               |= variable_name
+                               |. sspaces
+                           ; succeed (Done (List.rev rev_params))
+                           ]
+                     )
                 |. sspaces
                 |. symbol equals
                 |. sspaces

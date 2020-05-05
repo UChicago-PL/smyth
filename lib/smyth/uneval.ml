@@ -93,7 +93,7 @@ module FuelLimited = struct
             Nondet.none
 
       | (RCtor (name1, arg1), ExCtor (name2, arg2)) ->
-          if name1 = name2 then
+          if String.equal name1 name2 then
             uneval fuel delta sigma hf arg1 arg2
           else
             Nondet.none

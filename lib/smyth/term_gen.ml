@@ -83,8 +83,8 @@ let hash ({ term_kind; term_size; rel_binding; goal } : gen_input) : string =
             |> String.concat ","
             |> (fun s -> "(" ^ s ^ ")")
 
-      | TData d ->
-          d
+      | TData (d, type_args) ->
+          d ^ "<" ^ String.concat "," (List.map hash_type type_args)
 
       | TForall (a, bound_type) ->
           "f:" ^ a ^ "." ^ hash_type bound_type
@@ -476,10 +476,10 @@ and gen_i
                           taus
                           partition
 
-              | TData datatype_name ->
+              | TData (datatype_name, datatype_args) ->
                   let* (ctor_name, arg_type) =
                     List.assoc_opt datatype_name sigma
-                      |> Option2.map Nondet.from_list
+                      |> Option2.map (snd >> Nondet.from_list)
                       |> Option2.with_default Nondet.none
                   in
                   let+ arg =
@@ -491,7 +491,7 @@ and gen_i
                       ; goal = (Type_ctx.empty, arg_type, None)
                       }
                   in
-                    ECtor (ctor_name, arg)
+                    ECtor (ctor_name, datatype_args, arg)
 
               | TForall (a, bound_type) ->
                   let+ body =
@@ -586,10 +586,10 @@ and rel_gen_i
                     partition
                     part
 
-        | TData datatype_name ->
+        | TData (datatype_name, datatype_args) ->
             let* (ctor_name, arg_type) =
               List.assoc_opt datatype_name sigma
-                |> Option2.map Nondet.from_list
+                |> Option2.map (snd >> Nondet.from_list)
                 |> Option2.with_default Nondet.none
             in
             let+ arg =
@@ -601,7 +601,7 @@ and rel_gen_i
                 ; goal = (gamma, arg_type, None)
                 }
             in
-              ECtor (ctor_name, arg)
+              ECtor (ctor_name, datatype_args, arg)
 
         | TForall (a, bound_type) ->
             let+ body =

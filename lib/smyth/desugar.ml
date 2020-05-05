@@ -56,18 +56,18 @@ let nat : int -> exp =
     if n = 0 then
       acc
     else
-      helper (ECtor ("S", acc)) (n - 1)
+      helper (ECtor ("S", [], acc)) (n - 1)
   in
-  helper (ECtor ("Z", ETuple []))
+  helper (ECtor ("Z", [], ETuple []))
 
 let listt : exp list -> exp =
   fun es ->
     List.fold_right
       ( fun e acc ->
-          ECtor ("Cons", ETuple [e; acc])
+          ECtor ("Cons", [], ETuple [e; acc])
       )
       es
-      (ECtor ("Nil", ETuple []))
+      (ECtor ("Nil", [], ETuple []))
 
 type program =
   { datatypes : datatype_ctx

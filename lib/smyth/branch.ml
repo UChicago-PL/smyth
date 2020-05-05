@@ -94,7 +94,7 @@ let branch
   let arg_name =
     Term_gen.fresh_ident gamma Term_gen.match_char
   in
-  let* (data_name, data_ctors) =
+  let* (data_name, (data_params, data_ctors)) =
     Nondet.from_list sigma
   in
   let ctor_names =
@@ -108,7 +108,12 @@ let branch
   let* scrutinee =
     Term_gen.up_to_e sigma max_scrutinee_size
       ( gamma
-      , TData data_name
+      , TData
+          ( data_name
+          , List.map
+              (fun p -> TVar p)
+              data_params
+          )
       , None
       )
   in

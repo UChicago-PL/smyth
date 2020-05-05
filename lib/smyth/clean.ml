@@ -34,8 +34,8 @@ let propagate (hf : hole_filling) : hole_filling =
       | EProj (n, i, arg) ->
           EProj (n, i, propagate_exp arg)
 
-      | ECtor (ctor_name, arg) ->
-          ECtor (ctor_name, propagate_exp arg)
+      | ECtor (ctor_name, type_args, arg) ->
+          ECtor (ctor_name, type_args, propagate_exp arg)
 
       | ECase (scrutinee, branches) ->
           ECase

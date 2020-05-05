@@ -1,5 +1,22 @@
 open Lang
 
+let salvage_constructor : exp -> (string * typ list) option =
+  let rec helper type_args exp =
+    match exp with
+      | EVar name ->
+          if Char2.uppercase_char (String.get name 0) then
+            Some (name, type_args)
+          else
+            None
+
+      | ETApp (head, type_arg) ->
+          helper (type_arg :: type_args) head
+
+      | _ ->
+          None
+  in
+  helper []
+
 let exp : exp -> exp =
   fun root ->
     Fresh.set_largest_hole (Exp.largest_hole root);
@@ -9,24 +26,18 @@ let exp : exp -> exp =
 
         (* Handle constructor applications *)
         | EApp (special, e1, e2) ->
-            let default () =
-              EApp (special, helper e1, helper e2)
-            in
-            begin match e1 with
-              | EVar name ->
-                  if Char2.uppercase_char (String.get name 0) then
-                    ECtor (name, helper e2)
-                  else
-                    default ()
+            begin match salvage_constructor e1 with
+              | Some (ctor_name, type_args) ->
+                  ECtor (ctor_name, type_args, helper e2)
 
-              | _ ->
-                  default ()
+              | None ->
+                  EApp (special, helper e1, helper e2)
             end
 
         (* Handle syntactic sugar for unapplied constructors *)
         | EVar name ->
             if Char2.uppercase_char (String.get name 0) then
-              ECtor (name, ETuple [])
+              ECtor (name, [], ETuple [])
             else
               EVar name
 
@@ -48,8 +59,8 @@ let exp : exp -> exp =
         | EProj (n, i, arg) ->
             EProj (n, i, helper arg)
 
-        | ECtor (ctor_name, arg) ->
-            ECtor (ctor_name, helper arg)
+        | ECtor (ctor_name, type_args, arg) ->
+            ECtor (ctor_name, type_args, helper arg)
 
         | ECase (scrutinee, branches) ->
             ECase

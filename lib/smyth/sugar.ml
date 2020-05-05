@@ -2,10 +2,10 @@ open Lang
 
 let rec nat : exp -> int option =
   function
-    | ECtor ("S", arg) ->
+    | ECtor ("S", [], arg) ->
         Option.map ((+) 1) (nat arg)
 
-    | ECtor ("Z", ETuple []) ->
+    | ECtor ("Z", [], ETuple []) ->
         Some 0
 
     | _ ->
@@ -13,10 +13,10 @@ let rec nat : exp -> int option =
 
 let rec listt : exp -> exp list option =
   function
-    | ECtor ("Cons", ETuple [head; tail]) ->
+    | ECtor ("Cons", [], ETuple [head; tail]) ->
         Option.map (List.cons head) (listt tail)
 
-    | ECtor ("Nil", ETuple []) ->
+    | ECtor ("Nil", [], ETuple []) ->
         Some []
 
     | _ ->

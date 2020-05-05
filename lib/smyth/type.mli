@@ -39,13 +39,14 @@ type error =
   | VarNotFound of string
   | CtorNotFound of string
   | PatternMatchFailure of typ * pat
+  | WrongNumberOfTypeArguments of int * int
 
   | GotFunctionButExpected of typ
   | GotTupleButExpected of typ
   | GotTypeAbstractionButExpected of typ
   | GotButExpected of typ * typ
 
-  | BranchMismatch of typ * (string * typ)
+  | BranchMismatch of string * string
 
   | CannotInferFunctionType
   | CannotInferCaseType
@@ -55,6 +56,7 @@ type error =
   | ExpectedArrowButGot of typ
   | ExpectedTupleButGot of typ
   | ExpectedForallButGot of typ
+  | ExpectedDatatypeButGot of typ
 
   | TupleLengthMismatch of typ
   | ProjectionLengthMismatch of typ

@@ -66,7 +66,7 @@ let make_benchmark :
                 ( fun (input, output) ->
                   let args =
                     match d_in input with
-                      | Lang.ECtor ("args", Lang.ETuple args) ->
+                      | Lang.ECtor ("args", [], Lang.ETuple args) ->
                           args
 
                       | arg ->

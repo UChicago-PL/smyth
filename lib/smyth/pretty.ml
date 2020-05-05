@@ -30,16 +30,19 @@ let make_indent : int -> string =
 type paren_type =
   | Round
   | Square
+  | Angle
 
 let left_paren : paren_type -> string =
   function
     | Round -> "("
     | Square -> "["
+    | Angle -> "<"
 
 let right_paren : paren_type -> string =
   function
     | Round -> ")"
     | Square -> "]"
+    | Angle -> ">"
 
 let collection : paren_type -> state -> 'a printer -> 'a list -> string =
   fun paren_type state print comps ->
@@ -78,6 +81,10 @@ let collection : paren_type -> state -> 'a printer -> 'a list -> string =
         )
     in
       left ^ String.concat sep comp_strings ^ right
+
+let wrapped_poly : string -> string =
+  fun s ->
+    "<" ^ s ^ ">"
 
 (* Applications *)
 
@@ -151,18 +158,14 @@ let rec typ' : typ printer =
       | TTuple comps ->
           collection Round state typ' comps
 
-      | TData name ->
-          name
+      | TData (name, type_args) ->
+          name ^ collection Angle state typ' type_args
 
       | TForall (x, t) ->
           "forall " ^ x ^ ". " ^ typ' state t
 
       | TVar x ->
           x
-
-let wrapped_type : string -> string =
-  fun s ->
-    "<" ^ s ^ ">"
 
 (* Expressions *)
 
@@ -244,11 +247,11 @@ and exp' : exp printer =
                   exp'
                   arg
 
-            | ECtor (ctor_name, arg) ->
+            | ECtor (ctor_name, type_args, arg) ->
                 application
                   state
                   ( fun _ _ ->
-                      ctor_name
+                      ctor_name ^ collection Angle state typ' type_args
                   )
                   ()
                   exp'
@@ -324,14 +327,14 @@ and exp' : exp printer =
                   inner
 
             | ETAbs (x, body) ->
-                exp' state (EFix (None, PVar (wrapped_type x), body))
+                exp' state (EFix (None, PVar (wrapped_poly x), body))
 
             | ETApp (head, arg) ->
                 application
                   state
                   exp'
                   head
-                  (fun state s -> wrapped_type (typ' state s))
+                  (fun state s -> wrapped_poly (typ' state s))
                   arg
           end
 

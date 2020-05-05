@@ -15,7 +15,7 @@ type 'a hole_map =
 type typ =
   | TArr of typ * typ
   | TTuple of typ list
-  | TData of string
+  | TData of string * typ list
   | TForall of string * typ
   | TVar of string
   [@@deriving yojson]
@@ -34,7 +34,7 @@ type exp =
   | ETuple of exp list
   (* (n, i, arg) *)
   | EProj of int * int * exp
-  | ECtor of string * exp
+  | ECtor of string * typ list * exp
   | ECase of exp * (string * (pat * exp)) list
   | EHole of hole_name
   | EAssert of exp * exp
@@ -82,7 +82,7 @@ type type_ctx =
   [@@deriving yojson]
 
 type datatype_ctx =
-  (string * (string * typ) list) list
+  (string * (string list * (string * typ) list)) list
   [@@deriving yojson]
 
 (* (hole name, (type context, type, function decrease requirement, match depth))

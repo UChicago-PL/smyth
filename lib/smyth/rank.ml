@@ -18,7 +18,7 @@ let rec exp_size_rank : exp -> int =
         (* "Focusing": projections don't add to the size rank *)
         exp_size_rank arg
 
-    | ECtor (_, arg) ->
+    | ECtor (_, _, arg) ->
         1 + exp_size_rank arg
 
     | ECase (scrutinee, branches) ->

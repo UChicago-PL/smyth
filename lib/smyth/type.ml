@@ -11,8 +11,10 @@ let rec equal tau1 tau2 =
         List.length taus1 = List.length taus2
           && List.for_all2 equal taus1 taus2
 
-    | (TData d1, TData d2) ->
+    | (TData (d1, params1), TData (d2, params2)) ->
         String.equal d1 d2
+          && List.length params1 = List.length params2
+          && List.for_all2 equal params1 params2
 
     | (TForall (a1, bound_type1), TForall (a2, bound_type2)) ->
         String.equal a1 a2
@@ -164,9 +166,9 @@ let rec match_schema : schema:typ -> typ -> (string * typ) list option =
           else
             None
 
-      | (TData schema_name, TData tau_name) ->
+      | (TData (schema_name, schema_args), TData (tau_name, tau_args)) ->
           if String.equal schema_name tau_name then
-            Some []
+            match_schema ~schema:(TTuple schema_args) (TTuple tau_args)
           else
             None
 
@@ -184,6 +186,38 @@ let rec match_schema : schema:typ -> typ -> (string * typ) list option =
 
 (* Type checking *)
 
+type error =
+  | VarNotFound of string
+  | CtorNotFound of string
+  | PatternMatchFailure of typ * pat
+  | WrongNumberOfTypeArguments of int * int
+
+  | GotFunctionButExpected of typ
+  | GotTupleButExpected of typ
+  | GotTypeAbstractionButExpected of typ
+  | GotButExpected of typ * typ
+
+  | BranchMismatch of string * string
+
+  | CannotInferFunctionType
+  | CannotInferCaseType
+  | CannotInferHoleType
+  | CannotInferTypeAbstractionType
+
+  | ExpectedArrowButGot of typ
+  | ExpectedTupleButGot of typ
+  | ExpectedForallButGot of typ
+  | ExpectedDatatypeButGot of typ
+
+  | TupleLengthMismatch of typ
+  | ProjectionLengthMismatch of typ
+  | ProjectionOutOfBounds of int * int
+
+  | TypeAbstractionParameterNameMismatch of string * string
+
+  | AssertionTypeMismatch of typ * typ
+  [@@deriving yojson]
+
 let rec substitute : before:string -> after:typ -> typ -> typ =
   fun ~before ~after tau ->
     match tau with
@@ -200,8 +234,13 @@ let rec substitute : before:string -> after:typ -> typ -> typ =
                 components
             )
 
-      | TData name ->
-          TData name
+      | TData (name, args) ->
+          TData
+            ( name
+            , List.map
+                (substitute ~before ~after)
+                args
+            )
 
       | TForall (a, bound_type) ->
           if String.equal before a then
@@ -215,48 +254,30 @@ let rec substitute : before:string -> after:typ -> typ -> typ =
           else
             tau
 
-type error =
-  | VarNotFound of string
-  | CtorNotFound of string
-  | PatternMatchFailure of typ * pat
+let substitute_many : bindings:((string * typ) list) -> typ -> typ =
+  fun ~bindings tau ->
+    List.fold_left
+      ( fun acc (before, after) ->
+          substitute ~before ~after acc
+      )
+      tau
+      bindings
 
-  | GotFunctionButExpected of typ
-  | GotTupleButExpected of typ
-  | GotTypeAbstractionButExpected of typ
-  | GotButExpected of typ * typ
-
-  | BranchMismatch of typ * (string * typ)
-
-  | CannotInferFunctionType
-  | CannotInferCaseType
-  | CannotInferHoleType
-  | CannotInferTypeAbstractionType
-
-  | ExpectedArrowButGot of typ
-  | ExpectedTupleButGot of typ
-  | ExpectedForallButGot of typ
-
-  | TupleLengthMismatch of typ
-  | ProjectionLengthMismatch of typ
-  | ProjectionOutOfBounds of int * int
-
-  | TypeAbstractionParameterNameMismatch of string * string
-
-  | AssertionTypeMismatch of typ * typ
-  [@@deriving yojson]
-
-(* returns return type * arg type *)
+(* returns: type params * arg type * datatype name *)
 let ctor_info :
- exp -> datatype_ctx -> string -> (typ * typ, exp * error) result =
+ exp ->
+ datatype_ctx ->
+ string ->
+ (string list * typ * string, exp * error) result =
   fun exp_context sigma ctor_name ->
     Option.to_result
       ~none:(exp_context, CtorNotFound ctor_name)
       ( List2.find_map
-          ( fun (type_name, ctors) ->
+          ( fun (type_name, (type_params, ctors)) ->
               List2.find_map
                 ( fun (ctor_name', arg_type) ->
                     if String.equal ctor_name ctor_name' then
-                      Some (TData type_name, arg_type)
+                      Some (type_params, arg_type, type_name)
                     else
                       None
                 )
@@ -337,48 +358,92 @@ let rec check' :
           let* (scrutinee_type, scrutinee_delta) =
             infer' state sigma gamma scrutinee
           in
-          let dec_bind_spec =
-            scrutinee
-              |> bind_spec gamma
-              |> sub_bind_spec
-          in
-          let+ branch_deltas =
-            branches
-              |> List.map
-                   ( fun (ctor_name, (param_pat, body)) ->
-                       let* (return_type, arg_type) =
-                         ctor_info exp sigma ctor_name
-                       in
-                       if equal scrutinee_type return_type then
-                         let* param_gamma =
-                           Pat.bind_typ dec_bind_spec param_pat arg_type
-                             |> Option.to_result
-                                  ~none:
-                                    ( exp
-                                    , PatternMatchFailure (arg_type, param_pat)
-                                    )
-                         in
-                         check'
-                           { state with
-                               match_depth = state.match_depth + 1
-                           }
-                           sigma
-                           (Type_ctx.concat [param_gamma; gamma])
-                           body
-                           tau
-                       else
-                         Error
-                           ( exp
-                           , BranchMismatch
-                               ( scrutinee_type
-                               , (ctor_name, return_type)
-                               )
-                           )
-                   )
-              |> Result2.sequence
-              |> Result.map List.concat
-          in
-            scrutinee_delta @ branch_deltas
+          begin match scrutinee_type with
+            | TData (scrutinee_data_name, scrutinee_data_args) ->
+                let scrutinee_data_args_len =
+                  List.length scrutinee_data_args
+                in
+                let dec_bind_spec =
+                  scrutinee
+                    |> bind_spec gamma
+                    |> sub_bind_spec
+                in
+                let+ branch_deltas =
+                  branches
+                    |> List.map
+                         ( fun (ctor_name, (param_pat, body)) ->
+                             let* (type_params, arg_type, data_name) =
+                               ctor_info exp sigma ctor_name
+                             in
+                             if String.equal scrutinee_data_name data_name then
+                               let type_params_len =
+                                 List.length type_params
+                               in
+                               if
+                                 Int.equal
+                                   type_params_len
+                                   scrutinee_data_args_len
+                               then
+                                 let* param_gamma =
+                                   Pat.bind_typ dec_bind_spec param_pat arg_type
+                                     |> Option.to_result
+                                          ~none:
+                                            ( exp
+                                            , PatternMatchFailure
+                                                ( arg_type
+                                                , param_pat
+                                                )
+                                            )
+                                 in
+                                 let substituted_tau =
+                                   substitute_many
+                                     ~bindings:
+                                       ( List.combine
+                                           type_params
+                                           scrutinee_data_args
+                                       )
+                                     tau
+                                 in
+                                 check'
+                                   { state with
+                                       match_depth = state.match_depth + 1
+                                   }
+                                   sigma
+                                   ( Type_ctx.concat
+                                       [ param_gamma
+                                       ; gamma
+                                       ]
+                                   )
+                                   body
+                                   substituted_tau
+                               else
+                                 Error
+                                   ( exp
+                                   , WrongNumberOfTypeArguments
+                                     ( type_params_len
+                                     , scrutinee_data_args_len
+                                     )
+                                   )
+                             else
+                               Error
+                                 ( exp
+                                 , BranchMismatch
+                                     ( ctor_name
+                                     , scrutinee_data_name
+                                     )
+                                 )
+                         )
+                    |> Result2.sequence
+                    |> Result.map List.concat
+                in
+                  scrutinee_delta @ branch_deltas
+
+            | _ ->
+                Error
+                  ( exp
+                  , ExpectedDatatypeButGot scrutinee_type
+                  )
+          end
 
       | EHole name ->
           Ok
@@ -430,7 +495,7 @@ let rec check' :
       | EApp (_, _, _)
       | EVar _
       | EProj (_, _, _)
-      | ECtor (_, _)
+      | ECtor (_, _, _)
       | EAssert (_, _)
       | ETypeAnnotation (_, _)
       | ETApp (_, _) ->
@@ -529,14 +594,30 @@ and infer' :
                   )
           end
 
-      | ECtor (ctor_name, arg) ->
-          let* (return_type, arg_type) =
+      | ECtor (ctor_name, type_args, arg) ->
+          let* (type_params, arg_type, data_name) =
             ctor_info exp sigma ctor_name
           in
-          let+ arg_delta =
-            check' state sigma gamma arg arg_type
+          let args_len =
+            List.length type_args
           in
-          (return_type, arg_delta)
+          let params_len =
+            List.length type_params
+          in
+          if Int.equal args_len params_len then
+            let+ arg_delta =
+              check' state sigma gamma arg
+                ( substitute_many
+                    ~bindings:(List.combine type_params type_args)
+                    arg_type
+                )
+            in
+            (TData (data_name, type_args), arg_delta)
+          else
+            Error
+              ( exp
+              , WrongNumberOfTypeArguments (args_len, params_len)
+              )
 
       | ECase (_, _) ->
           Error

@@ -36,8 +36,10 @@ let rec syntactically_equal e1 e2 =
           && Int.equal i1 i2
           && syntactically_equal arg1 arg2
 
-    | (ECtor (name1, arg1), ECtor (name2, arg2)) ->
+    | (ECtor (name1, taus1, arg1), ECtor (name2, taus2, arg2)) ->
         String.equal name1 name2
+          && Int.equal (List.length taus1) (List.length taus2)
+          && List.for_all2 Type.equal taus1 taus2
           && syntactically_equal arg1 arg2
 
     | (ECase (s1, branches1), ECase (s2, branches2)) ->
@@ -90,7 +92,7 @@ let rec largest_hole : exp -> hole_name =
 
       | EFix (_, _, e)
       | EProj (_, _, e)
-      | ECtor (_, e)
+      | ECtor (_, _, e)
       | ETypeAnnotation (e, _)
       | ETAbs (_, e)
       | ETApp (e, _) ->
@@ -131,7 +133,7 @@ let rec has_special_recursion : exp -> bool =
     | EProj (_, _, arg) ->
         has_special_recursion arg
 
-    | ECtor (_, arg) ->
+    | ECtor (_, _, arg) ->
         has_special_recursion arg
 
     | ECase (scrutinee, branches) ->
@@ -182,8 +184,8 @@ let fill_hole : (hole_name * exp) -> exp -> exp =
         | EProj (n, i, arg) ->
             EProj (n, i, helper arg)
 
-        | ECtor (ctor_name, arg) ->
-            ECtor (ctor_name, helper arg)
+        | ECtor (ctor_name, type_args, arg) ->
+            ECtor (ctor_name, type_args, helper arg)
 
         | ECase (scrutinee, branches) ->
             ECase
