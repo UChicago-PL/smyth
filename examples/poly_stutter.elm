@@ -4,9 +4,9 @@ type Nat
 
 type List a
   = Nil ()
-  | Cons (a, List<a>)
+  | Cons (a, List a)
 
-listStutter : forall a . List<a> -> List<a>
+listStutter : forall a . List a -> List a
 listStutter <a> xs =
   ??
 

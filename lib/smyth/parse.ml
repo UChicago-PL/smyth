@@ -258,6 +258,16 @@ let any_spaces : unit parser =
         )
     )
 
+let single_line_spaces : unit parser =
+  loop 0
+    ( if_progress
+        ( one_of
+            [ line_comment line_comment_start
+            ; chomp_while (Char.equal ' ')
+            ]
+        )
+    )
+
 (* Indented spaces *)
 
 let sspaces : unit parser =
@@ -412,30 +422,35 @@ let rec typ' : unit -> typ parser =
   fun () ->
     let monotype' : unit -> typ parser =
       fun () ->
-        let ground_typ : typ parser =
-          succeed (fun t -> t)
-            |= one_of
-                 [ in_context CTTuple
-                     ( tuple (fun t -> t) (fun ts -> TTuple ts) (lazily typ')
-                     )
+        let rec ground_typ' : unit -> typ parser =
+          fun () ->
+            succeed (fun t -> t)
+              |= one_of
+                   [ in_context CTTuple
+                       ( tuple (fun t -> t) (fun ts -> TTuple ts) (lazily typ')
+                       )
 
-                 ; in_context CTData
-                     ( succeed (fun name args -> TData (name, args))
-                         |= constructor_name
-                         |. any_spaces
-                         |= one_of
-                              [ wrapped_poly (lazily typ')
-                              ; succeed []
-                              ]
-                     )
+                   ; in_context CTData
+                       ( succeed (fun name args -> TData (name, args))
+                           |= constructor_name
+                           |. single_line_spaces
+                           |= loop []
+                                ( fun rev_args ->
+                                    one_of
+                                      [ map (fun a -> Loop (a :: rev_args))
+                                          (lazily ground_typ')
+                                      ; succeed (Done (List.rev rev_args))
+                                      ]
+                                )
+                       )
 
-                 ; in_context CTVar
-                     ( map (fun name -> TVar name) variable_name
-                     )
-                 ]
-            |. any_spaces
+                   ; in_context CTVar
+                       ( map (fun name -> TVar name) variable_name
+                       )
+                   ]
+              |. single_line_spaces
         in
-        chainr1 CTArr ground_typ
+        chainr1 CTArr (lazily ground_typ')
           ( ignore_with (fun domain codomain -> TArr (domain, codomain))
               ( succeed ()
                   |. symbol right_arrow
@@ -448,11 +463,11 @@ let rec typ' : unit -> typ parser =
         in_context CTForall
           ( succeed (fun a bound_type -> TForall (a, bound_type))
               |. keyword forall_keyword
-              |. any_spaces
+              |. sspaces
               |= variable_name
-              |. any_spaces
+              |. sspaces
               |. symbol dot
-              |. any_spaces
+              |. sspaces
               |= lazily typ'
           )
     in
@@ -530,6 +545,7 @@ and definition' : unit -> (typ * string * Desugar.param list * exp) parser =
           |. symbol colon
           |. any_spaces
           |= typ
+          |. any_spaces
     in
     let* (name', pats, body) =
       lazily binding'
@@ -765,6 +781,7 @@ let statement_group : statement list parser =
                      )
                      ( ignore_with List.append
                          ( succeed ()
+                             |. backtrackable sspaces
                              |. symbol pipe
                              |. sspaces
                          )
