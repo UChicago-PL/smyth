@@ -8,11 +8,14 @@ type arg =
   | ExpArg of exp
   | TypeArg of typ
 
-let annotate_rec_name : string -> exp -> exp =
+let rec annotate_rec_name : string -> exp -> exp =
   fun rec_name exp ->
     match exp with
       | EFix (_, param, body) ->
           EFix (Some rec_name, param, body)
+
+      | ETAbs (type_param, body) ->
+          ETAbs (type_param, annotate_rec_name rec_name body)
 
       | _ ->
           exp

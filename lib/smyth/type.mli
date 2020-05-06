@@ -31,7 +31,12 @@ val structurally_decreasing :
 val matches_dec :
   string option -> bind_spec -> bool
 
-val match_schema : schema:typ -> typ -> (string * typ) list option
+val peel_forall : typ -> string list * typ
+
+(* Substitution *)
+
+val substitute : before:string -> after:typ -> typ -> typ
+val substitute_many : bindings:((string * typ) list) -> typ -> typ
 
 (* Type checking *)
 

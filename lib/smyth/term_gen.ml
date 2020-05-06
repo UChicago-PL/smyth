@@ -327,16 +327,48 @@ and rel_gen_e
   (sigma : datatype_ctx)
   (term_size : int)
   ((rel_name, (rel_type, rel_bind_spec)) as rel_binding : type_binding)
-  ((_, goal_type, goal_dec) as goal : gen_goal)
+  ((gamma, goal_type, goal_dec) as goal : gen_goal)
   : exp Nondet.t =
     match term_size with
       | 1 ->
+          let* (specialized_type, specialized_exp) =
+            match Type.peel_forall rel_type with
+              | ([], _) ->
+                  Nondet.pure
+                    ( rel_type
+                    , EVar rel_name
+                    )
+
+              | (params, bound_type) ->
+                  let base_type_args_nd =
+                    gamma
+                      |> Type_ctx.all_poly
+                      |> List.map (fun x -> print_endline x; TVar x)
+                      |> Nondet.from_list
+                  in
+                  params
+                    |> List.map (fun _ -> base_type_args_nd)
+                    |> Nondet.one_of_each
+                    |> Nondet.map
+                         ( fun args ->
+                             ( Type.substitute_many
+                                 ~bindings:(List.combine params args)
+                                 bound_type
+                             , Desugar.app
+                                 (EVar rel_name)
+                                 ( List.map
+                                     (fun a -> Desugar.TypeArg a)
+                                     args
+                                 )
+                             )
+                         )
+          in
           if
-            Type.equal goal_type rel_type
+            Type.equal goal_type specialized_type
               && Type.matches_dec goal_dec rel_bind_spec
           then
-            Nondet.pure @@
-              EVar rel_name
+            Nondet.pure
+              specialized_exp
           else if
             Type.matches_dec
               goal_dec

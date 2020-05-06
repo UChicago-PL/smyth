@@ -104,119 +104,18 @@ let matches_dec annot bind_spec =
     | None ->
         true
 
-module String_map =
-  Map.Make
-    ( struct
-        type t = string
-        let compare = String.compare
-      end
-    )
-
-type 'a nonempty_list =
-  'a * 'a list
-
-let nonempty_concat : 'a nonempty_list -> 'a nonempty_list -> 'a nonempty_list =
-  fun (x, xs) (y, ys) ->
-    (x, List.concat [xs; [y]; ys])
-
-let collate : (string * 'a) list -> (string * 'a nonempty_list) list =
-  fun bindings ->
-    String_map.bindings @@
-      List.fold_left
-        ( fun dict (name, x) ->
-            String_map.union
-              (fun _ k v -> Some (nonempty_concat k v))
-              (String_map.singleton name (x, []))
-              dict
-        )
-        String_map.empty
-        bindings
-
-let schema_combine : (string * typ) list -> (string * typ) list option =
-  fun bindings ->
-    bindings
-      |> collate
-      |> List.map
-           ( fun (x, (head, tail)) ->
-               if List.for_all (equal head) tail then
-                 Some (x, head)
-               else
-                 None
-           )
-      |> Option2.sequence
-
-let rec match_schema : schema:typ -> typ -> (string * typ) list option =
-  fun ~schema tau ->
-    match (schema, tau) with
-      | (TArr (schema_arg, schema_ret), TArr (tau_arg, tau_ret)) ->
-          [ match_schema ~schema:schema_arg tau_arg
-          ; match_schema ~schema:schema_ret tau_ret
-          ]
-            |> Option2.sequence
-            |> Option.map List.concat
-            |> Option2.and_then schema_combine
-
-      | (TTuple schema_comps, TTuple tau_comps) ->
-          if Int.equal (List.length schema_comps) (List.length tau_comps) then
-            List.map2
-             (fun s t -> match_schema ~schema:s t) schema_comps tau_comps
-              |> Option2.sequence
-              |> Option.map List.concat
-              |> Option2.and_then schema_combine
-          else
-            None
-
-      | (TData (schema_name, schema_args), TData (tau_name, tau_args)) ->
-          if String.equal schema_name tau_name then
-            match_schema ~schema:(TTuple schema_args) (TTuple tau_args)
-          else
-            None
-
-      | ( TForall (_, schema_bound_type)
-        , TForall (_, tau_bound_type)
-        ) ->
-          match_schema ~schema:schema_bound_type tau_bound_type
-            |> Option.map (fun _ -> [])
-
-      | (TVar schema_var, _) ->
-          Some [(schema_var, tau)]
+let peel_forall : typ -> string list * typ =
+  let rec helper acc tau =
+    match tau with
+      | TForall (a, bound_type) ->
+          helper (a :: acc) bound_type
 
       | _ ->
-          None
+          (List.rev acc, tau)
+  in
+  helper []
 
-(* Type checking *)
-
-type error =
-  | VarNotFound of string
-  | CtorNotFound of string
-  | PatternMatchFailure of typ * pat
-  | WrongNumberOfTypeArguments of int * int
-
-  | GotFunctionButExpected of typ
-  | GotTupleButExpected of typ
-  | GotTypeAbstractionButExpected of typ
-  | GotButExpected of typ * typ
-
-  | BranchMismatch of string * string
-
-  | CannotInferFunctionType
-  | CannotInferCaseType
-  | CannotInferHoleType
-  | CannotInferTypeAbstractionType
-
-  | ExpectedArrowButGot of typ
-  | ExpectedTupleButGot of typ
-  | ExpectedForallButGot of typ
-  | ExpectedDatatypeButGot of typ
-
-  | TupleLengthMismatch of typ
-  | ProjectionLengthMismatch of typ
-  | ProjectionOutOfBounds of int * int
-
-  | TypeAbstractionParameterNameMismatch of string * string
-
-  | AssertionTypeMismatch of typ * typ
-  [@@deriving yojson]
+(* Substitution *)
 
 let rec substitute : before:string -> after:typ -> typ -> typ =
   fun ~before ~after tau ->
@@ -262,6 +161,40 @@ let substitute_many : bindings:((string * typ) list) -> typ -> typ =
       )
       tau
       bindings
+
+(* Type checking *)
+
+type error =
+  | VarNotFound of string
+  | CtorNotFound of string
+  | PatternMatchFailure of typ * pat
+  | WrongNumberOfTypeArguments of int * int
+
+  | GotFunctionButExpected of typ
+  | GotTupleButExpected of typ
+  | GotTypeAbstractionButExpected of typ
+  | GotButExpected of typ * typ
+
+  | BranchMismatch of string * string
+
+  | CannotInferFunctionType
+  | CannotInferCaseType
+  | CannotInferHoleType
+  | CannotInferTypeAbstractionType
+
+  | ExpectedArrowButGot of typ
+  | ExpectedTupleButGot of typ
+  | ExpectedForallButGot of typ
+  | ExpectedDatatypeButGot of typ
+
+  | TupleLengthMismatch of typ
+  | ProjectionLengthMismatch of typ
+  | ProjectionOutOfBounds of int * int
+
+  | TypeAbstractionParameterNameMismatch of string * string
+
+  | AssertionTypeMismatch of typ * typ
+  [@@deriving yojson]
 
 (* returns: type params * arg type * datatype name *)
 let ctor_info :
