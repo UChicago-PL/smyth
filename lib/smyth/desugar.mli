@@ -17,7 +17,7 @@ val app : exp -> arg list -> exp
 (* Precondition: input >= 0 *)
 val nat : int -> exp
 
-val listt : exp list -> exp
+val listt : exp list -> typ list -> exp
 
 type program =
   { datatypes : datatype_ctx

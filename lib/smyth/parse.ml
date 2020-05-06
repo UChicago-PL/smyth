@@ -641,8 +641,12 @@ and ground_exp' : unit -> exp parser =
          )
 
       ; in_context CEList
-          ( map Desugar.listt
-              (listt (lazily exp'))
+          ( succeed Desugar.listt
+              |= listt (lazily exp')
+              |= one_of
+                   [ wrapped_poly typ
+                   ; succeed []
+                   ]
           )
 
       ; in_context CENat

@@ -63,14 +63,14 @@ let nat : int -> exp =
   in
   helper (ECtor ("Z", [], ETuple []))
 
-let listt : exp list -> exp =
-  fun es ->
+let listt : exp list -> typ list -> exp =
+  fun es ts ->
     List.fold_right
       ( fun e acc ->
-          ECtor ("Cons", [], ETuple [e; acc])
+          ECtor ("Cons", ts, ETuple [e; acc])
       )
       es
-      (ECtor ("Nil", [], ETuple []))
+      (ECtor ("Nil", ts, ETuple []))
 
 type program =
   { datatypes : datatype_ctx

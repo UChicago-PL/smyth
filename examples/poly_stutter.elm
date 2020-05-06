@@ -17,7 +17,7 @@ specifyFunction2 listStutter
     )
   -- , ([0], [0, 0])
   , ( <Nat>
-    , Cons<Nat> (1, Cons<Nat> (0, Nil<Nat> ()))
-    , Cons<Nat> (1, Cons<Nat> (1, Cons<Nat> (0, Cons<Nat> (0, Nil<Nat> ()))))
+    , [1, 0]<Nat>
+    , [1, 1, 0, 0]<Nat>
     )
   ]
