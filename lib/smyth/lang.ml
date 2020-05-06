@@ -100,7 +100,6 @@ type example =
   | ExTuple of example list
   | ExCtor of string * example
   | ExInputOutput of value * example
-  | ExTInputOutput of typ * example
   | ExTop
   [@@deriving yojson]
 
