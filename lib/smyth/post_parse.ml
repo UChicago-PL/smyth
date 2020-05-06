@@ -20,11 +20,12 @@ let salvage_constructor : exp -> (string * typ list) option =
 let exp : exp -> exp =
   fun root ->
     Fresh.set_largest_hole (Exp.largest_hole root);
-    let rec helper =
-      function
+    let rec helper exp =
+      match exp with
         (* Main cases *)
 
         (* Handle constructor applications *)
+
         | EApp (special, e1, e2) ->
             begin match salvage_constructor e1 with
               | Some (ctor_name, type_args) ->
@@ -35,13 +36,24 @@ let exp : exp -> exp =
             end
 
         (* Handle syntactic sugar for unapplied constructors *)
+
         | EVar name ->
             if Char2.uppercase_char (String.get name 0) then
               ECtor (name, [], ETuple [])
             else
               EVar name
 
+        | ETApp (head, type_arg) ->
+            begin match salvage_constructor exp with
+              | Some (ctor_name, type_args) ->
+                  ECtor (ctor_name, type_args, ETuple [])
+
+              | None ->
+                  ETApp (helper head, type_arg)
+            end
+
         (* Set proper hole names *)
+
         | EHole hole_name ->
             if Int.equal hole_name Fresh.unused then
               EHole (Fresh.gen_hole ())
@@ -76,9 +88,5 @@ let exp : exp -> exp =
 
         | ETAbs (x, body) ->
             ETAbs (x, helper body)
-
-        | ETApp (head, type_arg) ->
-            ETApp (head, type_arg)
     in
       helper root
-

@@ -10,14 +10,8 @@ listStutter : forall a . List<a> -> List<a>
 listStutter <a> xs =
   ??
 
-specifyFunction2 listStutter
-  [ ( <Nat>
-    , Nil<Nat> ()
-    , Nil<Nat> ()
-    )
+specifyFunction (listStutter <Nat>)
+  [ ([]<Nat>, []<Nat>)
   -- , ([0], [0, 0])
-  , ( <Nat>
-    , [1, 0]<Nat>
-    , [1, 1, 0, 0]<Nat>
-    )
+  , ([1, 0]<Nat>, [1, 1, 0, 0]<Nat>)
   ]
