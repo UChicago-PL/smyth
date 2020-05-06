@@ -800,6 +800,7 @@ let statement_group : statement list parser =
                            )
                       |. lspaces
                       |= in_context CSFuncSpecOutput exp
+                      |. lspaces
                       |. symbol right_paren
                   )
               in
