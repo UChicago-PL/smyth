@@ -11,13 +11,43 @@ let rec nat : exp -> int option =
     | _ ->
         None
 
-let rec listt : exp -> exp list option =
-  function
-    | ECtor ("Cons", [], ETuple [head; tail]) ->
-        Option.map (List.cons head) (listt tail)
+let listt : exp -> (exp list * typ list) option =
+  let rec helper expected_opt =
+    function
+      | ECtor ("Cons", type_args, ETuple [head; tail]) ->
+          let good () =
+            Option.map
+              (fun (es, taus) -> (head :: es, taus))
+              (helper expected_opt tail)
+          in
+          begin match expected_opt with
+            | Some expected ->
+                if Type.equal (TTuple expected) (TTuple type_args) then
+                  good ()
 
-    | ECtor ("Nil", [], ETuple []) ->
-        Some []
+                else
+                  None
 
-    | _ ->
-        None
+            | None ->
+                good ()
+          end
+
+      | ECtor ("Nil", type_args, ETuple []) ->
+          let good () =
+            Some ([], type_args)
+          in
+          begin match expected_opt with
+            | Some expected ->
+                if Type.equal (TTuple expected) (TTuple type_args) then
+                  good ()
+                else
+                  None
+
+            | None ->
+                good ()
+          end
+
+      | _ ->
+          None
+  in
+  helper None

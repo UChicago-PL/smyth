@@ -101,14 +101,20 @@ let application
     in
     let arg_string =
       print_arg
-        { indent = state.indent
+        { indent = state.indent + 1
         ; app_needs_parens = true
         ; fancy_needs_parens = true
         }
         arg
     in
+    let sep =
+      if String.contains arg_string '\n' then
+        "\n" ^ make_indent (state.indent + 1)
+      else
+        " "
+    in
     let inner =
-      head_string ^ " " ^ arg_string
+      head_string ^ sep ^ arg_string
     in
     if state.app_needs_parens then
       "(" ^ inner ^ ")"
@@ -184,8 +190,15 @@ let rec try_sugar : state -> exp -> string option =
 
       | None ->
           begin match Sugar.listt exp with
-            | Some exp_list ->
+            | Some (exp_list, []) ->
                 Some (collection Square state exp' exp_list)
+
+            | Some (exp_list, type_args) ->
+                Some
+                  ( collection Square state exp' exp_list
+                     ^ collection Angle state typ' type_args
+                  )
+
 
             | None ->
                 None
@@ -273,14 +286,24 @@ and exp' : exp printer =
                   arg
 
             | ECtor (ctor_name, type_args, arg) ->
-                application
-                  state
-                  ( fun _ _ ->
-                      ctor_name ^ collection Angle state typ' type_args
-                  )
-                  ()
-                  exp'
-                  arg
+                let type_args_string =
+                  if type_args = [] then
+                    ""
+                  else
+                    collection Angle state typ' type_args
+                in
+                let head_string =
+                  ctor_name ^ type_args_string
+                in
+                if Exp.syntactically_equal arg (ETuple []) then
+                  head_string
+                else
+                  application
+                    state
+                    (fun _ _ -> head_string)
+                    ()
+                    exp'
+                    arg
 
             | ECase (scrutinee, branches) ->
                 let indent1 =
