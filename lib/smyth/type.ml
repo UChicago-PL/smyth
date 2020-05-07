@@ -317,8 +317,18 @@ let rec check' :
                                    type_params_len
                                    scrutinee_data_args_len
                                then
+                                 let substituted_arg_type =
+                                   substitute_many
+                                     ~bindings:
+                                       ( List.combine
+                                           type_params
+                                           scrutinee_data_args
+                                       )
+                                       arg_type
+                                 in
                                  let* param_gamma =
-                                   Pat.bind_typ dec_bind_spec param_pat arg_type
+                                   substituted_arg_type
+                                     |> Pat.bind_typ dec_bind_spec param_pat
                                      |> Option.to_result
                                           ~none:
                                             ( exp
@@ -327,15 +337,6 @@ let rec check' :
                                                 , param_pat
                                                 )
                                             )
-                                 in
-                                 let substituted_tau =
-                                   substitute_many
-                                     ~bindings:
-                                       ( List.combine
-                                           type_params
-                                           scrutinee_data_args
-                                       )
-                                     tau
                                  in
                                  check'
                                    { state with
@@ -348,7 +349,7 @@ let rec check' :
                                        ]
                                    )
                                    body
-                                   substituted_tau
+                                   tau
                                else
                                  Error
                                    ( exp
