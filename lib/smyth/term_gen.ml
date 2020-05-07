@@ -343,7 +343,7 @@ and rel_gen_e
                   let base_type_args_nd =
                     gamma
                       |> Type_ctx.all_poly
-                      |> List.map (fun x -> print_endline x; TVar x)
+                      |> List.map (fun x -> TVar x)
                       |> Nondet.from_list
                   in
                   params

@@ -167,6 +167,13 @@ let rec typ' : typ printer =
       | TVar x ->
           x
 
+let typ : typ -> string =
+  typ'
+    { indent = 0
+    ; app_needs_parens = false
+    ; fancy_needs_parens = false
+    }
+
 (* Expressions *)
 
 let rec try_sugar : state -> exp -> string option =
