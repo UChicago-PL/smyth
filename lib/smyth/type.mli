@@ -4,6 +4,10 @@ open Lang
 
 val equal : typ -> typ -> bool
 
+val wildcard : typ
+
+val matches : typ -> typ -> bool
+
 val is_base : typ -> bool
 
 (* Suppose tau = a -> (b -> (c -> d)). Then:

@@ -21,10 +21,6 @@ let rec exp_size_rank : exp -> int =
         (* "Focusing": projections don't add to the size rank *)
         exp_size_rank arg
 
-    | ECtor (_, _, ETuple []) ->
-        (* Unitary constructors just count as a single node *)
-        1
-
     | ECtor (_, _, arg) ->
         1 + exp_size_rank arg
 

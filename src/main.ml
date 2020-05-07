@@ -123,10 +123,7 @@ let command_arguments : command -> (string * string) list =
         ]
 
     | SuiteTest ->
-        [ ( "specifications"
-          , "The path to the directory of specifications"
-          )
-        ; ( "suite"
+        [ ( "suite"
           , "The path to the suite to be tested"
           )
         ]
@@ -421,14 +418,11 @@ let () =
         end
 
     | SuiteTest ->
-        let spec_path =
+        let suite_path =
           Sys.argv.(2)
         in
-        let suite_path =
-          Sys.argv.(3)
-        in
         let benchmark_names =
-          Io2.visible_files suite_path
+          Io2.visible_files (Io2.path [suite_path ; "sketches"])
         in
         print_endline ("% N = " ^ string_of_int suite_test_n);
         benchmark_names
@@ -442,11 +436,11 @@ let () =
                                Endpoint.test
                                  ~specification:
                                    ( Io2.read_path
-                                       [spec_path; name]
+                                       [suite_path; "specifications"; name]
                                    )
                                  ~sketch:
                                    ( Io2.read_path
-                                       [suite_path; name]
+                                       [suite_path; "sketches"; name]
                                    )
                                  ~assertions:
                                    ( Io2.read_path

@@ -6,4 +6,4 @@ if [[ $# -ne 0 ]]; then
 fi
 
 echo "Experiment 5a"
-../suite-test poly-no-sketch
+../smyth suite-test ../suites/poly-no-sketch

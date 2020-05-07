@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ -f forge_temp_file ]]; then
+  echo "Forge temp file already exists."
+  exit 1
+fi
+
 if [[ $# -ne 2 ]]; then
   echo "usage:" $0 "<suite-name> <sketch-name>"
   exit 1
@@ -8,8 +13,8 @@ fi
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 cat \
-  $DIR/suites/suite-$1/$2.elm \
-  $DIR/suites/suite-$1/examples/$2.elm \
+  $DIR/suites/$1/sketches/$2.elm \
+  $DIR/suites/$1/examples/$2.elm \
   > $DIR/forge_temp_file
 
 $DIR/smyth forge $DIR/forge_temp_file

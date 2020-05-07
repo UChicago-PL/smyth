@@ -364,7 +364,7 @@ and rel_gen_e
                          )
           in
           if
-            Type.equal goal_type specialized_type
+            Type.matches goal_type specialized_type
               && Type.matches_dec goal_dec rel_bind_spec
           then
             Nondet.pure
@@ -382,7 +382,7 @@ and rel_gen_e
                   in
                     component_types
                       |> List.mapi Pair2.pair
-                      |> List.filter (snd >> Type.equal goal_type)
+                      |> List.filter (snd >> Type.matches goal_type)
                       (* Should be 1-indexed, so use i + 1 *)
                       |> List.map
                            (fun (i, _) -> EProj (n, i + 1, EVar rel_name))

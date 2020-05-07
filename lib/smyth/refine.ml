@@ -123,7 +123,7 @@ let refine _delta sigma ((gamma, goal_type, goal_dec), worlds) =
       (* Refine-Ctor *)
 
       | TData (datatype_name, datatype_args) ->
-          let* (_, datatype_ctors) =
+          let* (datatype_params, datatype_ctors) =
             List.assoc_opt datatype_name sigma
           in
           let* (ctor_name, refined_worlds) =
@@ -146,6 +146,14 @@ let refine _delta sigma ((gamma, goal_type, goal_dec), worlds) =
           in
           let+ arg_type =
             List.assoc_opt ctor_name datatype_ctors
+              |> Option.map
+                   ( Type.substitute_many
+                       ~bindings:
+                         ( List.combine
+                             datatype_params
+                             datatype_args
+                         )
+                   )
           in
           let hole_name =
             Fresh.gen_hole ()

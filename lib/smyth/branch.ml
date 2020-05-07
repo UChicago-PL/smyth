@@ -94,7 +94,7 @@ let branch
   let arg_name =
     Term_gen.fresh_ident gamma Term_gen.match_char
   in
-  let* (data_name, (data_params, data_ctors)) =
+  let* (data_name, (datatype_params, data_ctors)) =
     Nondet.from_list sigma
   in
   let ctor_names =
@@ -111,11 +111,29 @@ let branch
       , TData
           ( data_name
           , List.map
-              (fun p -> TVar p)
-              data_params
+              (fun _ -> Type.wildcard)
+              datatype_params
           )
       , None
       )
+  in
+  let* datatype_args =
+    Type.infer sigma gamma scrutinee
+      |> Result2.to_option
+      |> Option.map fst
+      |> Option2.and_then
+           ( function
+               | TData (_, datatype_args) ->
+                   Some datatype_args
+
+               | _ ->
+                   Log.warn
+                     ( "Non-datatype scrutinee from term generation: "
+                         ^ Pretty.exp scrutinee
+                     );
+                   None
+           )
+      |> Nondet.lift_option
   in
   let top_worlds =
     data_ctors
@@ -157,8 +175,17 @@ let branch
             let* acc =
               acc_opt
             in
-            let+ (arg_name, arg_type) =
+            let+ (arg_name, raw_arg_type) =
               Ctor_map.find_opt ctor_name ctor_info
+            in
+            let arg_type =
+              Type.substitute_many
+                ~bindings:
+                  ( List.combine
+                      datatype_params
+                      datatype_args
+                  )
+                raw_arg_type
             in
             let arg_bind_spec =
               scrutinee
