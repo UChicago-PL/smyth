@@ -5,8 +5,11 @@ let rec exp_size_rank : exp -> int =
     | EFix (_, _, body) ->
         1 + exp_size_rank body
 
-    | EApp (_, e1, e2) ->
+    | EApp (_, e1, EAExp e2) ->
         1 + exp_size_rank e1 + exp_size_rank e2
+
+    | EApp (_, e1, EAType _) ->
+        1 + exp_size_rank e1
 
     | EVar _ ->
         1
@@ -17,6 +20,10 @@ let rec exp_size_rank : exp -> int =
     | EProj (_, _, arg) ->
         (* "Focusing": projections don't add to the size rank *)
         exp_size_rank arg
+
+    | ECtor (_, _, ETuple []) ->
+        (* Unitary constructors just count as a single node *)
+        1
 
     | ECtor (_, _, arg) ->
         1 + exp_size_rank arg
@@ -35,12 +42,6 @@ let rec exp_size_rank : exp -> int =
     | ETypeAnnotation (e, _) ->
         (* Do not penalize for type annotations *)
         exp_size_rank e
-
-    | ETAbs (_, body) ->
-        1 + exp_size_rank body
-
-    | ETApp (head, _) ->
-        1 + exp_size_rank head
 
 let exp_rank : exp -> int =
   match !Params.ranking_method with

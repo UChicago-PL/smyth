@@ -15,14 +15,30 @@ let rec syntactically_equal e1 e2 =
                 false
           end
         in
+        let x_equal =
+          match (x1, x2) with
+            | (PatParam p1, PatParam p2) ->
+                Pat.syntactically_equal p1 p2
+
+            | (TypeParam t1, TypeParam t2) ->
+                String.equal t1 t2
+
+            | _ ->
+                false
+        in
           mf_equal
-            && Pat.syntactically_equal x1 x2
+            && x_equal
             && syntactically_equal body1 body2
 
-    | (EApp (b1, head1, arg1), EApp (b2, head2, arg2)) ->
+    | (EApp (b1, head1, EAExp arg1), EApp (b2, head2, EAExp arg2)) ->
         Bool.equal b1 b2
           && syntactically_equal head1 head2
           && syntactically_equal arg1 arg2
+
+    | (EApp (b1, e1, EAType t1), EApp (b2, e2, EAType t2)) ->
+        Bool.equal b1 b2
+          && syntactically_equal e1 e2
+          && Type.equal t1 t2
 
     | (EVar x1, EVar x2) ->
         String.equal x1 x2
@@ -65,14 +81,6 @@ let rec syntactically_equal e1 e2 =
         Type.equal tau1 tau2
           && syntactically_equal e1 e2
 
-    | (ETAbs (x1, body1), ETAbs (x2, body2)) ->
-        String.equal x1 x2
-          && syntactically_equal body1 body2
-
-    | (ETApp (e1, t1), ETApp (e2, t2)) ->
-        syntactically_equal e1 e2
-          && Type.equal t1 t2
-
     | _ ->
         false
 
@@ -86,16 +94,15 @@ let rec largest_hole : exp -> hole_name =
 
       (* Other cases *)
 
-      | EApp (_, e1, e2)
+      | EApp (_, e1, EAExp e2)
       | EAssert (e1, e2) ->
           max (largest_hole e1) (largest_hole e2)
 
       | EFix (_, _, e)
+      | EApp (_, e, EAType _)
       | EProj (_, _, e)
       | ECtor (_, _, e)
-      | ETypeAnnotation (e, _)
-      | ETAbs (_, e)
-      | ETApp (e, _) ->
+      | ETypeAnnotation (e, _) ->
           largest_hole e
 
       | EVar _ ->
@@ -121,8 +128,11 @@ let rec has_special_recursion : exp -> bool =
     | EFix (_, _, body) ->
         has_special_recursion body
 
-    | EApp (special, e1, e2) ->
+    | EApp (special, e1, EAExp e2) ->
         special || has_special_recursion e1 || has_special_recursion e2
+
+    | EApp (special, e1, EAType _) ->
+        special || has_special_recursion e1
 
     | EVar _ ->
         false
@@ -149,12 +159,6 @@ let rec has_special_recursion : exp -> bool =
     | ETypeAnnotation (e, _) ->
         has_special_recursion e
 
-    | ETAbs (_, body) ->
-        has_special_recursion body
-
-    | ETApp (head, _) ->
-        has_special_recursion head
-
 let fill_hole : (hole_name * exp) -> exp -> exp =
   fun (hole_name, hole_exp) ->
     let rec helper : exp -> exp =
@@ -172,8 +176,11 @@ let fill_hole : (hole_name * exp) -> exp -> exp =
         | EFix (f, x, body) ->
             EFix (f, x, helper body)
 
-        | EApp (special, e1, e2) ->
-            EApp (special, helper e1, helper e2)
+        | EApp (special, e1, EAExp e2) ->
+            EApp (special, helper e1, EAExp (helper e2))
+
+        | EApp (special, e1, EAType type_arg) ->
+            EApp (special, helper e1, EAType type_arg)
 
         | EVar x ->
             EVar x
@@ -198,11 +205,5 @@ let fill_hole : (hole_name * exp) -> exp -> exp =
 
         | ETypeAnnotation (e, tau) ->
             ETypeAnnotation (helper e, tau)
-
-        | ETAbs (x, body) ->
-            ETAbs (x, helper body)
-
-        | ETApp (head, type_arg) ->
-            ETApp (helper head, type_arg)
     in
     helper

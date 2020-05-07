@@ -51,6 +51,9 @@ let rec domain_of_codomain ~codomain tau =
         else
           domain_of_codomain ~codomain tau2
 
+    | TForall (_, bound_type) ->
+        domain_of_codomain ~codomain bound_type
+
     | _ ->
         None
 
@@ -72,7 +75,7 @@ let rec bind_spec gamma exp =
           |> Option2.map snd
           |> Option2.with_default NoSpec
 
-    | ETApp (head, _) ->
+    | EApp (_, head, EAType _) ->
         bind_spec gamma head
 
     | _ ->
@@ -180,7 +183,6 @@ type error =
   | CannotInferFunctionType
   | CannotInferCaseType
   | CannotInferHoleType
-  | CannotInferTypeAbstractionType
 
   | ExpectedArrowButGot of typ
   | ExpectedTupleButGot of typ
@@ -222,6 +224,7 @@ let ctor_info :
 type state =
   { function_decrease_requirement : string option (* TODO: currently unused *)
   ; match_depth : int
+  ; arg_of : string option
   }
 
 let rec check' :
@@ -233,8 +236,16 @@ let rec check' :
  (hole_ctx, exp * error) result =
   fun state sigma gamma exp tau ->
     let open Result2.Syntax in
+    let state =
+      match exp with
+        | EFix (_, _, _) ->
+            state
+
+        | _ ->
+            { state with arg_of = None }
+    in
     match exp with
-      | EFix (func_name_opt, param_pat, body) ->
+      | EFix (func_name_opt, PatParam param_pat, body) ->
           begin match tau with
             | TArr (arg_type, return_type) ->
                 let func_name_gamma =
@@ -243,7 +254,14 @@ let rec check' :
                 let arg_bind_spec =
                   func_name_opt
                     |> Option.map (fun name -> Arg name)
-                    |> Option2.with_default NoSpec
+                    |> Option2.with_default
+                         ( match state.arg_of with
+                             | Some name ->
+                                 Arg name
+
+                             | None ->
+                                 NoSpec
+                         )
                 in
                 let* param_gamma =
                   Pat.bind_typ arg_bind_spec param_pat arg_type
@@ -254,7 +272,7 @@ let rec check' :
                            )
                 in
                 check'
-                  state
+                  { state with arg_of = None }
                   sigma
                   (Type_ctx.concat [param_gamma; func_name_gamma; gamma])
                   body
@@ -264,6 +282,35 @@ let rec check' :
                 Error
                   ( exp
                   , GotFunctionButExpected tau
+                  )
+          end
+
+      | EFix (func_name_opt, TypeParam a, body) ->
+          begin match tau with
+            | TForall (a', bound_type) ->
+                if not (String.equal a a') then
+                  Error
+                    ( exp
+                    , TypeAbstractionParameterNameMismatch (a, a')
+                    )
+                else
+                  let func_name_gamma =
+                    Pat.bind_rec_name_typ func_name_opt tau
+                  in
+                  let param_gamma =
+                    Type_ctx.add_poly a Type_ctx.empty
+                  in
+                  check'
+                    { state with arg_of = func_name_opt }
+                    sigma
+                    (Type_ctx.concat [param_gamma; func_name_gamma; gamma])
+                    body
+                    bound_type
+
+            | _ ->
+                Error
+                  ( exp
+                  , GotTypeAbstractionButExpected tau
                   )
           end
 
@@ -391,7 +438,7 @@ let rec check' :
             ]
 
       (* Nonstandard, but useful for let-bindings *)
-      | EApp (_, head, ETypeAnnotation (arg, arg_type)) ->
+      | EApp (_, head, EAExp (ETypeAnnotation (arg, arg_type))) ->
           let* arg_delta =
             check' state sigma gamma arg arg_type
           in
@@ -400,39 +447,12 @@ let rec check' :
           in
           head_delta @ arg_delta
 
-      | ETAbs (a, body) ->
-          begin match tau with
-            | TForall (a', bound_type) ->
-                if not (String.equal a a') then
-                  Error
-                    ( exp
-                    , TypeAbstractionParameterNameMismatch (a, a')
-                    )
-                else
-                  let param_gamma =
-                    Type_ctx.add_poly a Type_ctx.empty
-                  in
-                  check'
-                    state
-                    sigma
-                    (Type_ctx.concat [param_gamma; gamma])
-                    body
-                    bound_type
-
-            | _ ->
-                Error
-                  ( exp
-                  , GotTypeAbstractionButExpected tau
-                  )
-          end
-
       | EApp (_, _, _)
       | EVar _
       | EProj (_, _, _)
       | ECtor (_, _, _)
       | EAssert (_, _)
-      | ETypeAnnotation (_, _)
-      | ETApp (_, _) ->
+      | ETypeAnnotation (_, _) ->
           let* (tau', delta) =
             infer' state sigma gamma exp
           in
@@ -459,7 +479,7 @@ and infer' :
             , CannotInferFunctionType
             )
 
-      | EApp (_, head, arg) ->
+      | EApp (_, head, (EAExp arg)) ->
           let* (head_type, head_delta) =
             infer' state sigma gamma head
           in
@@ -474,6 +494,24 @@ and infer' :
                 Error
                   ( exp
                   , ExpectedArrowButGot head_type
+                  )
+          end
+
+      | EApp (_, head, (EAType type_arg)) ->
+          let* (head_type, head_delta) =
+            infer' state sigma gamma head
+          in
+          begin match head_type with
+            | TForall (a, bound_type) ->
+                Ok
+                  ( substitute ~before:a ~after:type_arg bound_type
+                  , head_delta
+                  )
+
+            | _ ->
+                Error
+                  ( exp
+                  , ExpectedForallButGot head_type
                   )
           end
 
@@ -586,38 +624,16 @@ and infer' :
           in
           (tau', delta)
 
-      | ETAbs (_, _) ->
-          Error
-            ( exp
-            , CannotInferTypeAbstractionType
-            )
-
-      | ETApp (head, type_arg) ->
-          let* (head_type, head_delta) =
-            infer' state sigma gamma head
-          in
-          begin match head_type with
-            | TForall (a, bound_type) ->
-                Ok
-                  ( substitute ~before:a ~after:type_arg bound_type
-                  , head_delta
-                  )
-
-            | _ ->
-                Error
-                  ( exp
-                  , ExpectedForallButGot head_type
-                  )
-          end
-
 let check =
   check'
     { function_decrease_requirement = None
     ; match_depth = 0
+    ; arg_of = None
     }
 
 let infer =
   infer'
     { function_decrease_requirement = None
     ; match_depth = 0
+    ; arg_of = None
     }

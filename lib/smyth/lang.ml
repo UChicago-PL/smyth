@@ -26,10 +26,20 @@ type pat =
   | PWildcard
   [@@deriving yojson]
 
-type exp =
-  | EFix of string option * pat * exp
+type param =
+  | PatParam of pat
+  | TypeParam of string
+  [@@deriving yojson]
+
+type exp_arg =
+  | EAExp of exp
+  | EAType of typ
+  [@@deriving yojson]
+
+and exp =
+  | EFix of string option * param * exp
   (* bool: special recursive call (used only for "recursive window" UI) *)
-  | EApp of bool * exp * exp
+  | EApp of bool * exp * exp_arg
   | EVar of string
   | ETuple of exp list
   (* (n, i, arg) *)
@@ -39,23 +49,24 @@ type exp =
   | EHole of hole_name
   | EAssert of exp * exp
   | ETypeAnnotation of exp * typ
-  | ETAbs of string * exp
-  | ETApp of exp * typ
   [@@deriving yojson]
 
-type res =
+type res_arg =
+  | RARes of res
+  | RAType of typ
+  [@@deriving yojson]
+
+and res =
   (* Determinate results *)
-  | RFix of env * (string option) * pat * exp
+  | RFix of env * (string option) * param * exp
   | RTuple of res list
   | RCtor of string * res
   (* Indeterminate results *)
   | RHole of env * hole_name
-  | RApp of res * res
+  | RApp of res * res_arg
   | RProj of int * int * res
   | RCase of env * res * (string * (pat * exp)) list
   | RCtorInverse of string * res
-  | RTAbs of env * string * exp
-  | RTApp of res * typ
   [@@deriving yojson]
 
 and env =

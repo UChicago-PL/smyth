@@ -502,7 +502,7 @@ let pat : pat parser =
 
 (* Expressions *)
 
-let params : Desugar.param list parser =
+let params : param list parser =
   loop []
     ( fun rev_params ->
         one_of
@@ -513,12 +513,12 @@ let params : Desugar.param list parser =
                            ( fun taus ->
                                taus
                                  |> List.rev
-                                 |> List.map (fun tau -> Desugar.TypeParam tau)
+                                 |> List.map (fun tau -> TypeParam tau)
                            )
                            (wrapped_poly variable_name)
                        )
                    ; map
-                       (fun p -> [Desugar.PatParam p])
+                       (fun p -> [PatParam p])
                        pat
                    ]
               |. sspaces
@@ -526,7 +526,7 @@ let params : Desugar.param list parser =
           ]
     )
 
-let rec binding' : unit -> (string * Desugar.param list * exp) parser =
+let rec binding' : unit -> (string * param list * exp) parser =
   fun () ->
     succeed (fun name ps body -> (name, ps, body))
       |= variable_name
@@ -536,7 +536,7 @@ let rec binding' : unit -> (string * Desugar.param list * exp) parser =
       |. sspaces
       |= lazily exp'
 
-and definition' : unit -> (typ * string * Desugar.param list * exp) parser =
+and definition' : unit -> (typ * string * param list * exp) parser =
   fun () ->
     let* (name, the_typ) =
         succeed Pair2.pair
@@ -671,16 +671,16 @@ and ground_exp' : unit -> exp parser =
           )
       ]
 
-and ground_args' : unit -> Desugar.arg list parser =
+and ground_args' : unit -> exp_arg list parser =
   fun () ->
     one_of
       [ in_context CTypeArg
           ( map
-              (List.map (fun tau -> Desugar.TypeArg tau))
+              (List.map (fun tau -> EAType tau))
               (wrapped_poly typ)
           )
       ; map
-          (fun e -> [Desugar.ExpArg e])
+          (fun e -> [EAExp e])
           (lazily ground_exp')
       ]
 
@@ -707,18 +707,18 @@ let ground_exp : exp parser =
 let exp : exp parser =
   in_context CExp (lazily exp')
 
-let definition : (typ * string * Desugar.param list * exp) parser =
+let definition : (typ * string * param list * exp) parser =
   lazily definition'
 
-let arg : Desugar.arg parser =
+let arg : exp_arg parser =
   one_of
     [ in_context CTypeArg
         ( map
-            (fun tau -> Desugar.TypeArg tau)
+            (fun tau -> EAType tau)
             (single_wrapped_poly typ)
         )
     ; map
-        (fun e -> Desugar.ExpArg e)
+        (fun e -> EAExp e)
         exp
     ]
 

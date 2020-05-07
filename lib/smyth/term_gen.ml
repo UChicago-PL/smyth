@@ -239,7 +239,7 @@ and rel_gen_e_app
         Nondet.guard @@
           Type.structurally_decreasing combined_gamma ~head ~arg
       in
-        EApp (special, head, arg)
+        EApp (special, head, EAExp arg)
     in
     let* arg_type =
       gamma
@@ -357,7 +357,7 @@ and rel_gen_e
                              , Desugar.app
                                  (EVar rel_name)
                                  ( List.map
-                                     (fun a -> Desugar.TypeArg a)
+                                     (fun a -> EAType a)
                                      args
                                  )
                              )
@@ -481,7 +481,7 @@ and gen_i
                           )
                       }
                   in
-                    EFix (Some f_name, PVar arg_name, body)
+                    EFix (Some f_name, PatParam (PVar arg_name), body)
 
               | TTuple taus ->
                   let tuple_size =
@@ -541,7 +541,7 @@ and gen_i
                           )
                       }
                   in
-                    ETAbs (a, body)
+                    EFix (None, TypeParam a, body)
 
               | TVar _ ->
                   (* No introduction form for a type variable *)
@@ -593,7 +593,7 @@ and rel_gen_i
                     )
                 }
             in
-              EFix (Some f_name, PVar arg_name, body)
+              EFix (Some f_name, PatParam (PVar arg_name), body)
 
         | TTuple taus ->
             let tuple_size =
@@ -651,7 +651,7 @@ and rel_gen_i
                     )
                 }
             in
-              ETAbs (a, body)
+              EFix (None, TypeParam a, body)
 
         | TVar _ ->
             (* No introduction form for a type variable *)

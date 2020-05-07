@@ -1,21 +1,10 @@
 open Lang
 
-type param =
-  | PatParam of pat
-  | TypeParam of string
-
-type arg =
-  | ExpArg of exp
-  | TypeArg of typ
-
-let rec annotate_rec_name : string -> exp -> exp =
+let annotate_rec_name : string -> exp -> exp =
   fun rec_name exp ->
     match exp with
       | EFix (_, param, body) ->
           EFix (Some rec_name, param, body)
-
-      | ETAbs (type_param, body) ->
-          ETAbs (type_param, annotate_rec_name rec_name body)
 
       | _ ->
           exp
@@ -24,33 +13,25 @@ let lett : typ -> string -> exp -> exp -> exp =
   fun the_typ name binding body ->
     EApp
       ( false
-      , EFix (None, PVar name, body)
-      , ETypeAnnotation
-          ( annotate_rec_name name binding
-          , the_typ
+      , EFix (None, PatParam (PVar name), body)
+      , EAExp
+          ( ETypeAnnotation
+              ( annotate_rec_name name binding
+              , the_typ
+              )
           )
       )
 
 let func_params : param list -> exp -> exp =
   List.fold_right
     ( fun param body ->
-        match param with
-          | PatParam pat ->
-              EFix (None, pat, body)
-
-          | TypeParam type_param ->
-              ETAbs (type_param, body)
+        EFix (None, param, body)
     )
 
-let app : exp -> arg list -> exp =
+let app : exp -> exp_arg list -> exp =
   List.fold_left
     ( fun acc arg ->
-        match arg with
-          | ExpArg exp ->
-              EApp (false, acc, exp)
-
-          | TypeArg typ ->
-              ETApp (acc, typ)
+        EApp (false, acc, arg)
     )
 
 (* Precondition: input >= 0 *)

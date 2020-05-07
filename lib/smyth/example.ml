@@ -22,7 +22,14 @@ let rec res_satisfies hf res ex =
           && res_satisfies hf r_arg ex_arg
 
     | (_, ExInputOutput (input, output)) ->
-        begin match Eval.resume hf (RApp (res, Res.from_value input)) with
+        begin match
+          Eval.resume hf
+            ( RApp
+                ( res
+                , RARes (Res.from_value input)
+                )
+            )
+        with
           | Ok (r_out, []) ->
               res_satisfies hf r_out output
 

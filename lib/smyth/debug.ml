@@ -4,7 +4,7 @@ let debug func =
   if !Params.debug_mode then
     func ()
   else
-    ()
+    func ()
 
 let println s = debug @@ fun _ ->
   prerr_endline s
@@ -95,3 +95,11 @@ let print_nondet_len nd = debug @@ fun _ ->
     |> List.length
     |> string_of_int
     |> println
+
+let print_bind_spec b = debug @@ fun _ ->
+  println @@
+    match b with
+      | NoSpec -> "NoSpec"
+      | Rec r -> "Rec(" ^ r ^ ")"
+      | Arg a -> "Arg(" ^ a ^ ")"
+      | Dec d -> "Dec(" ^ d ^ ")"

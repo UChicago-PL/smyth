@@ -19,9 +19,6 @@ and determinate r =
     | RCtor (_, arg) ->
         final arg
 
-    | RTAbs (env, _, _) ->
-        final_env env
-
     | _ ->
         false
 
@@ -30,17 +27,17 @@ and indeterminate r =
     | RHole (env, _) ->
         final_env env
 
-    | RApp (r1, r2) ->
+    | RApp (r1, (RARes r2)) ->
         indeterminate r1 && final r2
+
+    | RApp (r1, (RAType _)) ->
+        indeterminate r1
 
     | RProj (_, _, arg) ->
         indeterminate arg
 
     | RCase (env, scrutinee, _) ->
         final_env env && indeterminate scrutinee
-
-    | RTApp (head, _) ->
-        indeterminate head
 
     | _ ->
         false

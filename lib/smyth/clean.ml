@@ -22,8 +22,11 @@ let propagate (hf : hole_filling) : hole_filling =
       | EFix (f, x, body) ->
           EFix (f, x, propagate_exp body)
 
-      | EApp (special, e1, e2) ->
-          EApp (special, propagate_exp e1, propagate_exp e2)
+      | EApp (special, e1, EAExp e2) ->
+          EApp (special, propagate_exp e1, EAExp (propagate_exp e2))
+
+      | EApp (special, e1, EAType type_arg) ->
+          EApp (special, propagate_exp e1, EAType type_arg)
 
       | EVar x ->
           EVar x
@@ -48,12 +51,6 @@ let propagate (hf : hole_filling) : hole_filling =
 
       | ETypeAnnotation (e, tau) ->
           ETypeAnnotation (propagate_exp e, tau)
-
-      | ETAbs (x, body) ->
-          ETAbs (x, propagate_exp body)
-
-      | ETApp (head, type_arg) ->
-          ETApp (propagate_exp head, type_arg)
   in
     Hole_map.map propagate_exp hf
 

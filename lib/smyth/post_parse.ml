@@ -9,7 +9,7 @@ let salvage_constructor : exp -> (string * typ list) option =
           else
             None
 
-      | ETApp (head, type_arg) ->
+      | EApp (_, head, EAType type_arg) ->
           helper (type_arg :: type_args) head
 
       | _ ->
@@ -26,13 +26,13 @@ let exp : exp -> exp =
 
         (* Handle constructor applications *)
 
-        | EApp (special, e1, e2) ->
+        | EApp (special, e1, EAExp e2) ->
             begin match salvage_constructor e1 with
               | Some (ctor_name, type_args) ->
                   ECtor (ctor_name, type_args, helper e2)
 
               | None ->
-                  EApp (special, helper e1, helper e2)
+                  EApp (special, helper e1, EAExp (helper e2))
             end
 
         (* Handle syntactic sugar for unapplied constructors *)
@@ -43,13 +43,13 @@ let exp : exp -> exp =
             else
               EVar name
 
-        | ETApp (head, type_arg) ->
+        | EApp (special, head, EAType type_arg) ->
             begin match salvage_constructor exp with
               | Some (ctor_name, type_args) ->
                   ECtor (ctor_name, type_args, ETuple [])
 
               | None ->
-                  ETApp (helper head, type_arg)
+                  EApp (special, helper head, EAType type_arg)
             end
 
         (* Set proper hole names *)
@@ -85,8 +85,5 @@ let exp : exp -> exp =
 
         | ETypeAnnotation (e, tau) ->
             ETypeAnnotation (helper e, tau)
-
-        | ETAbs (x, body) ->
-            ETAbs (x, helper body)
     in
       helper root

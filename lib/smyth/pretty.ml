@@ -199,7 +199,7 @@ and exp' : exp printer =
 
       | None ->
           begin match exp with
-            | EFix (rec_name_opt, param_pat, body) ->
+            | EFix (rec_name_opt, PatParam param_pat, body) ->
                 let lambda =
                   "\\"
                     ^ pat'
@@ -235,8 +235,26 @@ and exp' : exp printer =
                 else
                   inner
 
-            | EApp (_, head, arg) ->
+            | EFix (rec_name_opt, TypeParam x, body) ->
+                exp'
+                  state
+                  ( EFix
+                      ( rec_name_opt
+                      , PatParam (PVar (wrapped_poly x))
+                      , body
+                      )
+                  )
+
+            | EApp (_, head, EAExp arg) ->
                 application state exp' head exp' arg
+
+            | EApp (_, head, EAType arg) ->
+                application
+                  state
+                  exp'
+                  head
+                  (fun state s -> wrapped_poly (typ' state s))
+                  arg
 
             | EVar name ->
                 name
@@ -332,17 +350,6 @@ and exp' : exp printer =
                   "(" ^ inner ^ ")"
                 else
                   inner
-
-            | ETAbs (x, body) ->
-                exp' state (EFix (None, PVar (wrapped_poly x), body))
-
-            | ETApp (head, arg) ->
-                application
-                  state
-                  exp'
-                  head
-                  (fun state s -> wrapped_poly (typ' state s))
-                  arg
           end
 
 let exp : exp -> string =

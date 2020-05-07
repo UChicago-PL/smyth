@@ -59,7 +59,7 @@ module FuelLimited = struct
             , ks
             )
 
-      | EApp (_, e1, e2) ->
+      | EApp (_, e1, EAExp e2) ->
           let* (r1, ks1) =
             eval fuel env e1
           in
@@ -67,7 +67,7 @@ module FuelLimited = struct
             eval fuel env e2
           in
             begin match r1 with
-              | RFix (f_env, f, x, body) ->
+              | RFix (f_env, f, PatParam x, body) ->
                   let f_env_extension =
                       Pat.bind_rec_name_res f r1
                   in
@@ -88,10 +88,43 @@ module FuelLimited = struct
 
               | _ ->
                   Ok
-                    ( RApp (r1, r2)
+                    ( RApp (r1, RARes r2)
                     , ks1 @ ks2
                     )
             end
+
+      | EApp (_, head, EAType type_arg) ->
+          let* (r_head, ks1) =
+            eval fuel env head
+          in
+          begin match r_head with
+            | RFix (f_env, f, TypeParam type_param, body) ->
+                let f_env_extension =
+                    Pat.bind_rec_name_res f r_head
+                in
+                let param_env_extension =
+                  Env.add_type
+                    (type_param, type_arg)
+                    Env.empty
+                in
+                let new_env =
+                  Env.concat
+                    [ param_env_extension
+                    ; f_env_extension
+                    ; f_env
+                    ]
+                in
+                  Result2.map
+                    (Pair2.map_snd @@ fun ks2 -> ks1 @ ks2)
+                    (eval fuel new_env body)
+
+            | _ ->
+                Ok
+                  ( RApp (r_head, RAType type_arg)
+                  , ks1
+                  )
+          end
+
 
       | EProj (n, i, arg) ->
           if i <= 0 then
@@ -177,34 +210,6 @@ module FuelLimited = struct
       | ETypeAnnotation (e, _) ->
           eval fuel env e
 
-      | ETAbs (type_var, body) ->
-          Ok
-            ( RTAbs (env, type_var, body)
-            , []
-            )
-
-      | ETApp (head, type_arg) ->
-          let* (r_head, ks1) =
-            eval fuel env head
-          in
-          begin match r_head with
-            | RTAbs (f_env, type_param, body) ->
-                let new_env =
-                  Env.add_type
-                    (type_param, type_arg)
-                    f_env
-                in
-                  Result2.map
-                    (Pair2.map_snd @@ fun ks2 -> ks1 @ ks2)
-                    (eval fuel new_env body)
-
-            | _ ->
-                Ok
-                  ( RTApp (r_head, type_arg)
-                  , ks1
-                  )
-          end
-
   let rec resume fuel hf res =
     let open Result2.Syntax in
     match res with
@@ -260,7 +265,7 @@ module FuelLimited = struct
             , ks
             )
 
-      | RApp (r1, r2) ->
+      | RApp (r1, RARes r2) ->
           let* (r1', ks1) =
             resume fuel hf r1
           in
@@ -268,7 +273,7 @@ module FuelLimited = struct
             resume fuel hf r2
           in
             begin match r1' with
-              | RFix (f_env, f, x, body) ->
+              | RFix (f_env, f, PatParam x, body) ->
                   let f_env_extension =
                     Pat.bind_rec_name_res f r1'
                   in
@@ -295,10 +300,48 @@ module FuelLimited = struct
 
               | _ ->
                   Ok
-                    ( RApp (r1', r2')
+                    ( RApp (r1', RARes r2')
                     , ks1 @ ks2
                     )
             end
+
+      | RApp (r_head, RAType type_arg) ->
+          let* (r_head', ks_head) =
+            resume fuel hf r_head
+          in
+          begin match r_head' with
+            | RFix (f_env, f, TypeParam type_param, body) ->
+                let f_env_extension =
+                  Pat.bind_rec_name_res f r_head'
+                in
+                let param_env_extension =
+                  Env.add_type
+                    (type_param, type_arg)
+                    Env.empty
+                in
+                let new_env =
+                  Env.concat
+                    [ param_env_extension
+                    ; f_env_extension
+                    ; f_env
+                    ]
+                in
+                let* (r, ks) =
+                  eval (fuel - 1) new_env body
+                in
+                let+ (r', ks') =
+                  resume (fuel - 1) hf r
+                in
+                  ( r'
+                  , ks_head @ ks @ ks'
+                  )
+
+            | _ ->
+                Ok
+                  ( RApp (r_head', RAType type_arg)
+                  , ks_head
+                  )
+          end
 
       | RProj (n, i, arg) ->
           if i <= 0 then
@@ -340,8 +383,8 @@ module FuelLimited = struct
                           )
                           ( resume fuel hf @@
                               RApp
-                                ( RFix (env, None, arg_pattern, body)
-                                , r_arg
+                                ( RFix (env, None, PatParam arg_pattern, body)
+                                , RARes r_arg
                                 )
                           )
 
@@ -370,42 +413,6 @@ module FuelLimited = struct
             ( RCtorInverse (name, arg')
             , ks
             )
-
-      | RTAbs (env, type_param, body) ->
-          let+ (env', ks) =
-            resume_env fuel hf env
-          in
-          ( RTAbs (env', type_param, body)
-          , ks
-          )
-
-      | RTApp (r_head, type_arg) ->
-          let* (r_head', ks_head) =
-            resume fuel hf r_head
-          in
-          begin match r_head' with
-            | RTAbs (f_env, type_param, body) ->
-                let new_env =
-                  Env.add_type
-                    (type_param, type_arg)
-                    f_env
-                in
-                let* (r, ks) =
-                  eval (fuel - 1) new_env body
-                in
-                let+ (r', ks') =
-                  resume (fuel - 1) hf r
-                in
-                  ( r'
-                  , ks_head @ ks @ ks'
-                  )
-
-            | _ ->
-                Ok
-                  ( RTApp (r_head', type_arg)
-                  , ks_head
-                  )
-          end
 
   and resume_env fuel hf env : eval_env_result =
     let open Result2.Syntax in

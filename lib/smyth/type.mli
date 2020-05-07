@@ -56,7 +56,6 @@ type error =
   | CannotInferFunctionType
   | CannotInferCaseType
   | CannotInferHoleType
-  | CannotInferTypeAbstractionType
 
   | ExpectedArrowButGot of typ
   | ExpectedTupleButGot of typ

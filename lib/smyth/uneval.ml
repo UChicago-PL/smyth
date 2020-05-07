@@ -35,8 +35,7 @@ module FuelLimited = struct
 
         | RFix (_, _, _, _)
         | RTuple _
-        | RCtor (_, _)
-        | RTAbs (_, _, _) ->
+        | RCtor (_, _) ->
             None
 
         (* Indeterminate results *)
@@ -55,9 +54,6 @@ module FuelLimited = struct
 
         | RCtorInverse (_, arg) ->
             blocking_hole arg
-
-        | RTApp (head, _) ->
-            blocking_hole head
     in
     let guesses
       (delta : hole_ctx)
@@ -102,7 +98,7 @@ module FuelLimited = struct
           Nondet.pure @@
             Constraints.unsolved_singleton hole_name [(env, ex)]
 
-      | (RFix (env, f, x, body), ExInputOutput (input, output)) ->
+      | (RFix (env, f, (PatParam x), body), ExInputOutput (input, output)) ->
           let fix_env_extension =
             Pat.bind_rec_name_res f res
           in
@@ -116,7 +112,7 @@ module FuelLimited = struct
                 )
               ]
 
-      | (RApp (r1, r2), _) ->
+      | (RApp (r1, (RARes r2)), _) ->
           begin match Res.to_value r2 with
             | Some v2 ->
                 uneval fuel delta sigma hf r1 @@

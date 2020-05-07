@@ -1,18 +1,10 @@
 open Lang
 
-type param =
-  | PatParam of pat
-  | TypeParam of string
-
-type arg =
-  | ExpArg of exp
-  | TypeArg of typ
-
 val lett : typ -> string -> exp -> exp -> exp
 
 val func_params : param list -> exp -> exp
 
-val app : exp -> arg list -> exp
+val app : exp -> exp_arg list -> exp
 
 (* Precondition: input >= 0 *)
 val nat : int -> exp
