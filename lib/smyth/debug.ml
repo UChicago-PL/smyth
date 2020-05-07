@@ -67,7 +67,7 @@ let print_res res = debug @@ fun _ ->
 let print_typ typ = debug @@ fun _ ->
   println @@ Yojson.Safe.to_string (typ_to_yojson typ)
 
-let print_type_ctx gamma = debug @@ fun _ ->
+let print_type_ctx (gamma, _) = debug @@ fun _ ->
   let s =
    String.concat "\n, " @@
     List.map
