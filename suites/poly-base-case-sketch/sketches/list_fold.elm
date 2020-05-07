@@ -6,9 +6,9 @@ type Boolean
   = F ()
   | T ()
 
-type NatList
+type List a
   = Nil ()
-  | Cons (Nat, NatList)
+  | Cons (a, List a)
 
 sum : Nat -> Nat -> Nat
 sum n1 n2 =
@@ -31,10 +31,10 @@ countOdd n1 n2 =
     T _ -> S n1
     F _ -> n1
 
-listFold : (Nat -> Nat -> Nat) -> Nat -> NatList -> Nat
-listFold f acc =
+listFold : forall a . forall b . (b -> a -> b) -> b -> List a -> b
+listFold <a, b> f acc =
   let
-    fixListFold : NatList -> Nat
+    fixListFold : List a -> b
     fixListFold xs =
       case xs of
         Nil _ ->

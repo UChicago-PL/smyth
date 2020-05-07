@@ -2,9 +2,9 @@ type Nat
   = Z ()
   | S Nat
 
-type NatTree
+type Tree a
   = Leaf ()
-  | Node (NatTree, Nat, NatTree)
+  | Node (Tree a, a, Tree a)
 
 sum : Nat -> Nat -> Nat
 sum n1 n2 =
@@ -12,8 +12,8 @@ sum n1 n2 =
     Z _ -> n2
     S m -> S (sum m n2)
 
-treeCountNodes : NatTree -> Nat
-treeCountNodes tree =
+treeCountNodes : forall a . Tree a -> Nat
+treeCountNodes <a> tree =
   case tree of
     Leaf _ ->
       Z ()

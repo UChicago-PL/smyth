@@ -2,23 +2,23 @@ type Nat
   = Z ()
   | S Nat
 
-type NatList
+type List a
   = Nil ()
-  | Cons (Nat, NatList)
+  | Cons (a, List a)
 
-append : NatList -> NatList -> NatList
-append l1 l2 =
+append : forall a . List a -> List a -> List a
+append <a> l1 l2 =
   case l1 of
     Nil _ ->
       l2
     Cons p ->
-      Cons (#2.1 p, append (#2.2 p) l2)
+      Cons<a> (#2.1 p, append <a> (#2.2 p) l2)
 
-listRevAppend : NatList -> NatList
-listRevAppend xs =
+listRevAppend : forall a . List a -> List a
+listRevAppend <a> xs =
   case xs of
     Nil _ ->
-      Nil ()
+      Nil<a> ()
 
     Cons p ->
       ??

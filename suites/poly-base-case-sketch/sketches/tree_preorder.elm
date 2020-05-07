@@ -2,27 +2,27 @@ type Nat
   = Z ()
   | S Nat
 
-type NatList
+type List a
   = Nil ()
-  | Cons (Nat, NatList)
+  | Cons (a, List a)
 
-type NatTree
+type Tree a
   = Leaf ()
-  | Node (NatTree, Nat, NatTree)
+  | Node (Tree a, a, Tree a)
 
-append : NatList -> NatList -> NatList
-append l1 l2 =
+append : forall a . List a -> List a -> List a
+append <a> l1 l2 =
   case l1 of
     Nil _ ->
       l2
     Cons p ->
-      Cons (#2.1 p, append (#2.2 p) l2)
+      Cons<a>  (#2.1 p, append<a>  (#2.2 p) l2)
 
-treePreorder : NatTree -> NatList
-treePreorder tree =
+treePreorder : forall a . Tree a -> List a
+treePreorder <a> tree =
   case tree of
     Leaf _ ->
-      Nil ()
+      Nil<a>  ()
 
     Node node ->
       ??

@@ -2,9 +2,9 @@ type Nat
   = Z ()
   | S Nat
 
-type NatList
+type List a
   = Nil ()
-  | Cons (Nat, NatList)
+  | Cons (a, List a)
 
 zero : Nat -> Nat
 zero n =
@@ -14,14 +14,14 @@ inc : Nat -> Nat
 inc n =
   S n
 
-listMap : (Nat -> Nat) -> NatList -> NatList
-listMap f =
+listMap : forall a . forall b . (a -> b) -> List a -> List b
+listMap <a, b> f =
   let
-    listMapFix : NatList -> NatList
+    listMapFix : List a -> List b
     listMapFix xs =
       case xs of
         Nil _ ->
-          Nil ()
+          Nil<b> ()
 
         Cons p ->
           ??

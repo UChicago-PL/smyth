@@ -2,27 +2,27 @@ type Boolean
   = F ()
   | T ()
 
-type BooleanTree
+type Tree a
   = Leaf ()
-  | Node (BooleanTree, Boolean, BooleanTree)
+  | Node (Tree a, a, Tree a)
 
-type BooleanList
+type List a
   = Nil ()
-  | Cons (Boolean, BooleanList)
+  | Cons (a, List a)
 
-append : BooleanList -> BooleanList -> BooleanList
-append l1 l2 =
+append : forall a . List a -> List a -> List a
+append <a> l1 l2 =
   case l1 of
     Nil _ ->
       l2
     Cons p ->
-      Cons (#2.1 p, append (#2.2 p) l2)
+      Cons<a> (#2.1 p, append <a> (#2.2 p) l2)
 
-treeCollectLeaves : BooleanTree -> BooleanList
-treeCollectLeaves tree =
+treeCollectLeaves : forall a . Tree a -> List a
+treeCollectLeaves <a> tree =
   case tree of
     Leaf _ ->
-      Nil ()
+      Nil<a> ()
 
     Node node ->
       ??

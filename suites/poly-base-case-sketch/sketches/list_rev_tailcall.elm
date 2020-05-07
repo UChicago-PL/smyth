@@ -2,12 +2,12 @@ type Nat
   = Z ()
   | S Nat
 
-type NatList
+type List a
   = Nil ()
-  | Cons (Nat, NatList)
+  | Cons (a, List a)
 
-listRevTailcall : NatList -> NatList -> NatList
-listRevTailcall xs acc =
+listRevTailcall : forall a . List a -> List a -> List a
+listRevTailcall <a> xs acc =
   case xs of
     Nil _ ->
       acc

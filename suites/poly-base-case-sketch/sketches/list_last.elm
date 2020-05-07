@@ -2,19 +2,19 @@ type Nat
   = Z ()
   | S Nat
 
-type NatList
+type List a
   = Nil ()
-  | Cons (Nat, NatList)
+  | Cons (a, List a)
 
-type NatOpt
+type Option a
   = None ()
-  | Some Nat
+  | Some a
 
-listLast : NatList -> NatOpt
-listLast xs =
+listLast : forall a . List a -> Option a
+listLast <a> xs =
   case xs of
     Nil _ ->
-      None ()
+      None<a> ()
 
     Cons p ->
       ??

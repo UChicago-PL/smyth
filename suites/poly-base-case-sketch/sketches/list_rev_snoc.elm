@@ -2,21 +2,21 @@ type Nat
   = Z ()
   | S Nat
 
-type NatList
+type List a
   = Nil ()
-  | Cons (Nat, NatList)
+  | Cons (a, List a)
 
-snoc : NatList -> Nat -> NatList
-snoc xs n =
+snoc : forall a .  List a -> a -> List a
+snoc <a> xs n =
   case xs of
-    Nil _ -> Cons (n, Nil ())
-    Cons p -> Cons (#2.1 p, snoc (#2.2 p) n)
+    Nil _ -> Cons<a> (n, Nil<a> ())
+    Cons p -> Cons<a> (#2.1 p, snoc <a> (#2.2 p) n)
 
-listRevSnoc : NatList -> NatList
-listRevSnoc xs =
+listRevSnoc : forall a . List a -> List a
+listRevSnoc <a> xs =
   case xs of
     Nil _ ->
-      Nil ()
+      Nil<a> ()
 
     Cons p ->
       ??

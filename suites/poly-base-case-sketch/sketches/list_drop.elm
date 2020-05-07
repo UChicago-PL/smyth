@@ -2,12 +2,12 @@ type Nat
   = Z ()
   | S Nat
 
-type NatList
+type List a
   = Nil ()
-  | Cons (Nat, NatList)
+  | Cons (a, List a)
 
-listDrop : NatList -> Nat -> NatList
-listDrop xs n =
+listDrop : forall a . List a -> Nat -> List a
+listDrop <a> xs n =
   case n of
     Z _ ->
       xs

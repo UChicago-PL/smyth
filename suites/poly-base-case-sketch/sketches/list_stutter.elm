@@ -2,15 +2,15 @@ type Nat
   = Z ()
   | S Nat
 
-type NatList
+type List a
   = Nil ()
-  | Cons (Nat, NatList)
+  | Cons (Nat, List a)
 
-listStutter : NatList -> NatList
-listStutter xs =
+listStutter : forall a . List a -> List a
+listStutter <a> xs =
   case xs of
     Nil _ ->
-      Nil ()
+      Nil<a> ()
 
     Cons p ->
       ??

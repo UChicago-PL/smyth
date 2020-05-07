@@ -2,9 +2,9 @@ type Boolean
   = F ()
   | T ()
 
-type BooleanTree
+type Tree a
   = Leaf ()
-  | Node (BooleanTree, Boolean, BooleanTree)
+  | Node (Tree a, a, Tree a)
 
 type Nat
   = Z ()
@@ -16,8 +16,8 @@ sum n1 n2 =
     Z _ -> n2
     S m -> S (sum m n2)
 
-treeCountLeaves : BooleanTree -> Nat
-treeCountLeaves tree =
+treeCountLeaves : forall a . Tree a -> Nat
+treeCountLeaves <a> tree =
   case tree of
     Leaf _ ->
       S (Z ())

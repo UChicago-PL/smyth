@@ -20,5 +20,5 @@ concat <a> xss =
     Nil _ ->
       Nil<a> ()
 
-    Cons (h, t) ->
+    Cons p ->
       ??

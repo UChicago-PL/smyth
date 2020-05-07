@@ -2,9 +2,9 @@ type Nat
   = Z ()
   | S Nat
 
-type NatList
+type List a
   = Nil ()
-  | Cons (Nat, NatList)
+  | Cons (a, List a)
 
 type Boolean
   = F ()
@@ -25,14 +25,14 @@ isNonzero n =
     Z _ -> F ()
     S _ -> T ()
 
-listFilter : (Nat -> Boolean) -> NatList -> NatList
-listFilter predicate =
+listFilter : forall a . (a -> Boolean) -> List a -> List a
+listFilter <a> predicate =
   let
-    fixListFilter : NatList -> NatList
+    fixListFilter : List a -> List a
     fixListFilter xs =
       case xs of
         Nil _ ->
-          Nil ()
+          Nil<a> ()
 
         Cons p ->
           ??

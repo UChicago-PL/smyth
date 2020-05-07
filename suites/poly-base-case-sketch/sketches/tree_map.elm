@@ -2,13 +2,13 @@ type Nat
   = Z ()
   | S Nat
 
-type NatList
+type List a
   = Nil ()
-  | Cons (Nat, NatList)
+  | Cons (a, List a)
 
-type NatTree
+type Tree a
   = Leaf ()
-  | Node (NatTree, Nat, NatTree)
+  | Node (Tree a, a, Tree a)
 
 div2 : Nat -> Nat
 div2 n =
@@ -23,14 +23,14 @@ inc : Nat -> Nat
 inc n =
   S n
 
-treeMap : (Nat -> Nat) -> NatTree -> NatTree
-treeMap f =
+treeMap : forall a . forall b . (a -> b) -> Tree a -> Tree b
+treeMap <a, b> f =
   let
-    fixTreeMap : NatTree -> NatTree
+    fixTreeMap : Tree a -> Tree b
     fixTreeMap tree =
       case tree of
         Leaf _ ->
-          Leaf ()
+          Leaf<b> ()
 
         Node node ->
           ??
