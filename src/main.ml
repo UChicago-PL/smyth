@@ -379,11 +379,14 @@ let () =
               hole_fillings
                 |> Rank.sort
                 |> List2.take forge_solution_count
-                |> List.map
-                     ( fun hole_filling ->
+                |> List.mapi
+                     ( fun i_ hole_filling ->
                          String.concat "\n\n"
-                           [ "rank: "
+                           [ "Solution #"
+                               ^ (string_of_int (i_ + 1))
+                               ^ " (rank: "
                                ^ string_of_int (Rank.rank hole_filling)
+                               ^ ")"
                            ; hole_filling
                                |> List.map
                                     ( fun (hole_name, exp) ->
@@ -396,7 +399,7 @@ let () =
                            ]
                      )
                 |> String.concat
-                     "\n----------------------------------------\n"
+                     "\n--------------------------------------------------------------------------------\n"
                 |> print_endline
         end
 
