@@ -1,0 +1,10 @@
+specifyFunction2 (listMap <Nat, Nat>)
+  [ -- (inc, []<Nat>, []<Nat>)
+    (inc, [0]<Nat>, [1]<Nat>)
+  -- , (inc, [0, 0]<Nat>, [1, 1]<Nat>)
+  -- , (inc, [1]<Nat>, [2]<Nat>)
+  -- , (inc, [1, 1]<Nat>, [2, 2]<Nat>)
+  -- , (zero, []<Nat>, []<Nat>)
+  -- , (zero, [0]<Nat>, [0]<Nat>)
+  -- , (zero, [0, 0]<Nat>, [0, 0]<Nat>)
+  ]

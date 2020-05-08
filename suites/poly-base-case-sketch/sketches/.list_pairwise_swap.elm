@@ -2,15 +2,10 @@ type Nat
   = Z ()
   | S Nat
 
-type NatList
+type List a
   = Nil ()
-  | Cons (Nat, NatList)
+  | Cons (a, List a)
 
-listPairwiseSwap : NatList -> NatList
-listPairwiseSwap xs =
-  case xs of
-    Nil _ ->
-      Nil ()
-
-    Cons p ->
-      ??
+listPairwiseSwap : forall a . List a -> List a
+listPairwiseSwap <a> xs =
+  ??

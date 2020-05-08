@@ -1,0 +1,11 @@
+specifyFunction (treePostorder <Nat>)
+  [ (Leaf<Nat> (), []<Nat>)
+  , (Node<Nat> (Leaf<Nat> (), 1, Leaf<Nat> ()), [1]<Nat>)
+  , (Node<Nat> (Leaf<Nat> (), 2, Leaf<Nat> ()), [2]<Nat>)
+  , (Node<Nat> (Node<Nat> (Leaf<Nat> (), 1, Leaf<Nat> ()), 2, Leaf<Nat> ()), [1, 2]<Nat>)
+  , (Node<Nat> (Leaf<Nat> (), 1, Node<Nat> (Leaf<Nat> (), 2, Leaf<Nat> ())), [2, 1]<Nat>)
+  , (Node<Nat> (Node<Nat> (Leaf<Nat> (), 1, Leaf<Nat> ()), 0, Node<Nat> (Leaf<Nat> (), 2, Leaf<Nat> ()) ), [1, 2, 0]<Nat>)
+  , (Node<Nat> (Node<Nat> (Leaf<Nat> (), 2, Leaf<Nat> ()), 0, Node<Nat> (Leaf<Nat> (), 1, Leaf<Nat> ()) ), [2, 1, 0]<Nat>)
+  , (Node<Nat> (Node<Nat> (Node<Nat> (Leaf<Nat> (), 2, Leaf<Nat> ()), 0, Node<Nat> (Leaf<Nat> (), 1, Leaf<Nat> ()) ), 0, Leaf<Nat> ()), [2, 1, 0, 0]<Nat>)
+  , (Node<Nat> (Leaf<Nat> (), 2, Node<Nat> (Node<Nat> (Leaf<Nat> (), 2, Leaf<Nat> ()), 0, Node<Nat> (Leaf<Nat> (), 1, Leaf<Nat> ()) )), [2, 1, 0, 2]<Nat>)
+  ]
