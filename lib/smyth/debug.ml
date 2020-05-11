@@ -4,7 +4,7 @@ let debug func =
   if !Params.debug_mode then
     func ()
   else
-    func ()
+    ()
 
 let println s = debug @@ fun _ ->
   prerr_endline s

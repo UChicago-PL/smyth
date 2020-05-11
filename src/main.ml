@@ -68,9 +68,10 @@ type command =
   | Test
   | SuiteTest
   | Fuzz
+  | AssertionExport
 
 let commands : command list =
-  [ Solve; Test; SuiteTest; Fuzz ]
+  [ Solve; Test; SuiteTest; Fuzz; AssertionExport ]
 
 let command_name : command -> string =
   function
@@ -78,14 +79,15 @@ let command_name : command -> string =
     | Test -> "test"
     | SuiteTest -> "suite-test"
     | Fuzz -> "fuzz"
+    | AssertionExport -> "assertion-export"
 
 let command_from_name : string -> command option =
-  function
-    | "forge" -> Some Solve
-    | "test" -> Some Test
-    | "suite-test" -> Some SuiteTest
-    | "fuzz" -> Some Fuzz
-    | _ -> None
+  fun name ->
+    List.find_opt
+      ( fun cmd ->
+          String.equal (command_name cmd) name
+      )
+      commands
 
 let command_description : command -> string =
   function
@@ -96,11 +98,14 @@ let command_description : command -> string =
         "Test a solution against a specification"
 
     | SuiteTest ->
-        "Test multiple solutions against specifications."
+        "Test multiple solutions against specifications"
 
     | Fuzz ->
-        "Stress-test a program sketch with assertions fuzzed from a built-in "
-          ^ "function."
+        "Stress-test a program sketch with examples fuzzed from a built-in "
+          ^ "function"
+
+    | AssertionExport ->
+        "Export a set of assertions to Python code"
 
 let command_arguments : command -> (string * string) list =
   function
@@ -115,10 +120,10 @@ let command_arguments : command -> (string * string) list =
           , "The path to the specification"
           )
         ; ( "sketch"
-          , "The path to the sketch to be tested WITHOUT any assertions"
+          , "The path to the sketch to be tested WITHOUT any examples"
           )
-        ; ( "assertions"
-          , "The path to the assertions over " ^ arg_format "sketch"
+        ; ( "examples"
+          , "The path to the examples for " ^ arg_format "sketch"
           )
         ]
 
@@ -139,7 +144,16 @@ let command_arguments : command -> (string * string) list =
           , "The path to the specification"
           )
         ; ( "sketch"
-          , "The path to the sketch to be fuzzed WITHOUT any assertions"
+          , "The path to the sketch to be fuzzed WITHOUT any examples"
+          )
+        ]
+
+    | AssertionExport ->
+        [ ( "specification"
+          , "The path to the specification to be exported"
+          )
+        ; ( "examples"
+          , "The path to the examples to be exported"
           )
         ]
 
@@ -226,7 +240,7 @@ let available_commands =
       |> List.map
            ( fun command ->
                Printf.sprintf
-                 "  %-12s%s"
+                 "  %-20s%s"
                  (command_name command)
                  (command_description command)
            )
@@ -408,7 +422,7 @@ let () =
           Endpoint.test
             ~specification:(Io2.read_file Sys.argv.(2))
             ~sketch:(Io2.read_file Sys.argv.(3))
-            ~assertions:(Io2.read_file Sys.argv.(4))
+            ~examples:(Io2.read_file Sys.argv.(4))
         with
           | Error e ->
               prerr_endline (Show.error e);
@@ -445,7 +459,7 @@ let () =
                                    ( Io2.read_path
                                        [suite_path; "sketches"; name]
                                    )
-                                 ~assertions:
+                                 ~examples:
                                    ( Io2.read_path
                                        [suite_path; "examples"; name]
                                    )
@@ -578,5 +592,45 @@ let () =
                 )
         in
         print_endline result_string
+
+    | AssertionExport ->
+        begin match
+          Endpoint.assertion_info
+            ~specification:(Io2.read_file Sys.argv.(2))
+            ~assertions:(Io2.read_file Sys.argv.(3))
+        with
+          | Error e ->
+              print_endline
+                ( "? error ("
+                    ^ name
+                    ^ "): "
+                    ^ Show.error e
+                )
+
+          | Ok info ->
+              let insides =
+                info
+                  |> List.map
+                       ( fun (in_partial, inputs, output) ->
+                           "("
+                             ^ String.concat ", "
+                                 [ if in_partial then
+                                     "True"
+                                   else
+                                     "False"
+                                 ; Python_denotation.exp_collection "[" "]"
+                                     inputs
+                                 ; Python_denotation.exp
+                                     output
+                                 ]
+                             ^ ")"
+                       )
+              in
+              print_endline
+                ( "      [ "
+                    ^ String.concat "\n      , " insides
+                    ^ "\n      ]"
+                )
+        end
   end;
   exit 0

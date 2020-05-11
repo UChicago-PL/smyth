@@ -743,7 +743,7 @@ let specify_function_name : int parser =
 
 type statement =
   | Datatype of (string * (string list * (string * typ) list))
-  | Definition of (string * typ * exp)
+  | Definition of (string * (typ * exp))
   | Assertion of (exp * exp)
 
 let statement_group : statement list parser =
@@ -841,8 +841,9 @@ let statement_group : statement list parser =
               in
               [ Definition
                   ( name
-                  , typ
-                  , Desugar.func_params ps body
+                  , ( typ
+                    , Desugar.func_params ps body
+                    )
                   )
               ]
             )

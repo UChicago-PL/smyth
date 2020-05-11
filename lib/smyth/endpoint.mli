@@ -4,6 +4,7 @@ type error =
   | EvalError of string
   | TimedOut of float
   | NoSolutions
+  | PartialNotSubsetFull
 
 type 'a response =
   ('a, error) result
@@ -30,7 +31,7 @@ type test_result =
 val test :
   specification:string ->
   sketch:string ->
-  assertions:string ->
+  examples:string ->
   test_result response
 
 val test_assertions :
@@ -38,3 +39,10 @@ val test_assertions :
   sketch:string ->
   assertions:((Lang.exp * Lang.exp) list) ->
   test_result response
+
+(* Assertion Info *)
+
+val assertion_info :
+  specification:string ->
+  assertions:string ->
+  (bool * Lang.exp list * Lang.exp) list response

@@ -106,6 +106,9 @@ let error : error -> string =
     | NoSolutions ->
         "No solutions"
 
+    | PartialNotSubsetFull ->
+        "Error: examples are not a subset of the specification"
+
 let test_result : test_result -> string =
   fun tr ->
     String.concat ","

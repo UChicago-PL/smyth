@@ -55,7 +55,7 @@ let listt : exp list -> typ list -> exp =
 
 type program =
   { datatypes : datatype_ctx
-  ; definitions : (string * typ * exp) list
+  ; definitions : (string * (typ * exp)) list
   ; assertions : (exp * exp) list
   ; main_opt : exp option
   }
@@ -64,13 +64,13 @@ let program : program -> exp * datatype_ctx =
   fun { datatypes; definitions; assertions; main_opt } ->
     ( Post_parse.exp
         ( List.fold_right
-            ( fun (name, the_typ, the_exp) ->
+            ( fun (name, (the_typ, the_exp)) ->
                 lett the_typ name the_exp
             )
             definitions
             ( List.fold_right
                 ( fun (e1, e2) ->
-                  lett (TTuple []) "_" (EAssert (e1, e2))
+                    lett (TTuple []) "_" (EAssert (e1, e2))
                 )
                 assertions
                 ( Option2.with_default (ETuple [])

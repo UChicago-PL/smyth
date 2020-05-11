@@ -13,7 +13,7 @@ val listt : exp list -> typ list -> exp
 
 type program =
   { datatypes : datatype_ctx
-  ; definitions : (string * typ * exp) list
+  ; definitions : (string * (typ * exp)) list
   ; assertions : (exp * exp) list
   ; main_opt : exp option
   }

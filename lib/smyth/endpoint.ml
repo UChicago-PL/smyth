@@ -4,6 +4,7 @@ type error =
   | EvalError of string
   | TimedOut of float
   | NoSolutions
+  | PartialNotSubsetFull
 
 type 'a response =
   ('a, error) result
@@ -196,11 +197,57 @@ let test_assertions ~specification ~sketch ~assertions =
   ; top_recursive_success
   }
 
-let test ~specification ~sketch ~assertions =
+let test ~specification ~sketch ~examples =
   let open Desugar in
-  assertions
+  examples
     |> parse_program
     |> Result.map
          (fun prog -> prog.assertions)
     |> Result2.and_then
          (fun a -> test_assertions ~specification ~sketch ~assertions:a)
+
+(* Assertion Info *)
+
+let extract_arg_list : Lang.exp -> Lang.exp list =
+  let rec helper acc =
+    function
+      | Lang.EApp (_, head, Lang.EAExp arg) ->
+          helper (arg :: acc) head
+
+      | _ ->
+          acc
+  in
+  helper []
+
+let assertion_info ~specification ~assertions =
+  let open Desugar in
+  let open Result2.Syntax in
+  let* full_assertions =
+    specification
+      |> parse_program
+      |> Result.map
+           (fun prog -> prog.assertions)
+  in
+  let* partial_assertions =
+    assertions
+      |> parse_program
+      |> Result.map
+           (fun prog -> prog.assertions)
+  in
+  let+ _ =
+    Result2.guard PartialNotSubsetFull
+      ( List.for_all
+          ( fun io ->
+              (List.find_opt ((=) io) full_assertions) <> None
+          )
+          partial_assertions
+      )
+  in
+  List.map
+    ( fun (input, output) ->
+        ( (List.find_opt ((=) (input, output)) partial_assertions) <> None
+        , extract_arg_list input
+        , output
+        )
+    )
+    full_assertions
