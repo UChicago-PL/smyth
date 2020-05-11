@@ -25,6 +25,7 @@ module FuelLimited = struct
       worlds
         |> List.map check_one
         |> Nondet.one_of_each
+        |> Nondet.take !Params.uneval_limiter
         |> Nondet.map Constraints.merge
         |> Nondet.collapse_option
 
