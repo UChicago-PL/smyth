@@ -26,7 +26,7 @@ let print_hf hf = debug @@ fun _ ->
              "??"
                ^ (string_of_int h)
                ^ ": "
-               ^ (Yojson.Safe.to_string @@ exp_to_yojson e)
+               ^ (Pretty.exp e)
          )
     |> String.concat "\n"
     |> println
@@ -103,3 +103,6 @@ let print_bind_spec b = debug @@ fun _ ->
       | Rec r -> "Rec(" ^ r ^ ")"
       | Arg a -> "Arg(" ^ a ^ ")"
       | Dec d -> "Dec(" ^ d ^ ")"
+
+let print_len xs = debug @@ fun _ ->
+  println (string_of_int @@ List.length xs)
