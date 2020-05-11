@@ -100,7 +100,7 @@ module FuelLimited = struct
           begin match r_head with
             | RFix (f_env, f, TypeParam type_param, body) ->
                 let f_env_extension =
-                    Pat.bind_rec_name_res f r_head
+                  Pat.bind_rec_name_res f r_head
                 in
                 let param_env_extension =
                   Env.add_type
