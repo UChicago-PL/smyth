@@ -246,8 +246,8 @@ let assertion_info ~specification ~assertions =
   List.map
     ( fun (input, output) ->
         ( (List.find_opt ((=) (input, output)) partial_assertions) <> None
-        , extract_arg_list input
-        , output
+        , extract_arg_list (Post_parse.exp input)
+        , Post_parse.exp output
         )
     )
     full_assertions

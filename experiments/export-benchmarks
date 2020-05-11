@@ -1,0 +1,82 @@
+#!/bin/bash
+
+group() {
+  echo ""
+  echo "$1_benchmarks = \\"
+  echo "  ["
+}
+
+one() {
+  name=$1
+  shift
+  echo "(\"$name\", $*,"
+  ../smyth assertion-export \
+    ../suites/no-sketch/specifications/$name.elm \
+    ../suites/no-sketch/examples/$name.elm
+  echo "    )"
+}
+
+first() {
+  echo -n "    "
+  one $1 $2
+}
+
+rest() {
+  echo -n "  , "
+  one $1 $2
+}
+
+end_group() {
+  echo "  ]"
+}
+
+group bool
+first bool_band '["Boolean"], [("p", "Boolean"), ("q", "Boolean")], "Boolean"'
+rest bool_bor '["Boolean"], [("p", "Boolean"), ("q", "Boolean")], "Boolean"'
+rest bool_impl '["Boolean"], [("p", "Boolean"), ("q", "Boolean")], "Boolean"'
+rest bool_neg '["Boolean"], [("p", "Boolean")], "Boolean"'
+rest bool_xor '["Boolean"], [("p", "Boolean"), ("q", "Boolean")], "Boolean"'
+end_group
+
+group list
+first list_append '["Nat", "NatList"], [("xs", "NatList"), ("ys", "NatList")], "NatList"'
+rest list_compress '["Nat", "NatList", "Cmp", "nat_compare"], [("xs", "NatList")], "NatList"'
+rest list_concat '["Nat", "NatList", "NatListList", "list_append"], [("xss", "NatListList")], "NatList"'
+rest list_drop '["Nat", "NatList"], [("xs", "NatList"), ("n", "Nat")], "NatList"'
+rest list_even_parity '["Boolean", "BooleanList"], [("xs", "BooleanList")], "Boolean"'
+rest list_hd '["Nat", "NatList"], [("xs", "NatList")], "Nat"'
+rest list_inc '["Nat", "NatList", "list_map"], [("xs", "NatList")], "NatList"'
+rest list_last '["Nat", "NatList", "NatOpt"], [("xs", "NatList")], "NatOpt"'
+rest list_length '["Nat", "NatList"], [("xs", "NatList")], "Nat"'
+rest list_nth '["Nat", "NatList"], [("xs", "NatList"), ("n", "Nat")], "Nat"'
+rest list_pairwise_swap '["Nat", "NatList"], [("xs", "NatList")], "NatList"'
+rest list_rev_append '["Nat", "NatList", "list_append"], [("l1", "NatList"), ("l2", "NatList")], "NatList"'
+rest list_rev_fold '["Nat", "NatList", "list_fold", "list_snoc"], [("xs", "NatList")], "NatList"'
+rest list_rev_snoc '["Nat", "NatList", "list_snoc"], [("xs", "NatList")], "NatList"'
+rest list_rev_tailcall '["Nat", "NatList"], [("xs", "NatList"), ("acc", "NatList")], "NatList"'
+rest list_snoc '["Nat", "NatList"], [("xs", "NatList"), ("n", "Nat")], "NatList"'
+rest list_sort_sorted_insert '["Nat", "NatList", "Cmp", "nat_compare", "list_insert"], [("xs", "NatList")], "NatList"'
+rest list_sorted_insert '["Nat", "NatList", "Cmp", "nat_compare"], [("xs", "NatList"), ("n", "Nat")], "NatList"'
+rest list_stutter '["Nat", "NatList"], [("xs", "NatList")], "NatList"'
+rest list_sum '["Nat", "NatList", "list_fold", "nat_add"], [("xs", "NatList")], "Nat"'
+rest list_take '["Nat", "NatList"], [("n", "Nat"), ("xs", "NatList")], "NatList"'
+rest list_tl '["Nat", "NatList"], [("xs", "NatList")], "NatList"'
+end_group
+
+group nat
+first nat_iseven '["Nat", "Boolean"], [("n", "Nat")], "Boolean"'
+rest nat_max '["Nat", "Boolean", "Cmp", "nat_compare"], [("n1", "Nat"), ("n2", "Nat")], "Nat"'
+rest nat_pred '["Nat"], [("n", "Nat")], "Nat"'
+rest nat_add '["Nat"], [("in1", "Nat"), ("in2", "Nat")], "Nat"'
+end_group
+
+group tree
+first tree_binsert '["Nat", "NatTree", "Cmp", "nat_compare"], [("t", "NatTree"), ("n", "Nat")], "NatTree"'
+rest tree_collect_leaves '["Boolean", "BooleanTree", "BooleanList", "boolean_list_append"], [("t", "BooleanTree")], "BooleanList"'
+rest tree_count_leaves '["Nat", "Boolean", "BooleanTree", "nat_add"], [("t", "BooleanTree")], "Nat"'
+rest tree_count_nodes '["Nat", "NatTree", "nat_add"], [("t", "NatTree")], "Nat"'
+rest tree_inorder '["Nat", "NatList", "NatTree", "list_append"], [("t", "NatTree")], "NatList"'
+rest tree_nodes_at_level '["Nat", "Boolean", "BooleanTree"], [("t", "BooleanTree"), ("n", "Nat")], "Nat"'
+rest tree_postorder '["Nat", "NatList", "NatTree", "list_append"], [("t", "NatTree")], "NatList"'
+rest tree_preorder '["Nat", "NatList", "NatTree", "list_append"], [("t", "NatTree")], "NatList"'
+end_group
