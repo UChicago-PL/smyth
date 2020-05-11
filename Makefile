@@ -1,6 +1,9 @@
 build:
 	dune build src/main.exe
 
+bc:
+	dune build src/main.bc
+
 serve:
 	make build && python3 serve.py
 
