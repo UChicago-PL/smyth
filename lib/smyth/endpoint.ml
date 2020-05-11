@@ -24,6 +24,7 @@ type solve_result =
 let synthesis_pipeline delta sigma assertions =
   assertions
     |> Uneval.simplify_assertions delta sigma
+    |> (fun x -> Uneval.minimal_uneval := true; x)
     |> Solve.solve_any delta sigma
 
 let solve_program : Desugar.program -> solve_result response =
