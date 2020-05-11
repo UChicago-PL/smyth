@@ -20,7 +20,7 @@ let uneval_case_budget : int ref =
   ref 10
 
 let uneval_limiter : int ref =
-  ref 10
+  ref 100
 
 let max_total_time : float ref =
   ref 20.0

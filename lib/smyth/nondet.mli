@@ -36,6 +36,8 @@ val dedup : 'a t -> 'a t
 val collapse_option : ('a option) t -> 'a t
 val take : int -> 'a t -> 'a t
 
+val curb_overflow : int -> 'a t -> 'a t
+
 (* Lifting *)
 
 val lift_option : 'a option -> 'a t

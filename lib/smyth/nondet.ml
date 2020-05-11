@@ -63,6 +63,12 @@ let collapse_option =
 let take =
   List2.take
 
+let curb_overflow n xs =
+  if List.compare_length_with xs n > 0 then
+    none
+  else
+    xs
+
 (* Lifting *)
 
 let lift_option op =
