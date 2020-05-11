@@ -5,15 +5,17 @@ import glob
 import os
 import csv
 
-if len(sys.argv) != 2:
-    print("usage:", sys.argv[0], "<experiment-name>")
+if len(sys.argv) != 3 or (sys.argv[1] != "nosketch" and sys.argv[1] != "sketch"):
+    print("usage:", sys.argv[0], "<nosketch|sketch> <experiment-name>")
     sys.exit(1)
 
-experiment = sys.argv[1]
+has_sketch = sys.argv[1] == "sketch"
 
-prefix = ""
-if experiment == "exp-3b":
-    prefix = "1+"
+experiment = sys.argv[2]
+
+prefix = "1+" if has_sketch else ""
+
+p_col = 2 if has_sketch else 1
 
 def show_k(k):
     if k:
@@ -38,7 +40,7 @@ for filename in glob.glob("data/" + experiment + "/csv/*.csv"):
         for row in reader:
             kMax += 1
             k = int(row[0])
-            p = float(row[1])
+            p = float(row[p_col])
             if p < 0.5:
                 k50 = k
             if p < 0.9:

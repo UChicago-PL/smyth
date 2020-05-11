@@ -10,5 +10,5 @@ fi
 ./plot exp-2b
 ./plot exp-3b
 
-./analyze exp-2b > data/exp-2b/analysis.csv
-./analyze exp-3b > data/exp-3b/analysis.csv
+./analyze nosketch exp-2b > data/exp-2b/analysis.csv
+./analyze sketch exp-3b > data/exp-3b/analysis.csv
