@@ -37,8 +37,94 @@ let match_char =
   'y'
 
 (*******************************************************************************
+ * Polymorphic helpers
+ *)
+
+let simple_types : datatype_ctx -> type_ctx -> typ Nondet.t =
+  fun sigma gamma ->
+    let polymorphic_variables =
+      gamma
+        |> Type_ctx.all_poly
+        |> List.map (fun x -> TVar x)
+    in
+    (* Uncomment for monomorphic instantiations *)
+    (*
+    let monomorphic_datatypes =
+      sigma
+        |> List2.concat_map
+             ( fun (_name, (type_params, _)) ->
+                 if type_params = [] then
+                   [TData (name, [])]
+                 else
+                   []
+             )
+    in
+    *)
+    let rank_zero_nd =
+      Nondet.from_list
+        ( polymorphic_variables
+            (* @ monomorphic_datatypes *)
+        )
+    in
+    let datatypes_nd =
+      let* (datatype_name, datatype_params) =
+        sigma
+          |> List.map
+               ( fun (name, (type_params, _)) ->
+                   ( name
+                   ,   type_params
+                   )
+               )
+          |> Nondet.from_list
+      in
+      datatype_params
+        |> List.map (fun _ -> rank_zero_nd)
+        |> Nondet.one_of_each
+        |> Nondet.map
+             ( fun args ->
+                 TData (datatype_name, args)
+             )
+    in
+    Nondet.union
+      [ Nondet.from_list polymorphic_variables
+      ; datatypes_nd
+      ]
+
+let instantiations :
+ datatype_ctx -> type_ctx -> string -> typ -> (typ * exp) Nondet.t =
+  fun sigma gamma name tau ->
+    match Type.peel_forall tau with
+      | ([], _) ->
+          Nondet.pure
+            ( tau
+            , EVar name
+            )
+
+      | (params, bound_type) ->
+          let simple_types_nd =
+            simple_types sigma gamma
+          in
+          params
+            |> List.map (fun _ -> simple_types_nd)
+            |> Nondet.one_of_each
+            |> Nondet.map
+                 ( fun args ->
+                     ( Type.substitute_many
+                         ~bindings:(List.combine params args)
+                         bound_type
+                     , Desugar.app
+                         (EVar name)
+                         ( List.map
+                             (fun a -> EAType a)
+                             args
+                         )
+                     )
+                 )
+
+(*******************************************************************************
  * Term permission helpers
  *)
+
 
 type term_permission =
   | Must
@@ -244,11 +330,18 @@ and rel_gen_e_app
     let* arg_type =
       gamma
         |> Type_ctx.all_type
-        |> List.filter_map
-             ( fun (_, (tau, _)) ->
-                 Type.domain_of_codomain ~codomain:goal_type tau
+        |> List.map
+             ( fun (name, (tau, _)) ->
+                 let* (specialized_tau, _) =
+                   instantiations sigma gamma name tau
+                 in
+                 Nondet.lift_option
+                   ( Type.domain_of_codomain
+                       ~codomain:goal_type
+                       specialized_tau
+                   )
              )
-        |> Nondet.from_list
+        |> Nondet.union
     in
     let* partition =
       Nondet.from_list @@
@@ -332,36 +425,7 @@ and rel_gen_e
     match term_size with
       | 1 ->
           let* (specialized_type, specialized_exp) =
-            match Type.peel_forall rel_type with
-              | ([], _) ->
-                  Nondet.pure
-                    ( rel_type
-                    , EVar rel_name
-                    )
-
-              | (params, bound_type) ->
-                  let base_type_args_nd =
-                    gamma
-                      |> Type_ctx.all_poly
-                      |> List.map (fun x -> TVar x)
-                      |> Nondet.from_list
-                  in
-                  params
-                    |> List.map (fun _ -> base_type_args_nd)
-                    |> Nondet.one_of_each
-                    |> Nondet.map
-                         ( fun args ->
-                             ( Type.substitute_many
-                                 ~bindings:(List.combine params args)
-                                 bound_type
-                             , Desugar.app
-                                 (EVar rel_name)
-                                 ( List.map
-                                     (fun a -> EAType a)
-                                     args
-                                 )
-                             )
-                         )
+            instantiations sigma gamma rel_name rel_type
           in
           if
             Type.matches goal_type specialized_type
