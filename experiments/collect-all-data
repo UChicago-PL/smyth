@@ -14,5 +14,5 @@ mv summaries/*.txt summaries-backup 2> /dev/null
 ./exp-3a | tee summaries/3a.txt
 ./exp-3b $1 | tee summaries/3b.txt
 
-./exp-5a | tee summaries/5a.txt
 ./exp-6a | tee summaries/6a.txt
+./exp-7a | tee summaries/7a.txt
