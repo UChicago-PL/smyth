@@ -1,0 +1,28 @@
+Experiment 3a
+% N = 5
+list_append.elm,0.016253,6,1,false,true
+list_concat.elm,0.018112,6,1,true,true
+list_drop.elm,0.0092876,11,2,false,true
+list_filter.elm,0.0725136,8,3,true,true
+list_fold.elm,1.4903884,9,3,true,true
+list_last.elm,0.005946,6,2,true,true
+list_length.elm,0.0043494,3,1,false,true
+list_map.elm,0.3361736,8,2,false,true
+list_nth.elm,0.0094928,13,2,false,true
+list_rev_append.elm,0.0536292,5,2,true,true
+list_rev_snoc.elm,0.0570966,5,1,false,true
+list_rev_tailcall.elm,0.0171078,8,1,false,true
+list_snoc.elm,0.0075956,8,1,false,true
+list_sort_sorted_insert.elm,0.0509014,7,1,false,true
+list_sorted_insert.elm,0.1312656,12,7,true,true
+list_stutter.elm,0.0055458,3,1,true,true
+list_take.elm,0.0170544,12,3,true,true
+nat_add.elm,0.0078708,9,1,false,true
+nat_iseven.elm,0.0031522,4,2,false,true
+nat_max.elm,0.037448,9,4,true,true
+tree_collect_leaves.elm,0.0247738,6,2,false,true
+tree_count_leaves.elm,0.0836304,7,1,false,true
+tree_count_nodes.elm,0.07964,6,2,true,true
+tree_inorder.elm,0.026797,5,2,true,true
+tree_map.elm,0.8422268,7,3,true,true
+tree_preorder.elm,0.0295516,5,2,true,true

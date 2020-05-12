@@ -1,0 +1,7 @@
+bool_neg
+timeout,1.0
+trial count,50
+example count,top success percent,top recursive success percent
+0,0.0000,0.0000
+1,0.0000,0.0000
+2,1.0000,0.0000

@@ -1,0 +1,24 @@
+Experiment 5a
+% N = 5
+list_append.elm,0.0096688,6,3,true,true
+list_concat.elm,0.0150366,6,3,true,true
+list_drop.elm,0.0259562,11,4,true,true
+list_filter.elm,0.1031294,8,4,true,true
+list_fold.elm,0.981828,9,2,true,true
+list_last.elm,0.00799,6,3,true,true
+list_length.elm,0.0063092,3,3,true,true
+list_map.elm,0.6765222,8,2,true,true
+list_rev_append.elm,0.0508502,5,2,true,true
+list_rev_fold.elm,0.1582582,5,2,true,false
+list_rev_snoc.elm,0.0091694,5,2,true,true
+list_rev_tailcall.elm,0.0073404,8,2,true,true
+list_snoc.elm,0.0079256,8,2,true,true
+list_stutter.elm,0.0034916,3,2,true,true
+list_take.elm,0.019178,12,3,true,true
+list_tl.elm,0.003359,3,2,true,false
+tree_collect_leaves.elm,0.0417706,6,3,true,true
+tree_count_leaves.elm,1.0783108,7,3,true,true
+tree_count_nodes.elm,0.1411674,6,3,true,true
+tree_inorder.elm,0.0410822,5,3,true,true
+tree_map.elm,1.5613772,7,3,true,true
+tree_preorder.elm,0.0542876,5,3,true,true

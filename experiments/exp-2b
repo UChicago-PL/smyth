@@ -20,6 +20,7 @@ run() {
     echo "completed."
   else
     echo "failed!"
+  fi
 }
 
 run 1 bool_band
