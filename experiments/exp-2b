@@ -19,7 +19,14 @@ run() {
   if [ $? -eq 0 ]; then
     echo "completed."
   else
-    echo "failed!"
+    echo "failed! Trying again:"
+    echo -n "(2b; N=$trial_count; t=$1) Running $2... "
+    ../fuzz $trial_count $1 no-sketch $2 > data/exp-2b/csv/$2.csv
+    if [ $? -eq 0 ]; then
+      echo "completed."
+    else
+      echo "failed again! Moving on..."
+    fi
   fi
 }
 
