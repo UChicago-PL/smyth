@@ -5,8 +5,8 @@ open Smyth
 let forge_solution_count : int =
   3
 
-let suite_test_n : int =
-  5
+let suite_test_n : int ref =
+  ref 10
 
 (* Information *)
 
@@ -162,20 +162,24 @@ let command_arguments : command -> (string * string) list =
 type prog_option =
   | Debug
   | MaxTotalTime
+  | Replications
 
 let prog_options : prog_option list =
-  [ Debug; MaxTotalTime ]
+  [ Debug; MaxTotalTime; Replications ]
 
 let prog_option_name : prog_option -> string =
   function
     | Debug -> "debug"
     | MaxTotalTime -> "timeout"
+    | Replications -> "replications"
 
 let prog_option_from_name : string -> prog_option option =
-  function
-    | "debug" -> Some Debug
-    | "timeout" -> Some MaxTotalTime
-    | _ -> None
+  fun name ->
+    List.find_opt
+      ( fun p ->
+          String.equal (prog_option_name p) name
+      )
+      prog_options
 
 let prog_option_info : prog_option -> string * string * string list =
   function
@@ -188,7 +192,13 @@ let prog_option_info : prog_option -> string * string * string list =
     | MaxTotalTime ->
         ( "Set maximum total time allowed per synthesis request"
         , Float2.to_string !Params.max_total_time
-        , ["<positive-number>"]
+        , ["<positive-float>"]
+        )
+
+    | Replications ->
+        ( "Set the number of replications for a suite test"
+        , string_of_int !suite_test_n
+        , ["<positive-integer>"]
         )
 
 let prog_option_action : prog_option -> string -> bool =
@@ -203,7 +213,23 @@ let prog_option_action : prog_option -> string -> bool =
 
       | MaxTotalTime ->
           begin match float_of_string_opt value with
-            | Some timeout -> (Params.max_total_time := timeout; true)
+            | Some timeout ->
+                if timeout > 0.0 then
+                  (Params.max_total_time := timeout; true)
+                else
+                  false
+
+            | None -> false
+          end
+
+      | Replications ->
+          begin match int_of_string_opt value with
+            | Some replications ->
+                if replications > 0 then
+                  (suite_test_n := replications; true)
+                else
+
+                  false
             | None -> false
           end
 
@@ -262,7 +288,7 @@ let available_options =
                  String.concat "|" possibles
                in
                Printf.sprintf
-                 "  %-12s(%s) %s. Default: %s"
+                 "  %-20s(%s) %s. Default: %s"
                  name
                  possible_string
                  description
@@ -441,14 +467,14 @@ let () =
         let benchmark_names =
           Io2.visible_files (Io2.path [suite_path ; "sketches"])
         in
-        print_endline ("% N = " ^ string_of_int suite_test_n);
+        print_endline ("% Replications = " ^ string_of_int !suite_test_n);
         benchmark_names
           |> List.iter
                ( fun name ->
                    let output =
                      begin match
                        Result2.sequence @@
-                         List.init suite_test_n
+                         List.init !suite_test_n
                            ( fun _ ->
                                Endpoint.test
                                  ~specification:
