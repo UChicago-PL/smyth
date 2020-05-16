@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [[ $# -ne 0 ]]; then
+  echo "usage:" $0
+  exit 1
+fi
+
+echo "Experiment 1"
+../smyth suite-test ../suites/myth
