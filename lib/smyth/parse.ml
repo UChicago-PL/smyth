@@ -635,12 +635,16 @@ and ground_exp' : unit -> exp parser =
               |= lazily ground_exp'
           )
 
+      (* Don't allow user hole names (so each hole name appears at most
+       * once in a program) for type checking.
+       *)
       ; in_context CEHole
-          ( ignore_with (EHole Fresh.unused)
-              (symbol hole)
-              (* Don't allow user hole names (so each hole name appears at most
-               * once in a program)
-               *)
+          ( succeed (fun name -> EHole name)
+              |. symbol hole
+              |= one_of
+                   [ (* Bark.int ExpectingHoleName
+                   ; *) succeed Fresh.unused
+                   ]
           )
 
       ; in_context CELambda
