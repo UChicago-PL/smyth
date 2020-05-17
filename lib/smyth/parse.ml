@@ -573,10 +573,7 @@ and ground_exp' : unit -> exp parser =
                   |. check_indent Strict
                   |= constructor_name
                   |. sspaces
-                  |= one_of
-                       [ pat
-                       ; succeed (PTuple [])
-                       ]
+                  |= pat
                   |. sspaces
                   |. symbol right_arrow
                   |. sspaces
@@ -791,11 +788,12 @@ let statement_group : statement list parser =
         ; in_context CSAssertion
             ( succeed (fun e1 e2 -> [Assertion (e1, e2)])
                 |. keyword assert_keyword
+                |. sspaces
                 |= exp
                 |. sspaces
                 |. symbol double_equals
                 |. sspaces
-                |= exp
+                |= ground_exp
             )
 
         ; in_context CSFuncSpec

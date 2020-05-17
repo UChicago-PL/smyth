@@ -26,7 +26,7 @@ let print_hf hf = debug @@ fun _ ->
              "??"
                ^ (string_of_int h)
                ^ ": "
-               ^ (Pretty.exp e)
+               ^ Yojson.Safe.to_string (exp_to_yojson e)
          )
     |> String.concat "\n"
     |> println

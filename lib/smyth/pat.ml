@@ -33,7 +33,16 @@ let rec bind_res : pat -> res -> env option =
                   None
 
             | _ ->
-                None
+                let len =
+                  List.length ps
+                in
+                ps
+                  |> List.mapi
+                       ( fun i_ p ->
+                           bind_res p (RProj (len, i_ + 1, r))
+                       )
+                  |> Option2.sequence
+                  |> Option2.map Env.concat
           end
 
       | PWildcard ->
