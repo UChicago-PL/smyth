@@ -1,18 +1,18 @@
 open Smyth
 
-(* References *)
-
-type ('a, 'b) reference =
-  { function_name : string
-  ; k_max : int
-  ; d_in : 'a Denotation.t
-  ; d_out : 'b Denotation.t
-  ; input : 'a Sample2.gen
-  ; base_case : 'a Sample2.gen option
-  ; func : 'a -> 'b
-  }
-
 (* Helpers *)
+
+let rec list_compress : 'a list -> 'a list =
+  fun xs ->
+    match xs with
+      | a :: b :: rest ->
+          if a = b then
+            list_compress (b :: rest)
+          else
+            a :: list_compress (b :: rest)
+
+      | _ ->
+          xs
 
 let rec list_even_parity : bool list -> bool =
   fun bs ->
@@ -54,42 +54,26 @@ let rec list_sorted_insert : 'a -> 'a list -> 'a list =
           else
             head :: (list_sorted_insert y tail)
 
-(* Benchmarks *)
+(* References *)
 
-let make_benchmark :
- int -> ('a, 'b) reference -> unit -> (Lang.exp * Lang.exp) list list list =
-  fun n { function_name; k_max; d_in; d_out; input; base_case; func } () ->
-    List.map
-      ( fun k ->
-          List.map
-            ( List.map
-                ( fun (input, output) ->
-                  let args =
-                    match d_in input with
-                      | Lang.ECtor ("args", [], Lang.ETuple args) ->
-                          args
+type ('i, 'o) reference =
+  { function_name : string
+  ; k_max : int
+  ; d_in : 'i Denotation.t
+  ; d_out : 'o Denotation.t
+  ; input : 'i Sample2.gen
+  ; base_case : 'i Sample2.gen option
+  ; func : 'i -> 'o
+  }
 
-                      | arg ->
-                          [arg]
-                    in
-                    ( Desugar.app
-                        (Lang.EVar function_name)
-                        (List.map (fun e -> Lang.EAExp e) args)
-                    , d_out output
-                    )
-                )
-            )
-            ( Sample2.io_trial n k func input base_case
-            )
-      )
-      ( List2.range ~low:0 ~high:k_max
-      )
+type 'a reference_projection =
+  { proj : 'i 'o . ('i, 'o) reference -> 'a
+  }
 
-let benchmarks :
- int -> (string * (unit -> (Lang.exp * Lang.exp) list list list)) list =
-  fun trial_count ->
+let all : 'a reference_projection -> (string * 'a) list =
+  fun { proj } ->
     [ ( "bool_band"
-      , make_benchmark trial_count
+      , proj
           { function_name = "and"
           ; k_max = 4
           ; d_in = Denotation.args2 Denotation.bool Denotation.bool
@@ -105,7 +89,7 @@ let benchmarks :
           }
       )
     ; ( "bool_bor"
-      , make_benchmark trial_count
+      , proj
           { function_name = "or"
           ; k_max = 4
           ; d_in = Denotation.args2 Denotation.bool Denotation.bool
@@ -121,7 +105,7 @@ let benchmarks :
           }
       )
     ; ( "bool_impl"
-      , make_benchmark trial_count
+      , proj
           { function_name = "impl"
           ; k_max = 4
           ; d_in = Denotation.args2 Denotation.bool Denotation.bool
@@ -137,7 +121,7 @@ let benchmarks :
           }
       )
     ; ( "bool_neg"
-      , make_benchmark trial_count
+      , proj
           { function_name = "neg"
           ; k_max = 2
           ; d_in = Denotation.bool
@@ -153,7 +137,7 @@ let benchmarks :
           }
       )
     ; ( "bool_xor"
-      , make_benchmark trial_count
+      , proj
           { function_name = "xor"
           ; k_max = 4
           ; d_in = Denotation.args2 Denotation.bool Denotation.bool
@@ -169,7 +153,7 @@ let benchmarks :
           }
       )
     ; ( "list_append"
-      , make_benchmark trial_count
+      , proj
           { function_name = "append"
           ; k_max = 20
           ; d_in =
@@ -187,8 +171,24 @@ let benchmarks :
               f
           }
       )
+    ; ( "list_compress"
+      , proj
+          { function_name = "compress"
+          ; k_max = 20
+          ; d_in = Denotation.list Denotation.int
+          ; d_out = Denotation.list Denotation.int
+          ; input = Sample2.nat_list
+          ; base_case = Some (Sample2.constant [])
+          ; func =
+              let f : int list -> int list =
+                fun xs ->
+                  list_compress xs
+              in
+              f
+          }
+      )
     ; ( "list_concat"
-      , make_benchmark trial_count
+      , proj
           { function_name = "concat"
           ; k_max = 20
           ; d_in = Denotation.nested_list Denotation.int
@@ -204,7 +204,7 @@ let benchmarks :
           }
       )
     ; ( "list_drop"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listDrop"
           ; k_max = 20
           ; d_in =
@@ -221,7 +221,7 @@ let benchmarks :
           }
       )
     ; ( "list_even_parity"
-      , make_benchmark trial_count
+      , proj
           { function_name = "evenParity"
           ; k_max = 15
           ; d_in = Denotation.list Denotation.bool
@@ -236,8 +236,69 @@ let benchmarks :
               f
           }
       )
+    ; ( "list_filter"
+      , proj
+          { function_name = "listFilter"
+          ; k_max = 15
+          ; d_in =
+              Denotation.args2
+                Denotation.var
+                (Denotation.list Denotation.int)
+          ; d_out = Denotation.list Denotation.int
+          ; input =
+              Sample2.pair
+                (Sample2.from ("isEven", ["isNonzero"]))
+                Sample2.nat_list
+          ; base_case = Some (Sample2.constant ("isEven", []))
+          ; func =
+              let f : string * int list -> int list =
+                fun (fname, xs) ->
+                  let pred =
+                    match fname with
+                      | "isEven" -> fun x -> x mod 2 = 0
+                      | "isNonzero" -> fun x -> x <> 0
+                      | _ -> failwith ("Unknown Myth built-in '" ^ fname ^ "'")
+                  in
+                  List.filter pred xs
+              in
+              f
+          }
+      )
+    ; ( "list_fold"
+      , proj
+          { function_name = "listFold"
+          ; k_max = 15
+          ; d_in =
+              Denotation.args3
+                Denotation.var
+                Denotation.int
+                (Denotation.list Denotation.int)
+          ; d_out = Denotation.int
+          ; input =
+              Sample2.triple
+                (Sample2.from ("sum", ["countOdd"]))
+                Sample2.nat
+                Sample2.nat_list
+          ; base_case = Some (Sample2.constant ("sum", 0, []))
+          ; func =
+              let f : string * int * int list -> int =
+                fun (fname, acc, xs) ->
+                  let folder =
+                    match fname with
+                      | "sum" ->
+                          fun x y -> x + y
+                      | "countOdd" ->
+                          fun a x -> if x mod 2 = 1 then a + 1 else a
+                      | _ ->
+                          failwith ("Unknown Myth built-in '" ^ fname ^ "'")
+                  in
+                  List.fold_left folder acc xs
+              in
+              f
+          }
+      )
     ; ( "list_hd"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listHead"
           ; k_max = 10
           ; d_in = Denotation.list Denotation.int
@@ -258,7 +319,7 @@ let benchmarks :
           }
       )
     ; ( "list_inc"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listInc"
           ; k_max = 10
           ; d_in = Denotation.list Denotation.int
@@ -274,7 +335,7 @@ let benchmarks :
           }
       )
     ; ( "list_last"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listLast"
           ; k_max = 20
           ; d_in = Denotation.list Denotation.int
@@ -298,7 +359,7 @@ let benchmarks :
           }
       )
     ; ( "list_length"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listLength"
           ; k_max = 5
           ; d_in = Denotation.list Denotation.int
@@ -313,8 +374,36 @@ let benchmarks :
               f
           }
       )
+    ; ( "list_map"
+      , proj
+          { function_name = "listMap"
+          ; k_max = 15
+          ; d_in =
+              Denotation.args2
+                Denotation.var
+                (Denotation.list Denotation.int)
+          ; d_out = Denotation.list Denotation.int
+          ; input =
+              Sample2.pair
+                (Sample2.from ("inc", ["zero"]))
+                Sample2.nat_list
+          ; base_case = Some (Sample2.constant ("inc", []))
+          ; func =
+              let f : string * int list -> int list =
+                fun (fname, xs) ->
+                  let mapper =
+                    match fname with
+                      | "inc" -> fun x -> x + 1
+                      | "zero" -> fun _ -> 0
+                      | _ -> failwith ("Unknown Myth built-in '" ^ fname ^ "'")
+                  in
+                  List.map mapper xs
+              in
+              f
+          }
+      )
     ; ( "list_nth"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listNth"
           ; k_max = 20
           ; d_in =
@@ -339,7 +428,7 @@ let benchmarks :
           }
       )
     ; ( "list_pairwise_swap"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listPairwiseSwap"
           ; k_max = 20
           ; d_in = Denotation.list Denotation.int
@@ -360,7 +449,7 @@ let benchmarks :
           }
       )
     ; ( "list_rev_append"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listRevAppend"
           ; k_max = 15
           ; d_in = Denotation.list Denotation.int
@@ -376,7 +465,7 @@ let benchmarks :
           }
       )
     ; ( "list_rev_fold"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listRevFold"
           ; k_max = 15
           ; d_in = Denotation.list Denotation.int
@@ -392,7 +481,7 @@ let benchmarks :
           }
       )
     ; ( "list_rev_snoc"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listRevSnoc"
           ; k_max = 15
           ; d_in = Denotation.list Denotation.int
@@ -408,7 +497,7 @@ let benchmarks :
           }
       )
     ; ( "list_rev_tailcall"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listRevTailcall"
           ; k_max = 20
           ; d_in =
@@ -432,7 +521,7 @@ let benchmarks :
           }
       )
     ; ( "list_snoc"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listSnoc"
           ; k_max = 20
           ; d_in =
@@ -449,7 +538,7 @@ let benchmarks :
           }
       )
     ; ( "list_sort_sorted_insert"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listSortSortedInsert"
           ; k_max = 20
           ; d_in = Denotation.list Denotation.int
@@ -465,7 +554,7 @@ let benchmarks :
           }
       )
     ; ( "list_sorted_insert"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listSortedInsert"
           ; k_max = 20
           ; d_in =
@@ -482,7 +571,7 @@ let benchmarks :
           }
       )
     ; ( "list_stutter"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listStutter"
           ; k_max = 10
           ; d_in = Denotation.list Denotation.int
@@ -503,7 +592,7 @@ let benchmarks :
           }
       )
     ; ( "list_sum"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listSum"
           ; k_max = 10
           ; d_in = Denotation.list Denotation.int
@@ -519,7 +608,7 @@ let benchmarks :
           }
       )
     ; ( "list_take"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listTake"
           ; k_max = 20
           ; d_in =
@@ -536,7 +625,7 @@ let benchmarks :
           }
       )
     ; ( "list_tl"
-      , make_benchmark trial_count
+      , proj
           { function_name = "listTail"
           ; k_max = 10
           ; d_in = Denotation.list Denotation.int
@@ -557,7 +646,7 @@ let benchmarks :
           }
       )
     ; ( "nat_iseven"
-      , make_benchmark trial_count
+      , proj
           { function_name = "isEven"
           ; k_max = 4
           ; d_in = Denotation.int
@@ -578,7 +667,7 @@ let benchmarks :
           }
       )
     ; ( "nat_max"
-      , make_benchmark trial_count
+      , proj
           { function_name = "natMax"
           ; k_max = 15
           ; d_in = Denotation.args2 Denotation.int Denotation.int
@@ -597,7 +686,7 @@ let benchmarks :
           }
       )
     ; ( "nat_pred"
-      , make_benchmark trial_count
+      , proj
           { function_name = "natPred"
           ; k_max = 4
           ; d_in = Denotation.int
@@ -616,7 +705,7 @@ let benchmarks :
           }
       )
     ; ( "nat_add"
-      , make_benchmark trial_count
+      , proj
           { function_name = "natAdd"
           ; k_max = 9
           ; d_in = Denotation.args2 Denotation.int Denotation.int
@@ -632,7 +721,7 @@ let benchmarks :
           }
       )
     ; ( "tree_binsert"
-      , make_benchmark trial_count
+      , proj
           { function_name = "treeBInsert"
           ; k_max = 20
           ; d_in =
@@ -649,7 +738,7 @@ let benchmarks :
           }
       )
     ; ( "tree_collect_leaves"
-      , make_benchmark trial_count
+      , proj
           { function_name = "treeCollectLeaves"
           ; k_max = 20
           ; d_in = Denotation.tree Denotation.bool
@@ -665,7 +754,7 @@ let benchmarks :
           }
       )
     ; ( "tree_count_leaves"
-      , make_benchmark trial_count
+      , proj
           { function_name = "treeCountLeaves"
           ; k_max = 15
           ; d_in = Denotation.tree Denotation.bool
@@ -681,7 +770,7 @@ let benchmarks :
           }
       )
     ; ( "tree_count_nodes"
-      , make_benchmark trial_count
+      , proj
           { function_name = "treeCountNodes"
           ; k_max = 15
           ; d_in = Denotation.tree Denotation.int
@@ -697,7 +786,7 @@ let benchmarks :
           }
       )
     ; ( "tree_inorder"
-      , make_benchmark trial_count
+      , proj
           { function_name = "treeInOrder"
           ; k_max = 15
           ; d_in = Denotation.tree Denotation.int
@@ -712,8 +801,36 @@ let benchmarks :
               f
           }
       )
+    ; ( "tree_map"
+      , proj
+          { function_name = "treeMap"
+          ; k_max = 15
+          ; d_in =
+              Denotation.args2
+                Denotation.var
+                (Denotation.tree Denotation.int)
+          ; d_out = Denotation.tree Denotation.int
+          ; input =
+              Sample2.pair
+                (Sample2.from ("div2", ["inc"]))
+                Sample2.nat_tree
+          ; base_case = Some (Sample2.constant ("div2", Tree2.Leaf))
+          ; func =
+              let f : string * int Tree2.t -> int Tree2.t =
+                fun (fname, t) ->
+                  let mapper =
+                    match fname with
+                      | "div2" -> fun x -> x / 2
+                      | "inc" -> fun x -> x + 1
+                      | _ -> failwith ("Unknown Myth built-in '" ^ fname ^ "'")
+                  in
+                  Tree2.map mapper t
+              in
+              f
+          }
+      )
     ; ( "tree_nodes_at_level"
-      , make_benchmark trial_count
+      , proj
           { function_name = "treeNodesAtLevel"
           ; k_max = 20
           ; d_in =
@@ -730,7 +847,7 @@ let benchmarks :
           }
       )
     ; ( "tree_postorder"
-      , make_benchmark trial_count
+      , proj
           { function_name = "treePostorder"
           ; k_max = 20
           ; d_in = Denotation.tree Denotation.int
@@ -746,7 +863,7 @@ let benchmarks :
           }
       )
     ; ( "tree_preorder"
-      , make_benchmark trial_count
+      , proj
           { function_name = "treePreorder"
           ; k_max = 15
           ; d_in = Denotation.tree Denotation.int

@@ -1,0 +1,17 @@
+specifyFunction treeInOrder
+  [ (Leaf, [])
+  , (Node (Leaf, 2, Node (Leaf, 0, Node (Leaf, 3, Node (Leaf, 1, Leaf)))), [2, 0, 3, 1])
+  , (Node (Node (Node (Leaf, 1, Leaf), 1, Node (Leaf, 0, Leaf)), 2, Leaf), [1, 1, 0, 2])
+  , (Node (Node (Node (Leaf, 0, Leaf), 2, Leaf), 0, Node (Leaf, 2, Leaf)), [0, 2, 0, 2])
+  , (Node (Node (Leaf, 0, Node (Leaf, 0, Node (Leaf, 0, Leaf))), 0, Leaf), [0, 0, 0, 0])
+  , (Node (Node (Node (Leaf, 2, Leaf), 3, Node (Leaf, 2, Leaf)), 2, Leaf), [2, 3, 2, 2])
+  , (Node (Node (Leaf, 3, Node (Leaf, 2, Node (Leaf, 1, Leaf))), 3, Leaf), [3, 2, 1, 3])
+  , (Node (Node (Node (Node (Leaf, 3, Leaf), 0, Leaf), 1, Leaf), 3, Leaf), [3, 0, 1, 3])
+  , (Node (Node (Leaf, 0, Leaf), 0, Node (Leaf, 3, Leaf)), [0, 0, 3])
+  , (Node (Node (Leaf, 2, Node (Leaf, 3, Leaf)), 3, Node (Leaf, 2, Leaf)), [2, 3, 3, 2])
+  , (Node (Node (Leaf, 0, Node (Node (Leaf, 1, Leaf), 1, Leaf)), 1, Leaf), [0, 1, 1, 1])
+  , (Node (Node (Leaf, 0, Node (Node (Leaf, 0, Leaf), 3, Leaf)), 2, Leaf), [0, 0, 3, 2])
+  , (Node (Node (Leaf, 2, Leaf), 2, Node (Node (Leaf, 1, Leaf), 1, Leaf)), [2, 2, 1, 1])
+  , (Node (Leaf, 0, Leaf), [0])
+  , (Node (Node (Leaf, 1, Node (Leaf, 1, Node (Leaf, 1, Leaf))), 0, Leaf), [1, 1, 1, 0])
+  ]

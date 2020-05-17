@@ -4,5 +4,5 @@ specifyFunction concat
   -- , (LCons ([0], LNil ()), [0])
   -- , (LCons ([0], LCons([0], LNil ())), [0,0])
   -- , (LCons ([1], LNil ()), [1])
-    (LCons ([1], LCons([2], LNil ())), [1, 2])
+    (LCons ([1], LCons([1], LNil ())), [1, 1])
   ]

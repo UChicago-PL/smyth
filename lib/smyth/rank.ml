@@ -15,7 +15,11 @@ let rec exp_size_rank : exp -> int =
         1
 
     | ETuple components ->
-        1 + List2.sum (List.map exp_size_rank components)
+        (* Don't penalize units *)
+        if components = [] then
+          0
+        else
+          1 + List2.sum (List.map exp_size_rank components)
 
     | EProj (_, _, arg) ->
         (* "Focusing": projections don't add to the size rank *)

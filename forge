@@ -5,18 +5,18 @@ if [[ -f forge_temp_file ]]; then
   exit 1
 fi
 
-if [[ $# -ne 2 ]]; then
-  echo "usage:" $0 "<suite-name> <sketch-name>"
+if [[ $# -ne 3 ]]; then
+  echo "usage:" $0 "<show-option> <suite-name> <sketch-name>"
   exit 1
 fi
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 cat \
-  $DIR/suites/$1/sketches/$2.elm \
-  $DIR/suites/$1/examples/$2.elm \
+  $DIR/suites/$2/sketches/$3.elm \
+  $DIR/suites/$2/examples/$3.elm \
   > $DIR/forge_temp_file
 
-$DIR/smyth forge $DIR/forge_temp_file
+$DIR/smyth forge $DIR/forge_temp_file --show=$1
 
 rm $DIR/forge_temp_file

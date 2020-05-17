@@ -3,7 +3,11 @@ type 'a gen =
 
 val constant : 'a -> 'a gen
 
+val from : 'a * 'a list -> 'a gen
+
 val pair : 'a gen -> 'b gen -> ('a * 'b) gen
+
+val triple : 'a gen -> 'b gen -> 'c gen -> ('a * 'b * 'c) gen
 
 val nat : int gen
 
@@ -20,8 +24,8 @@ val nat_tree : int Tree2.t gen
 val bool_tree : bool Tree2.t gen
 
 val io_trial :
-  int ->
-  int ->
+  n:int ->
+  k:int ->
   ('a -> 'b) ->
   'a gen ->
   'a gen option ->

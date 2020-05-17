@@ -6,4 +6,4 @@ if [[ $# -ne 0 ]]; then
 fi
 
 echo "Experiment 2a"
-../smyth suite-test ../suites/no-sketch
+../smyth suite-test ../suites/no-sketch --test-alert=top1

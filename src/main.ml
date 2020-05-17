@@ -2,11 +2,23 @@ open Smyth
 
 (* Parameters *)
 
-let forge_solution_count : int =
-  3
+type show_type =
+  | ShowTop1
+  | ShowTop1R
+  | ShowTop3
+
+let show_type : show_type ref =
+  ref ShowTop1
 
 let suite_test_n : int ref =
   ref 10
+
+type test_criterion =
+  | TestTop1
+  | TestTop1R
+
+let test_criterion : test_criterion ref =
+  ref TestTop1
 
 (* Information *)
 
@@ -28,6 +40,9 @@ let description =
   "Programming-by-example in a typed functional language with sketches."
 
 (* Helpers *)
+
+let divider =
+  "--------------------------------------------------------------------------------"
 
 let arg_format : string -> string =
   fun s ->
@@ -69,9 +84,10 @@ type command =
   | SuiteTest
   | Fuzz
   | AssertionExport
+  | GenerateSpec
 
 let commands : command list =
-  [ Solve; Test; SuiteTest; Fuzz; AssertionExport ]
+  [ Solve; Test; SuiteTest; Fuzz; AssertionExport; GenerateSpec ]
 
 let command_name : command -> string =
   function
@@ -79,7 +95,8 @@ let command_name : command -> string =
     | Test -> "test"
     | SuiteTest -> "suite-test"
     | Fuzz -> "fuzz"
-    | AssertionExport -> "assertion-export"
+    | AssertionExport -> "export-assertions"
+    | GenerateSpec -> "generate-spec"
 
 let command_from_name : string -> command option =
   fun name ->
@@ -106,6 +123,9 @@ let command_description : command -> string =
 
     | AssertionExport ->
         "Export a set of assertions to Python code"
+
+    | GenerateSpec ->
+        "Generate an example specification of a built-in function"
 
 let command_arguments : command -> (string * string) list =
   function
@@ -138,7 +158,7 @@ let command_arguments : command -> (string * string) list =
           , "The number of trials to run for each size of example set"
           )
         ; ( "built-in-func"
-          , "The identifier of the built-in function to use as a reference"
+          , "The built-in function to use as a reference"
           )
         ; ( "specification"
           , "The path to the specification"
@@ -157,21 +177,31 @@ let command_arguments : command -> (string * string) list =
           )
         ]
 
+    | GenerateSpec ->
+        [ ( "built-in-func"
+          , "The built-in function to generate an example specification for"
+          )
+        ]
+
 (* Options *)
 
 type prog_option =
   | Debug
   | MaxTotalTime
   | Replications
+  | TestAlert
+  | Show
 
 let prog_options : prog_option list =
-  [ Debug; MaxTotalTime; Replications ]
+  [ Debug; MaxTotalTime; Replications; TestAlert; Show ]
 
 let prog_option_name : prog_option -> string =
   function
     | Debug -> "debug"
     | MaxTotalTime -> "timeout"
     | Replications -> "replications"
+    | TestAlert -> "test-alert"
+    | Show -> "show"
 
 let prog_option_from_name : string -> prog_option option =
   fun name ->
@@ -201,6 +231,18 @@ let prog_option_info : prog_option -> string * string * string list =
         , ["<positive-integer>"]
         )
 
+    | TestAlert ->
+        ( "Set the criterion to alert a failure for suite tests"
+        , "top1"
+        , ["<top1|top1r>"]
+        )
+
+    | Show ->
+        ( "Set the display method for forge results"
+        , "top1"
+        , ["<top1|top1r|top3>"]
+        )
+
 let prog_option_action : prog_option -> string -> bool =
   fun prog_option value ->
     match prog_option with
@@ -228,9 +270,24 @@ let prog_option_action : prog_option -> string -> bool =
                 if replications > 0 then
                   (suite_test_n := replications; true)
                 else
-
                   false
+
             | None -> false
+          end
+
+      | TestAlert ->
+          begin match value with
+            | "top1" -> (test_criterion := TestTop1; true)
+            | "top1r" -> (test_criterion := TestTop1R; true)
+            | _ -> false
+          end
+
+      | Show ->
+          begin match value with
+            | "top1" -> (show_type := ShowTop1; true)
+            | "top1r" -> (show_type := ShowTop1R; true)
+            | "top3" -> (show_type := ShowTop3; true)
+            | _ -> false
           end
 
 (* Help *)
@@ -413,34 +470,63 @@ let () =
               exit 1
 
           | Ok solve_result ->
-              let hole_fillings =
-                solve_result.Endpoint.hole_fillings
+              let show_one hole_filling =
+                hole_filling
+                  |> List.map
+                       ( fun (hole_name, exp) ->
+                           "??"
+                             ^ string_of_int hole_name
+                             ^ ": \n\n"
+                             ^ Pretty.exp exp
+                       )
+                  |> String.concat "\n\n"
               in
-              hole_fillings
-                |> Rank.sort
-                |> List2.take forge_solution_count
-                |> List.mapi
-                     ( fun i_ hole_filling ->
-                         String.concat "\n\n"
-                           [ "Solution #"
-                               ^ (string_of_int (i_ + 1))
-                               ^ " (rank: "
-                               ^ string_of_int (Rank.rank hole_filling)
-                               ^ ")"
-                           ; hole_filling
-                               |> List.map
-                                    ( fun (hole_name, exp) ->
-                                        "??"
-                                          ^ string_of_int hole_name
-                                          ^ ": \n\n"
-                                          ^ Pretty.exp exp
-                                    )
-                               |> String.concat "\n\n"
-                           ]
-                     )
-                |> String.concat
-                     "\n--------------------------------------------------------------------------------\n"
-                |> print_endline
+              let ranked_hole_fillings =
+                solve_result.Endpoint.hole_fillings
+                  |> Rank.sort
+              in
+              begin match !show_type with
+                | ShowTop1 ->
+                    begin match ranked_hole_fillings with
+                      | top :: _ ->
+                          print_endline (show_one top)
+
+                      | _ ->
+                          print_endline "No solutions."
+                    end
+
+                | ShowTop1R ->
+                    begin match Rank.first_recursive ranked_hole_fillings with
+                      | Some top_r ->
+                          print_endline
+                            ( "Top recursive solution:\n\n"
+                            ^ show_one top_r
+                            )
+
+                      | _ ->
+                          print_endline "No recursive solutions."
+                    end
+
+                | ShowTop3 ->
+                    if ranked_hole_fillings = [] then
+                      print_endline "No solutions."
+                    else
+                      ranked_hole_fillings
+                        |> List2.take 3
+                        |> List.mapi
+                             ( fun i_ hole_filling ->
+                                 String.concat "\n\n"
+                                   [ "Solution #"
+                                       ^ (string_of_int (i_ + 1))
+                                       ^ " (rank "
+                                       ^ string_of_int (Rank.rank hole_filling)
+                                       ^ "):"
+                                   ; show_one hole_filling
+                                   ]
+                             )
+                        |> String.concat ("\n" ^ divider ^ "\n")
+                        |> print_endline
+              end
         end
 
     | Test ->
@@ -500,8 +586,12 @@ let () =
                                  let prefix =
                                    let open Endpoint in
                                    if
-                                     not test_result.top_success &&
-                                     not test_result.top_recursive_success
+                                     ( !test_criterion = TestTop1 &&
+                                       not test_result.top_success
+                                     ) ||
+                                     ( !test_criterion = TestTop1R &&
+                                       not test_result.top_recursive_success
+                                     )
                                    then
                                      "! failure: "
                                    else
@@ -543,7 +633,7 @@ let () =
           match
             List.assoc_opt
               builtin
-              (Random_experiment.benchmarks trial_count)
+              (References.all (Fuzz.experiment_proj trial_count))
           with
             | Some benchmark_thunk ->
                 benchmark_thunk ()
@@ -657,6 +747,23 @@ let () =
                     ^ String.concat "\n      , " insides
                     ^ "\n      ]"
                 )
+        end
+
+    | GenerateSpec ->
+        let builtin =
+          Sys.argv.(2)
+        in
+        begin match
+          List.assoc_opt
+            builtin
+            (References.all Fuzz.specification_proj)
+        with
+          | Some spec ->
+              print_endline spec
+
+          | None ->
+              prerr_endline ("Unknown built-in function '" ^ builtin ^ "'.");
+              exit 1
         end
   end;
   exit 0

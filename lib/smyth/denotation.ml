@@ -13,6 +13,10 @@ let bool : bool t =
 let int : int t =
   Desugar.nat
 
+let var : string t =
+  fun x ->
+    EVar x
+
 let opt : 'a t -> 'a option t =
   fun da x_opt ->
     match x_opt with
@@ -59,3 +63,7 @@ let rec tree : 'a t -> 'a Tree2.t t =
 let args2 : 'a1 t -> 'a2 t -> ('a1 * 'a2) t =
   fun da1 da2 (x1, x2) ->
     ECtor ("args", [], ETuple [da1 x1; da2 x2])
+
+let args3 : 'a1 t -> 'a2 t -> 'a3 t -> ('a1 * 'a2 * 'a3) t =
+  fun da1 da2 da3 (x1, x2, x3) ->
+    ECtor ("args", [], ETuple [da1 x1; da2 x2; da3 x3])

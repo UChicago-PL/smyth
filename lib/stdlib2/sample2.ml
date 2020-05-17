@@ -53,9 +53,23 @@ let constant : 'a -> 'a gen =
   fun x () ->
     x
 
+let from : 'a * 'a list -> 'a gen =
+  fun (x, xs) () ->
+    let choice =
+      Random.int (List.length xs + 1)
+    in
+    if Int.equal choice 0 then
+      x
+    else
+      List.nth xs (choice - 1)
+
 let pair : 'a gen -> 'b gen -> ('a * 'b) gen =
   fun x y () ->
     (x (), y ())
+
+let triple : 'a gen -> 'b gen -> 'c gen -> ('a * 'b * 'c) gen =
+  fun x y z () ->
+    (x (), y (), z ())
 
 (* Semi-Generic *)
 
@@ -178,13 +192,13 @@ let io : ('a -> 'b) -> 'a gen -> ('a * 'b) gen =
     (x, f x)
 
 let io_trial :
- int ->
- int ->
+ n:int ->
+ k:int ->
  ('a -> 'b) ->
  'a gen ->
  'a gen option ->
  ('a * 'b) list list =
-  fun n k ref input base_case_opt ->
+  fun ~n ~k ref input base_case_opt ->
     List.init n
       ( fun _ ->
           let amounts =
