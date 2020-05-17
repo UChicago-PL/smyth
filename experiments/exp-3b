@@ -38,7 +38,7 @@ run 1 list_append
 # run 1 list_compress
 run 1 list_concat
 run 1 list_drop
-# run 1 list_even_parity
+run 1 list_even_parity
 # run 1 list_filter
 # run 1 list_fold
 # run 1 list_hd

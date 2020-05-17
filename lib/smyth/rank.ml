@@ -33,7 +33,7 @@ let rec exp_size_rank : exp -> int =
         1
 
     | EAssert (e1, e2) ->
-        exp_size_rank e1 + exp_size_rank e2
+        1 + exp_size_rank e1 + exp_size_rank e2
 
     | ETypeAnnotation (e, _) ->
         (* Do not penalize for type annotations *)
