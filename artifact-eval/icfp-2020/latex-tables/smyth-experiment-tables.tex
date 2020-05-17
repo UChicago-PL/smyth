@@ -1,0 +1,42 @@
+\documentclass[acmsmall,nonacm]{acmart}
+
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    \normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}
+
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+\newcommand{\highlightBlue}[1]{\textcolor{blue}{\textbf{#1}}}
+\newcommand{\highlightRed}[1]{\textcolor{red}{\textbf{#1}}}
+
+\newcommand{\snsMyth}
+  {\ensuremath{\textsc{Smyth}}}
+\newcommand{\myth}
+  {\ensuremath{\textsc{Myth}}}
+\newcommand{\leon}
+  {\ensuremath{\textsc{Leon}}}
+\newcommand{\synquid}
+  {\ensuremath{\textsc{Synquid}}}
+
+\newcommand{\experimentTableSize}
+  {\scriptsize}
+
+\newcommand{\vsepBeforeCaption}{\vspace{0.05in}}
+
+\begin{document}
+
+\title{Smyth Experiment Tables}
+\maketitle
+
+\setcounter{figure}{9}
+\input{latex-tables/figure-10-submission}
+\setcounter{figure}{0}
+
+\input{latex-tables/figure-1}
+\input{latex-tables/figure-2}
+\input{latex-tables/figure-3}
+
+\end{document}
+\endinput
