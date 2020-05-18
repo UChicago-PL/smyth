@@ -67,37 +67,47 @@ assert (len(benchmarks) == 43)
 ## the "latex-tables/figure-10-data.tex" rendered in our submission.
 ## The follow functions mirror some of the LaTeX macros.
 
-def loadFigure10():
-    table = {}
-    for line in open("latex-tables/figure-10-data.csv"):
-        line = line.strip()
-        columns = line.split(",")
-        if len(columns) != 11:
-            print "Ignoring line:", columns
-        else:
-            table[columns[0]] = \
-                { "Experiment1" : { "Expert" : columns[1] , "Time" : columns[2] }
-                , "Experiment2a" : { "Expert" : figure10_2a(columns[3]) }
-                , "Experiment2b" : { "Random" : figure10_2b_3b(columns[4]) }
-                , "Experiment3a" : { "Expert" : figure10_3a(columns[5]) }
-                , "Experiment3b" : { "Random" : figure10_2b_3b(columns[6]) }
-                , "Experiment4" :
-                      { "Leon" : { "1" : columns[7] , "2a" : columns[8] }
-                      , "Synquid" : { "1" : columns[9] , "2a" : columns[10] }
-                      }
-                }
-    return table
+def data_loader(filename, expected_columns, handle_columns):
+    try:
+        table = {}
+        for line in open(filename):
+            line = line.strip()
+            columns = line.split(",")
+            if len(columns) != expected_columns:
+                print "[" + filename + "] ignoring line:", columns
+            else:
+                handle_columns(table, columns)
+        return table
+    except IOError:
+        print "[" + filename + "] not found"
+        return None
 
-def figure10_2a(string):
+def load_figure_10():
+    def handle_columns(table, columns):
+        table[columns[0]] = \
+            { "Experiment1" : { "Expert" : columns[1] , "Time" : columns[2] }
+            , "Experiment2a" : { "Expert" : figure_10_2a(columns[3]) }
+            , "Experiment2b" : { "Random" : figure_10_2b_3b(columns[4]) }
+            , "Experiment3a" : { "Expert" : figure_10_3a(columns[5]) }
+            , "Experiment3b" : { "Random" : figure_10_2b_3b(columns[6]) }
+            , "Experiment4" :
+                  { "Leon" : { "1" : columns[7] , "2a" : columns[8] }
+                  , "Synquid" : { "1" : columns[9] , "2a" : columns[10] }
+                  }
+            }
+
+    return data_loader("latex-tables/figure-10-data.csv", 11, handle_columns)
+
+def figure_10_2a(string):
     return string
 
-def figure10_3a(string):
+def figure_10_3a(string):
     if string == "FailedOverSpecialized":
         return "\\scriptsize{overspec}"
     else:
         return string
 
-def figure10_2b_3b(string):
+def figure_10_2b_3b(string):
     if string == "---":
         return "---"
     if string == "RandFailedHigherOrder":
@@ -111,69 +121,55 @@ def figure10_2b_3b(string):
         if len(triple) == 3:
             [k50, k90, t] = triple
             if k90 == "":
-                return showRand(k50, "$\\downarrow$", t)
+                return show_rand(k50, "$\\downarrow$", t)
             else:
-                return showRand(k50, k90, t)
+                return show_rand(k50, k90, t)
         else:
+            # Unexpected format
             return "XXX " + string
 
-def showRand(k50, k90, t):
+def show_rand(k50, k90, t):
     return "(" + k50 + "," + k90 + ")$^{" + t + "}$"
 
-figure10 = \
-    loadFigure10()
+figure_10 = \
+    load_figure_10()
 
 
 ################################################################################
 ## Load dictionaries of data for Figures 1 through TODO for artifact evaluation.
 
-def data_loader(filename, expectedColumns, handleColumns):
-    try:
-        table = {}
-        for line in open(filename):
-            line = line.strip()
-            columns = line.split(",")
-            if len(columns) != expectedColumns:
-                print "[" + filename + "] ignoring line:", columns
-            else:
-                handleColumns(table, columns)
-        return table
-    except IOError:
-        print "[" + filename + "] not found"
-        return None
-
 def load_data_1(filename):
-    def handleColumns(table, columns):
+    def handle_columns(table, columns):
         [benchmark, time, expert, _, _, _] = columns
         benchmark = benchmark.replace(".elm", "")
         time = str(float(int(1000 * float(time))) / 1000).ljust(5, "0")
         table[benchmark] = { "Expert" : expert, "Time" : time }
 
-    return data_loader(filename, 6, handleColumns)
+    return data_loader(filename, 6, handle_columns)
 
-# For Experiment 2a, extraExamples = 0.
-# For Experiment 3a, extraExamples = 1 (base case is always required).
+# For Experiment 2a, extra_examples = 0.
+# For Experiment 3a, extra_examples = 1 (base case is always required).
 #
-def load_data_2a_3a(filename, extraExamples):
-    def handleColumns(table, columns):
-        [benchmark, _, mythExamples, smythExamples, _, _] = columns
+def load_data_2a_3a(filename, extra_examples):
+    def handle_columns(table, columns):
+        [benchmark, _, myth_examples, smyth_examples, _, _] = columns
         benchmark = benchmark.replace(".elm", "")
-        adjustedSmythExamples = extraExamples + float(smythExamples)
-        pct = str(int(round(100 * adjustedSmythExamples / float(mythExamples))))
-        if extraExamples == 0:
-            string = smythExamples + " (" + pct + "%)"
+        adjustedSmyth_examples = extra_examples + float(smyth_examples)
+        pct = str(int(round(100 * adjustedSmyth_examples / float(myth_examples))))
+        if extra_examples == 0:
+            string = smyth_examples + " (" + pct + "%)"
         else:
-            string = str(extraExamples) + "+" + smythExamples + " (" + pct + "%)"
+            string = str(extra_examples) + "+" + smyth_examples + " (" + pct + "%)"
         table[benchmark] = { "Expert" : string }
 
-    return data_loader(filename, 6, handleColumns)
+    return data_loader(filename, 6, handle_columns)
 
 def load_data_2b_3b(filename):
-    def handleColumns(table, columns):
+    def handle_columns(table, columns):
         [benchmark, k50, k90] = columns
-        table[benchmark] = { "Random" : showRand(k50, k90, "") }
+        table[benchmark] = { "Random" : show_rand(k50, k90, "") }
 
-    return data_loader(filename, 3, handleColumns)
+    return data_loader(filename, 3, handle_columns)
 
 def load_data_123(prefix):
     return \
@@ -184,10 +180,10 @@ def load_data_123(prefix):
         , "3b" : load_data_2b_3b(prefix + "data/exp-3b/analysis.csv")
         }
 
-ourData = \
+our_data = \
     load_data_123("../../experiments/") # TODO
 
-yourData = \
+your_data = \
     load_data_123("../../experiments/TODO/") # TODO
 
 
@@ -200,81 +196,76 @@ output_tables = \
     , "3" : open("generated/table-3-data.tex", "w+")
     }
 
-def writeTables():
+def write_tables():
     for benchmarks in benchmarks_by_type:
 
         for i in output_tables:
-            writeRow(output_tables[i], [])
+            output_tables[i].write("\\\\ \n")
 
         for benchmark in benchmarks:
 
-            writeRowWithHighlights \
+            write_row \
                 ( output_tables["1"]
                 , benchmark
-                , ( figure10[benchmark]["Experiment1"]["Expert"]
-                  , try_lookup(ourData["1"], benchmark, "Expert")
-                  , try_lookup(yourData["1"], benchmark, "Expert")
+                , ( figure_10[benchmark]["Experiment1"]["Expert"]
+                  , try_lookup(our_data["1"], benchmark, "Expert")
+                  , try_lookup(your_data["1"], benchmark, "Expert")
                   )
-                , ( figure10[benchmark]["Experiment1"]["Time"]
-                  , try_lookup(ourData["1"], benchmark, "Time")
-                  , try_lookup(yourData["1"], benchmark, "Time")
+                , ( figure_10[benchmark]["Experiment1"]["Time"]
+                  , try_lookup(our_data["1"], benchmark, "Time")
+                  , try_lookup(your_data["1"], benchmark, "Time")
                   )
                 )
 
-            writeRowWithHighlights \
+            write_row \
                 ( output_tables["2"]
                 , benchmark
-                , ( figure10[benchmark]["Experiment2a"]["Expert"]
-                  , try_lookup(ourData["2a"], benchmark, "Expert")
-                  , try_lookup(yourData["2a"], benchmark, "Expert")
+                , ( figure_10[benchmark]["Experiment2a"]["Expert"]
+                  , try_lookup(our_data["2a"], benchmark, "Expert")
+                  , try_lookup(your_data["2a"], benchmark, "Expert")
                   )
-                , ( figure10[benchmark]["Experiment2b"]["Random"]
-                  , try_lookup(ourData["2b"], benchmark, "Random")
-                  , try_lookup(yourData["2b"], benchmark, "Random")
+                , ( figure_10[benchmark]["Experiment2b"]["Random"]
+                  , try_lookup(our_data["2b"], benchmark, "Random")
+                  , try_lookup(your_data["2b"], benchmark, "Random")
                   )
                 )
 
-            writeRowWithHighlights \
+            write_row \
                 ( output_tables["3"]
                 , benchmark
-                , ( figure10[benchmark]["Experiment3a"]["Expert"]
-                  , try_lookup(ourData["3a"], benchmark, "Expert")
-                  , try_lookup(yourData["3a"], benchmark, "Expert")
+                , ( figure_10[benchmark]["Experiment3a"]["Expert"]
+                  , try_lookup(our_data["3a"], benchmark, "Expert")
+                  , try_lookup(your_data["3a"], benchmark, "Expert")
                   )
-                , ( figure10[benchmark]["Experiment3b"]["Random"]
-                  , try_lookup(ourData["3b"], benchmark, "Random")
-                  , try_lookup(yourData["3b"], benchmark, "Random")
+                , ( figure_10[benchmark]["Experiment3b"]["Random"]
+                  , try_lookup(our_data["3b"], benchmark, "Random")
+                  , try_lookup(your_data["3b"], benchmark, "Random")
                   )
                 )
 
-def try_lookup(yourData, benchmark, column):
+def try_lookup(table, benchmark, column):
     try:
-        return yourData[benchmark][column]
+        return table[benchmark][column]
     except:
         return "$\\bullet$"
 
-def escapeLaTeX(string):
+def escape_LaTeX(string):
     string = string.replace("_", "\\_")
     string = string.replace("%", "\\%")
     return string
 
-def writeRow(f, list):
-    f.write (escapeLaTeX
-       ("&".join(list) + "\\\\ \n")
-    )
-
-def writeRowWithHighlights(f, name, triple1, triple2):
-    f.write (escapeLaTeX
+def write_row(f, name, triple1, triple2):
+    f.write (escape_LaTeX
         ( name + "&"
-        + "&".join(showThreeWithHighlights(triple1)) + "&"
-        + "&".join(showThreeWithHighlights(triple2)) + "\\\\ \n"
+        + "&".join(show_three_with_highlights(triple1)) + "&"
+        + "&".join(show_three_with_highlights(triple2)) + "\\\\ \n"
         )
     )
 
-def showThreeWithHighlights(triple):
+def show_three_with_highlights(triple):
     [s1, s2, s3] = triple
     out2 = s2 if s1 == s2 else "\\highlightBlue{" + s2 + "}"
     out3 = s3 if s2 == s3 else "\\highlightRed{" + s3 + "}"
     return [s1, out2, out3]
 
-writeTables()
+write_tables()
