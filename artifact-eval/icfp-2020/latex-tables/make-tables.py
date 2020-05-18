@@ -146,7 +146,7 @@ def load_data_1(filename):
     def handleColumns(table, columns):
         [benchmark, time, expert, _, _, _] = columns
         benchmark = benchmark.replace(".elm", "")
-        time = str(float(int(1000 * float(time))) / 1000).rjust(5, "0")
+        time = str(float(int(1000 * float(time))) / 1000).ljust(5, "0")
         table[benchmark] = { "Expert" : expert, "Time" : time }
 
     return data_loader(filename, 6, handleColumns)
@@ -192,12 +192,12 @@ yourData = \
 
 
 ################################################################################
-## Write table data for Figures 1 through TODO for artifact evaluation.
+## Write table data for Tables 1 through TODO for artifact evaluation.
 
 output_tables = \
-    { "1" : open("generated/figure-1-data.tex", "w+")
-    , "2" : open("generated/figure-2-data.tex", "w+")
-    , "3" : open("generated/figure-3-data.tex", "w+")
+    { "1" : open("generated/table-1-data.tex", "w+")
+    , "2" : open("generated/table-2-data.tex", "w+")
+    , "3" : open("generated/table-3-data.tex", "w+")
     }
 
 def writeTables():
