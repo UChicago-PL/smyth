@@ -1,0 +1,9 @@
+bool_xor
+timeout,1.0
+trial count,50
+example count,top success percent,top recursive success percent
+0,0.0000,0.0000
+1,0.0000,0.0000
+2,0.0000,0.0000
+3,0.0000,0.0000
+4,1.0000,0.0000

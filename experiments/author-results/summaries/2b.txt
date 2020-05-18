@@ -1,0 +1,35 @@
+Experiment 2b
+(2b; N=50; t=1) Running bool_band... completed.
+(2b; N=50; t=1) Running bool_bor... completed.
+(2b; N=50; t=1) Running bool_impl... completed.
+(2b; N=50; t=1) Running bool_neg... completed.
+(2b; N=50; t=1) Running bool_xor... completed.
+(2b; N=50; t=1) Running list_append... completed.
+(2b; N=50; t=1) Running list_concat... completed.
+(2b; N=50; t=1) Running list_drop... completed.
+(2b; N=50; t=1) Running list_even_parity... failed! Trying again:
+(2b; N=50; t=1) Running list_even_parity... failed again! Moving on...
+(2b; N=50; t=1) Running list_hd... completed.
+(2b; N=50; t=1) Running list_inc... completed.
+(2b; N=50; t=1) Running list_last... failed! Trying again:
+(2b; N=50; t=1) Running list_last... completed.
+(2b; N=50; t=1) Running list_length... completed.
+(2b; N=50; t=1) Running list_nth... completed.
+(2b; N=50; t=1) Running list_rev_append... completed.
+(2b; N=50; t=1) Running list_rev_fold... completed.
+(2b; N=50; t=1) Running list_rev_snoc... completed.
+(2b; N=50; t=1) Running list_rev_tailcall... completed.
+(2b; N=50; t=1) Running list_snoc... completed.
+(2b; N=50; t=1) Running list_sort_sorted_insert... completed.
+(2b; N=50; t=1) Running list_stutter... completed.
+(2b; N=50; t=1) Running list_sum... completed.
+(2b; N=50; t=1) Running list_take... completed.
+(2b; N=50; t=1) Running list_tl... completed.
+(2b; N=50; t=1) Running nat_add... completed.
+(2b; N=50; t=1) Running nat_iseven... completed.
+(2b; N=50; t=1) Running nat_max... completed.
+(2b; N=50; t=1) Running nat_pred... completed.
+(2b; N=50; t=1) Running tree_inorder... completed.
+(2b; N=50; t=3) Running tree_collect_leaves... completed.
+(2b; N=50; t=3) Running tree_preorder... completed.
+(2b; N=50; t=10) Running tree_count_nodes... completed.

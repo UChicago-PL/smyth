@@ -1,5 +1,7 @@
 _build/
 *.merlin
+experiments/data
+experiments/summaries
 data-backup/
 summaries-backup/
-specifications-bkp
+specifications-backup

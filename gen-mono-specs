@@ -8,8 +8,8 @@ fi
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 mkdir -p specifications/mono
-mkdir -p specifications-bkp/mono
-mv specifications/mono/*.elm specifications-bkp/mono 2> /dev/null
+mkdir -p specifications-backup/mono
+mv specifications/mono/*.elm specifications-backup/mono 2> /dev/null
 
 run() {
   $DIR/smyth generate-spec $1 > specifications/mono/$1.elm

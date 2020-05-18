@@ -24,7 +24,7 @@ def show_k(k):
         return "---"
 
 print("task,k50,k90")
-for filename in glob.glob("data/" + experiment + "/csv/*.csv"):
+for filename in sorted(glob.glob("data/" + experiment + "/csv/*.csv")):
     k90 = None
     k50 = None
     with open(filename) as csvfile:
@@ -38,7 +38,7 @@ for filename in glob.glob("data/" + experiment + "/csv/*.csv"):
             next(reader)
             k50 = 0
             k90 = 0
-            kMax = 0
+            kMax = -1
             for row in reader:
                 kMax += 1
                 k = int(row[0])
