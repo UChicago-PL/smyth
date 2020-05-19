@@ -18,6 +18,43 @@
 
 \vspace{0.10in}
 
-\caption{Experiment 1.}
+\caption{Experiment 1.
+%
+Differences (in blue) between results from \snsMyth{} at submission and
+\snsMyth{} now:
+%
+\experimentCaptionSize
+%
+\\[3pt]
+%
+\textbf{list\_compress, tree\_binsert, tree\_nodes\_at\_level:} Not
+automatically run by our scripts because they {\scriptsize{timeout}}.
+%
+\\[3pt]
+%
+\textbf{Expert: list\_even\_parity:} \snsMyth{} now finds a smaller solution
+that is consistent with the \myth{} examples. We are not sure why \myth{} did
+not also find that solution (which would have meant that they would have added
+more examples until the desired solution was synthesized). We will mark this as
+{\scriptsize{overspec}}.
+%
+\\[3pt]
+%
+\textbf{Expert: list\_filter:} We noticed that, given the \myth{} expert
+examples, the term synthesized by \myth{} (\cite[]{XXX}) is not actually a
+correct implementation of the list filter function. So we added trace-complete
+examples until \snsMyth{} synthesizes a correct solution; there are XXX examples
+instead of the 8 reported by \cite{XXX}. This approach is a proxy for what the
+\myth{} developers might have done to obtain their expert set of examples. (We
+did not contact the \myth{} developers nor try \myth{} given these new
+examples.)
+%
+\\[3pt]
+%
+\textbf{Time:} Small variations in running time are expected. Two benchmarks
+(list\_pairwise\_swap, list\_sorted\_insert) are now significantly faster due to
+the improvements in search order.
+%
+}
 
 \end{table}
