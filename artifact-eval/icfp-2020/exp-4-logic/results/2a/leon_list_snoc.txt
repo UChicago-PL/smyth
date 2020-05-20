@@ -19,10 +19,10 @@ def list_snoc(xs: NatList, n: Nat): NatList = { choose { (out:NatList) =>
    (((xs == Nil) && (n == S(Z))) ==> (out == Cons(S(Z), Nil))) &&
    (((xs == Cons(Z, Nil)) && (n == Z)) ==> (out == Cons(Z, Cons(Z, Nil)))) &&
 // (((xs == Cons(Z, Nil)) && (n == S(Z))) ==> (out == Cons(Z, Cons(S(Z), Nil)))) &&
-   (((xs == Cons(S(Z), Cons(Z, Nil))) && (n == Z)) ==> (out == Cons(S(Z), Cons(Z, Cons(Z, Nil))))) &&
+// (((xs == Cons(S(Z), Cons(Z, Nil))) && (n == Z)) ==> (out == Cons(S(Z), Cons(Z, Cons(Z, Nil))))) &&
 // (((xs == Cons(S(Z), Cons(Z, Nil))) && (n == S(Z))) ==> (out == Cons(S(Z), Cons(Z, Cons(S(Z), Nil))))) &&
 // (((xs == Cons(S(S(Z)), Cons(S(Z), Cons(Z, Nil)))) && (n == Z)) ==> (out == Cons(S(S(Z)), Cons(S(Z), Cons(Z, Cons(Z, Nil)))))) &&
-// (((xs == Cons(S(S(Z)), Cons(S(Z), Cons(Z, Nil)))) && (n == S(Z))) ==> (out == Cons(S(S(Z)), Cons(S(Z), Cons(Z, Cons(S(Z), Nil)))))) &&
+   (((xs == Cons(S(S(Z)), Cons(S(Z), Cons(Z, Nil)))) && (n == S(Z))) ==> (out == Cons(S(S(Z)), Cons(S(Z), Cons(Z, Cons(S(Z), Nil)))))) &&
    true
 
 } }

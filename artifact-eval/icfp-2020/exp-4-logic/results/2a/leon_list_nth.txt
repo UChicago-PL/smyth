@@ -15,15 +15,15 @@ case object Nil extends NatList
   
 def list_nth(xs: NatList, n: Nat): Nat = { choose { (out:Nat) => 
 
-   (((xs == Nil) && (n == Z)) ==> (out == Z)) &&
+// (((xs == Nil) && (n == Z)) ==> (out == Z)) &&
    (((xs == Nil) && (n == S(Z))) ==> (out == Z)) &&
-   (((xs == Cons(S(S(Z)), Nil)) && (n == Z)) ==> (out == S(S(Z)))) &&
+// (((xs == Cons(S(S(Z)), Nil)) && (n == Z)) ==> (out == S(S(Z)))) &&
    (((xs == Cons(S(S(Z)), Nil)) && (n == S(Z))) ==> (out == Z)) &&
    (((xs == Cons(S(Z), Cons(S(S(Z)), Nil))) && (n == Z)) ==> (out == S(Z))) &&
    (((xs == Cons(S(Z), Cons(S(S(Z)), Nil))) && (n == S(Z))) ==> (out == S(S(Z)))) &&
 // (((xs == Cons(S(Z), Nil)) && (n == Z)) ==> (out == S(Z))) &&
 // (((xs == Cons(S(Z), Nil)) && (n == S(Z))) ==> (out == Z)) &&
-// (((xs == Cons(S(S(Z)), Cons(S(Z), Nil))) && (n == Z)) ==> (out == S(S(Z)))) &&
+   (((xs == Cons(S(S(Z)), Cons(S(Z), Nil))) && (n == Z)) ==> (out == S(S(Z)))) &&
 // (((xs == Cons(S(S(Z)), Cons(S(Z), Nil))) && (n == S(Z))) ==> (out == S(Z))) &&
 // (((xs == Cons(S(S(S(Z))), Cons(S(S(Z)), Cons(S(Z), Nil)))) && (n == Z)) ==> (out == S(S(S(Z))))) &&
 // (((xs == Cons(S(S(S(Z))), Cons(S(S(Z)), Cons(S(Z), Nil)))) && (n == S(Z))) ==> (out == S(S(Z)))) &&

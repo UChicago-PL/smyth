@@ -16,9 +16,9 @@ case object F extends Boolean
 def nat_iseven(n: Nat): Boolean = { choose { (out:Boolean) => 
 
    ((n == Z) ==> (out == T)) &&
-   ((n == S(Z)) ==> (out == F)) &&
+// ((n == S(Z)) ==> (out == F)) &&
    ((n == S(S(Z))) ==> (out == T)) &&
-// ((n == S(S(S(Z)))) ==> (out == F)) &&
+   ((n == S(S(S(Z)))) ==> (out == F)) &&
    true
 
 } }
