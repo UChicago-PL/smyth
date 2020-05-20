@@ -99,7 +99,7 @@ def load_figure_10():
                   }
             }
 
-    return data_loader("latex-tables/figure-10-data.csv", 11, handle_columns)
+    return data_loader("figure-10-data.csv", 11, handle_columns)
 
 def figure_10_2a(string):
     return string
@@ -185,10 +185,10 @@ def load_data_123(prefix):
         }
 
 our_data = \
-    load_data_123("../../experiments/author-results/")
+    load_data_123("../../../experiments/author-results/")
 
 your_data = \
-    load_data_123("../../experiments/")
+    load_data_123("../../../experiments/")
 
 
 ################################################################################
