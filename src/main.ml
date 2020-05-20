@@ -593,7 +593,7 @@ let () =
                                        not test_result.top_recursive_success
                                      )
                                    then
-                                     "! failure: "
+                                     "% ! failure: "
                                    else
                                      ""
                                  in
