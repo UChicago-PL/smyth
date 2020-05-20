@@ -16,7 +16,7 @@ case object Nil extends NatList
 def list_take(n: Nat, xs: NatList): NatList = { choose { (out:NatList) => 
 
    (((n == Z) && (xs == Nil)) ==> (out == Nil)) &&
-   (((n == Z) && (xs == Cons(S(Z), Nil))) ==> (out == Nil)) &&
+// (((n == Z) && (xs == Cons(S(Z), Nil))) ==> (out == Nil)) &&
    (((n == Z) && (xs == Cons(Z, Cons(S(Z), Nil)))) ==> (out == Nil)) &&
 // (((n == Z) && (xs == Cons(S(Z), Cons(Z, Cons(S(Z), Nil))))) ==> (out == Nil)) &&
 // (((n == S(Z)) && (xs == Nil)) ==> (out == Nil)) &&
@@ -25,8 +25,8 @@ def list_take(n: Nat, xs: NatList): NatList = { choose { (out:NatList) =>
 // (((n == S(Z)) && (xs == Cons(S(Z), Cons(Z, Cons(S(Z), Nil))))) ==> (out == Cons(S(Z), Nil))) &&
 // (((n == S(S(Z))) && (xs == Nil)) ==> (out == Nil)) &&
 // (((n == S(S(Z))) && (xs == Cons(S(Z), Nil))) ==> (out == Cons(S(Z), Nil))) &&
-   (((n == S(S(Z))) && (xs == Cons(Z, Cons(S(Z), Nil)))) ==> (out == Cons(Z, Cons(S(Z), Nil)))) &&
-// (((n == S(S(Z))) && (xs == Cons(S(Z), Cons(Z, Cons(S(Z), Nil))))) ==> (out == Cons(S(Z), Cons(Z, Nil)))) &&
+// (((n == S(S(Z))) && (xs == Cons(Z, Cons(S(Z), Nil)))) ==> (out == Cons(Z, Cons(S(Z), Nil)))) &&
+   (((n == S(S(Z))) && (xs == Cons(S(Z), Cons(Z, Cons(S(Z), Nil))))) ==> (out == Cons(S(Z), Cons(Z, Nil)))) &&
    true
 
 } }
