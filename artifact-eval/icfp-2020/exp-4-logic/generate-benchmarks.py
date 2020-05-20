@@ -488,18 +488,18 @@ def writeBenchmarkFile(tool, benchmark, which_examples):
 
   (name, context, in_names_and_types, out_type, examples) = benchmark
 
+  ## These benchmarks:
+  ##   (1) timeout in Experiment 1
+  ##   (2) incorrect solution in Experiment 1
+  ##   (3) expert examples in Experiment 2a same as in Experiment 1
   if which_examples == FEWER \
-      ## These benchmarks:
-      ##   (1) timeout in Experiment 1
-      ##   (2) incorrect solution in Experiment 1
-      ##   (3) expert examples in Experiment 2a same as in Experiment 1    
         and name in \
           [ "list_compress", "tree_binsert", "tree_nodes_at_level", "tree_postorder" # (1)
           , "list_even_parity"                                                       # (2)
           , "bool_neg", "bool_xor", "list_length", "nat_max"                         # (3)
           ]:
       ## ... so just generating "N/A" placeholders for Experiment 4-2a
-      write(tool.tool_name, which_examples, name, "N/A")
+      write(tool.tool_name, which_examples, name, "N/A\n")
       return
 
   examples_with_types = \
