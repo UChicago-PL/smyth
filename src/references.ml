@@ -239,7 +239,7 @@ let all : 'a reference_projection -> (string * 'a) list =
     ; ( "list_filter"
       , proj
           { function_name = "listFilter"
-          ; k_max = 15
+          ; k_max = 20
           ; d_in =
               Denotation.args2
                 Denotation.var
@@ -267,7 +267,7 @@ let all : 'a reference_projection -> (string * 'a) list =
     ; ( "list_fold"
       , proj
           { function_name = "listFold"
-          ; k_max = 15
+          ; k_max = 20
           ; d_in =
               Denotation.args3
                 Denotation.var
@@ -377,7 +377,7 @@ let all : 'a reference_projection -> (string * 'a) list =
     ; ( "list_map"
       , proj
           { function_name = "listMap"
-          ; k_max = 15
+          ; k_max = 20
           ; d_in =
               Denotation.args2
                 Denotation.var
@@ -804,7 +804,7 @@ let all : 'a reference_projection -> (string * 'a) list =
     ; ( "tree_map"
       , proj
           { function_name = "treeMap"
-          ; k_max = 15
+          ; k_max = 20
           ; d_in =
               Denotation.args2
                 Denotation.var
