@@ -1,4 +1,4 @@
 specifyFunction neg
-  [ (T, F)
-  , (F, T)
+  [ (F, T)
+  , (T, F)
   ]
