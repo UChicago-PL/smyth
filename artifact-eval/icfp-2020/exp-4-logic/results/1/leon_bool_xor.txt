@@ -1,0 +1,36 @@
+
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Blah {
+  
+sealed abstract class Boolean
+case object T extends Boolean
+case object F extends Boolean
+  
+def bool_xor(p: Boolean, q: Boolean): Boolean = { choose { (out:Boolean) => 
+
+   (((p == T) && (q == T)) ==> (out == F)) &&
+   (((p == T) && (q == F)) ==> (out == T)) &&
+   (((p == F) && (q == T)) ==> (out == T)) &&
+   (((p == F) && (q == F)) ==> (out == F)) &&
+   true
+
+} }
+
+}
+
+p match {
+  case F =>
+    q
+  case T =>
+    q match {
+      case F =>
+        T
+      case T =>
+        F
+    }
+}
+
+Correct

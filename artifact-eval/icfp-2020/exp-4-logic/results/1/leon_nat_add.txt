@@ -1,0 +1,36 @@
+
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Blah {
+  
+sealed abstract class Nat
+case class S(nat: Nat) extends Nat
+case object Z extends Nat
+  
+def nat_add(in1: Nat, in2: Nat): Nat = { choose { (out:Nat) => 
+
+   (((in1 == Z) && (in2 == Z)) ==> (out == Z)) &&
+   (((in1 == Z) && (in2 == S(Z))) ==> (out == S(Z))) &&
+   (((in1 == Z) && (in2 == S(S(Z)))) ==> (out == S(S(Z)))) &&
+   (((in1 == S(Z)) && (in2 == Z)) ==> (out == S(Z))) &&
+   (((in1 == S(Z)) && (in2 == S(Z))) ==> (out == S(S(Z)))) &&
+   (((in1 == S(Z)) && (in2 == S(S(Z)))) ==> (out == S(S(S(Z))))) &&
+   (((in1 == S(S(Z))) && (in2 == Z)) ==> (out == S(S(Z)))) &&
+   (((in1 == S(S(Z))) && (in2 == S(Z))) ==> (out == S(S(S(Z))))) &&
+   (((in1 == S(S(Z))) && (in2 == S(S(Z)))) ==> (out == S(S(S(S(Z)))))) &&
+   true
+
+} }
+
+}
+
+in1 match {
+  case Z =>
+    in2
+  case S(nat) =>
+    S(nat_add(nat, in2))
+}
+
+Correct

@@ -19,6 +19,42 @@
 
 \vspace{0.10in}
 
-\caption{Experiment 2.}
+\caption{Experiment 2.
+%
+Differences (in blue) between results from \snsMyth{} at submission and
+\snsMyth{} now:
+%
+\experimentCaptionSize
+%
+\\[3pt]
+%
+\textbf{list\_compress, tree\_binsert, tree\_nodes\_at\_level:} Not run because
+they failed in Experiment 1.
+%
+\\[3pt]
+%
+\textbf{Expert: bool\_xor:} With the algorithmic changes, \snsMyth{} now
+requires (all) 4 examples.  (Small changes to search order and search parameters
+can change the results of synthesis tools.)
+%
+\\[3pt]
+%
+\textbf{Expert: list\_take:} When looking through our tasks again, we noticed an
+opportunity to try removing another example; \snsMyth{} produces the correct
+solution given these 5 examples.
+%
+\\[3pt]
+%
+\textbf{Random:} Small variations in k50 and k90 are expected because the
+examples are generated randomly. There are some blue dots because our scripts
+for benchmarking and generating the table differences do not automatically
+display {\scriptsize{failed}}, {\scriptsize{timeout}}, superscripts 3 and 10, or
+the $\downarrow$ arrow presented in Figure 10.
+%
+\\[3pt]
+%
+higher-order funcs: TODO should be blue nums
+%
+}
 
 \end{table}

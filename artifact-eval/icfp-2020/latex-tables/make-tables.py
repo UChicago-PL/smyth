@@ -73,7 +73,10 @@ def data_loader(filename, expected_columns, handle_columns):
         for line in open(filename):
             line = line.strip()
             columns = line.split(",")
-            if len(columns) != expected_columns:
+            # TODO
+            if line.startswith("! failure"):
+                print "[" + filename + "] ignoring line:", columns
+            elif len(columns) != expected_columns:
                 print "[" + filename + "] ignoring line:", columns
             else:
                 handle_columns(table, columns)
@@ -96,7 +99,7 @@ def load_figure_10():
                   }
             }
 
-    return data_loader("latex-tables/figure-10-data.csv", 11, handle_columns)
+    return data_loader("figure-10-data.csv", 11, handle_columns)
 
 def figure_10_2a(string):
     return string
@@ -140,26 +143,27 @@ figure_10 = \
 
 def load_data_1(filename):
     def handle_columns(table, columns):
-        [benchmark, time, expert, _, _, _] = columns
+        [benchmark, time, _, expert, _, _] = columns
         benchmark = benchmark.replace(".elm", "")
         time = str(float(int(1000 * float(time))) / 1000).ljust(5, "0")
         table[benchmark] = { "Expert" : expert, "Time" : time }
 
     return data_loader(filename, 6, handle_columns)
 
-# For Experiment 2a, extra_examples = 0.
-# For Experiment 3a, extra_examples = 1 (base case is always required).
+# For Experiment 2a, base_examples = 0.
+# For Experiment 3a, base_examples = 1 (base case is always required).
 #
-def load_data_2a_3a(filename, extra_examples):
+def load_data_2a_3a(filename, base_examples):
     def handle_columns(table, columns):
-        [benchmark, _, myth_examples, smyth_examples, _, _] = columns
+        [benchmark, _, _, smyth_examples, _, _] = columns
         benchmark = benchmark.replace(".elm", "")
-        adjustedSmyth_examples = extra_examples + float(smyth_examples)
-        pct = str(int(round(100 * adjustedSmyth_examples / float(myth_examples))))
-        if extra_examples == 0:
+        myth_examples = figure_10[benchmark]["Experiment1"]["Expert"]
+        adjusted_smyth_examples = base_examples + float(smyth_examples)
+        pct = str(int(round(100 * adjusted_smyth_examples / float(myth_examples))))
+        if base_examples == 0:
             string = smyth_examples + " (" + pct + "%)"
         else:
-            string = str(extra_examples) + "+" + smyth_examples + " (" + pct + "%)"
+            string = str(base_examples) + "+" + smyth_examples + " (" + pct + "%)"
         table[benchmark] = { "Expert" : string }
 
     return data_loader(filename, 6, handle_columns)
@@ -181,10 +185,10 @@ def load_data_123(prefix):
         }
 
 our_data = \
-    load_data_123("../../experiments/") # TODO
+    load_data_123("../../../experiments/author-results/")
 
 your_data = \
-    load_data_123("../../experiments/TODO/") # TODO
+    load_data_123("../../../experiments/")
 
 
 ################################################################################
@@ -200,7 +204,7 @@ def write_tables():
     for benchmarks in benchmarks_by_type:
 
         for i in output_tables:
-            output_tables[i].write("\\\\ \n")
+            output_tables[i].write("\\\\\n")
 
         for benchmark in benchmarks:
 
@@ -258,7 +262,7 @@ def write_row(f, name, triple1, triple2):
     f.write (escape_LaTeX
         ( name + "&"
         + "&".join(show_three_with_highlights(triple1)) + "&"
-        + "&".join(show_three_with_highlights(triple2)) + "\\\\ \n"
+        + "&".join(show_three_with_highlights(triple2)) + "\\\\\n"
         )
     )
 

@@ -1,0 +1,34 @@
+
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Blah {
+  
+sealed abstract class Nat
+case class S(nat: Nat) extends Nat
+case object Z extends Nat
+  
+sealed abstract class NatList
+case class Cons(head: Nat, tail: NatList) extends NatList
+case object Nil extends NatList
+  
+def list_stutter(xs: NatList): NatList = { choose { (out:NatList) => 
+
+   ((xs == Nil) ==> (out == Nil)) &&
+   ((xs == Cons(Z, Nil)) ==> (out == Cons(Z, Cons(Z, Nil)))) &&
+   ((xs == Cons(S(Z), Cons(Z, Nil))) ==> (out == Cons(S(Z), Cons(S(Z), Cons(Z, Cons(Z, Nil)))))) &&
+   true
+
+} }
+
+}
+
+xs match {
+  case Nil =>
+    Nil
+  case Cons(head, tail) =>
+    Cons(head, Cons(head, list_stutter(tail)))
+}
+
+Correct

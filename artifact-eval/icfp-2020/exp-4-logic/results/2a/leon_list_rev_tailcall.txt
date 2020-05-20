@@ -1,0 +1,44 @@
+
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Blah {
+  
+sealed abstract class Nat
+case class S(nat: Nat) extends Nat
+case object Z extends Nat
+  
+sealed abstract class NatList
+case class Cons(head: Nat, tail: NatList) extends NatList
+case object Nil extends NatList
+  
+def list_rev_tailcall(xs: NatList, acc: NatList): NatList = { choose { (out:NatList) => 
+
+   (((xs == Nil) && (acc == Nil)) ==> (out == Nil)) &&
+// (((xs == Nil) && (acc == Cons(Z, Nil))) ==> (out == Cons(Z, Nil))) &&
+// (((xs == Nil) && (acc == Cons(S(Z), Nil))) ==> (out == Cons(S(Z), Nil))) &&
+// (((xs == Nil) && (acc == Cons(S(Z), Cons(Z, Nil)))) ==> (out == Cons(S(Z), Cons(Z, Nil)))) &&
+   (((xs == Cons(Z, Nil)) && (acc == Nil)) ==> (out == Cons(Z, Nil))) &&
+// (((xs == Cons(S(Z), Nil)) && (acc == Nil)) ==> (out == Cons(S(Z), Nil))) &&
+// (((xs == Cons(S(Z), Nil)) && (acc == Cons(Z, Nil))) ==> (out == Cons(S(Z), Cons(Z, Nil)))) &&
+   (((xs == Cons(Z, Cons(S(Z), Nil))) && (acc == Nil)) ==> (out == Cons(S(Z), Cons(Z, Nil)))) &&
+   true
+
+} }
+
+}
+
+xs match {
+  case Nil =>
+    Nil
+  case Cons(head, tail) =>
+    list_rev_tailcall(tail, acc) match {
+      case Nil =>
+        Cons(head, acc)
+      case Cons(head$1, tail$1) =>
+        Cons(head$1, Cons(head, acc))
+    }
+}
+
+Correct (inside-out instead of tail-rec)

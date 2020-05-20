@@ -1,0 +1,22 @@
+
+data Boolean where
+  T :: Boolean
+  F :: Boolean
+  
+bool_bor :: p:Boolean -> q:Boolean -> { Boolean | 
+
+   (p == T && q == T ==> _v == T) &&
+   (p == T && q == F ==> _v == T) &&
+   (p == F && q == T ==> _v == T) &&
+   (p == F && q == F ==> _v == F) &&
+   True
+
+}
+bool_bor = ??
+
+bool_bor = \p . \q .
+match p with
+T -> p
+F -> q
+
+Correct

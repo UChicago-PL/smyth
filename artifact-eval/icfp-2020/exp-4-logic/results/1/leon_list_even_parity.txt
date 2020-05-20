@@ -1,0 +1,49 @@
+
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Blah {
+  
+sealed abstract class Boolean
+case object T extends Boolean
+case object F extends Boolean
+  
+sealed abstract class BooleanList
+case class Cons(head: Boolean, tail: BooleanList) extends BooleanList
+case object Nil extends BooleanList
+  
+def list_even_parity(xs: BooleanList): Boolean = { choose { (out:Boolean) => 
+
+   ((xs == Nil) ==> (out == T)) &&
+   ((xs == Cons(F, Nil)) ==> (out == T)) &&
+   ((xs == Cons(T, Nil)) ==> (out == F)) &&
+   ((xs == Cons(F, Cons(F, Nil))) ==> (out == T)) &&
+   ((xs == Cons(F, Cons(T, Nil))) ==> (out == F)) &&
+   ((xs == Cons(T, Cons(F, Nil))) ==> (out == F)) &&
+   ((xs == Cons(T, Cons(T, Nil))) ==> (out == T)) &&
+   true
+
+} }
+
+}
+
+xs match {
+  case Nil =>
+    T
+  case Cons(head, tail) =>
+    val rec: Boolean = list_even_parity(tail)
+    head match {
+      case F =>
+        rec
+      case T =>
+        rec match {
+          case F =>
+            T
+          case T =>
+            F
+        }
+    }
+}
+
+Correct
