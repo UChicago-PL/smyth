@@ -41,13 +41,13 @@ run 1 list_append
 run 1 list_concat
 run 1 list_drop
 run 1 list_even_parity
-# run 1 list_filter
-# run 1 list_fold
+run 1 list_filter
+run 1 list_fold
 run 1 list_hd
 run 1 list_inc
 run 1 list_last
 run 1 list_length
-# run 1 list_map
+run 1 list_map
 run 1 list_nth
 # run 1 list_pairwise_swap
 run 1 list_rev_append
@@ -70,7 +70,7 @@ run 1 nat_pred
 # run 1 tree_binsert
 # run 1 tree_count_leaves
 run 1 tree_inorder
-# run 1 tree_map
+run 1 tree_map
 # run 1 tree_nodes_at_level
 # run 1 tree_postorder
 
