@@ -54,6 +54,6 @@ for filename in sorted(glob.glob("data/" + experiment + "/csv/*.csv")):
             if k90 > kMax:
                 k90 = None
         except Exception as e:
-            print(task, "(ERROR)")
+            print("%", task, "(ERROR)")
             continue
     print(task, show_k(k50), show_k(k90), sep=",")
