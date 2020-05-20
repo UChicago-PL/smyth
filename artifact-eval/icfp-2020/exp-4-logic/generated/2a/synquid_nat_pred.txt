@@ -1,0 +1,18 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+nat_pred :: n:Nat -> { Nat | 
+
+   (n == Z ==> _v == Z) &&
+-- (n == (S Z) ==> _v == Z) &&
+   (n == (S (S Z)) ==> _v == (S Z)) &&
+   True
+
+}
+nat_pred = ??

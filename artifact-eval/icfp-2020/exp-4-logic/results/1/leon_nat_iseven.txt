@@ -1,0 +1,40 @@
+
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Blah {
+  
+sealed abstract class Nat
+case class S(nat: Nat) extends Nat
+case object Z extends Nat
+  
+sealed abstract class Boolean
+case object T extends Boolean
+case object F extends Boolean
+  
+def nat_iseven(n: Nat): Boolean = { choose { (out:Boolean) => 
+
+   ((n == Z) ==> (out == T)) &&
+   ((n == S(Z)) ==> (out == F)) &&
+   ((n == S(S(Z))) ==> (out == T)) &&
+   ((n == S(S(S(Z)))) ==> (out == F)) &&
+   true
+
+} }
+
+}
+
+n match {
+  case Z =>
+    T
+  case S(nat) =>
+    nat_iseven(nat) match {
+      case F =>
+        T
+      case T =>
+        F
+    }
+}
+
+Correct

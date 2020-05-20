@@ -1,0 +1,46 @@
+
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Blah {
+  
+sealed abstract class Nat
+case class S(nat: Nat) extends Nat
+case object Z extends Nat
+  
+sealed abstract class NatList
+case class Cons(head: Nat, tail: NatList) extends NatList
+case object Nil extends NatList
+  
+sealed abstract class NatTree
+case object Leaf extends NatTree
+case class Node(left: NatTree, n: Nat, right: NatTree) extends NatTree
+  
+def list_append(l1: NatList, l2: NatList): NatList =
+  l1 match {
+    case Nil              => l2
+    case Cons(head, tail) => Cons (head, list_append(tail, l2))
+  }
+
+def tree_preorder(t: NatTree): NatList = { choose { (out:NatList) => 
+
+   ((t == Leaf) ==> (out == Nil)) &&
+   ((t == Node(Leaf, S(Z), Leaf)) ==> (out == Cons(S(Z), Nil))) &&
+   ((t == Node(Leaf, S(S(Z)), Leaf)) ==> (out == Cons(S(S(Z)), Nil))) &&
+   ((t == Node(Node(Leaf, S(Z), Leaf), S(S(Z)), Leaf)) ==> (out == Cons(S(S(Z)), Cons(S(Z), Nil)))) &&
+   ((t == Node(Leaf, S(Z), Node(Leaf, S(S(Z)), Leaf))) ==> (out == Cons(S(Z), Cons(S(S(Z)), Nil)))) &&
+   true
+
+} }
+
+}
+
+t match {
+  case Leaf =>
+    Nil
+  case Node(left, n, right) =>
+    list_append(Cons(n, tree_preorder(left)), tree_preorder(right))
+}
+
+Correct

@@ -1,0 +1,69 @@
+
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Blah {
+  
+sealed abstract class Nat
+case class S(nat: Nat) extends Nat
+case object Z extends Nat
+  
+sealed abstract class Boolean
+case object T extends Boolean
+case object F extends Boolean
+  
+sealed abstract class Cmp
+case object LT extends Cmp
+case object EQ extends Cmp
+case object GT extends Cmp
+  
+def nat_compare(n1: Nat, n2: Nat): Cmp =
+  n1 match {
+    case Z =>
+      n2 match {
+        case Z    => EQ
+        case S(_) => LT
+      }
+    case S(m1) =>
+      n2 match {
+        case Z     => GT
+        case S(m2) => nat_compare(m1, m2)
+      }
+  }
+  
+def nat_max(n1: Nat, n2: Nat): Nat = { choose { (out:Nat) => 
+
+   (((n1 == Z) && (n2 == Z)) ==> (out == Z)) &&
+   (((n1 == Z) && (n2 == S(Z))) ==> (out == S(Z))) &&
+   (((n1 == Z) && (n2 == S(S(Z)))) ==> (out == S(S(Z)))) &&
+   (((n1 == S(Z)) && (n2 == Z)) ==> (out == S(Z))) &&
+   (((n1 == S(Z)) && (n2 == S(Z))) ==> (out == S(Z))) &&
+   (((n1 == S(Z)) && (n2 == S(S(Z)))) ==> (out == S(S(Z)))) &&
+   (((n1 == S(S(Z))) && (n2 == Z)) ==> (out == S(S(Z)))) &&
+   (((n1 == S(S(Z))) && (n2 == S(Z))) ==> (out == S(S(Z)))) &&
+   (((n1 == S(S(Z))) && (n2 == S(S(Z)))) ==> (out == S(S(Z)))) &&
+   true
+
+} }
+
+}
+
+n1 match {
+  case Z =>
+    n2
+  case S(nat) =>
+    nat_max(nat, n2) match {
+      case Z =>
+        S(nat)
+      case S(nat$1) =>
+        nat$1 match {
+          case Z =>
+            S(nat)
+          case S(nat$2) =>
+            n2
+        }
+    }
+}
+
+Incorrect

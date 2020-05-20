@@ -1,0 +1,43 @@
+
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Blah {
+  
+sealed abstract class Nat
+case class S(nat: Nat) extends Nat
+case object Z extends Nat
+  
+sealed abstract class NatTree
+case object Leaf extends NatTree
+case class Node(left: NatTree, n: Nat, right: NatTree) extends NatTree
+  
+def nat_add(n1: Nat, n2: Nat): Nat =
+  n1 match {
+    case Z    => n2
+    case S(m) => S (nat_add(m, n2))
+  }
+  
+def tree_count_nodes(t: NatTree): Nat = { choose { (out:Nat) => 
+
+   ((t == Leaf) ==> (out == Z)) &&
+   ((t == Node(Leaf, Z, Leaf)) ==> (out == S(Z))) &&
+   ((t == Node(Node(Leaf, Z, Leaf), Z, Leaf)) ==> (out == S(S(Z)))) &&
+   ((t == Node(Leaf, Z, Node(Leaf, Z, Leaf))) ==> (out == S(S(Z)))) &&
+   ((t == Node(Node(Leaf, Z, Node(Leaf, Z, Leaf)), Z, Leaf)) ==> (out == S(S(S(Z))))) &&
+   ((t == Node(Leaf, Z, Node(Leaf, Z, Node(Leaf, Z, Leaf)))) ==> (out == S(S(S(Z))))) &&
+   true
+
+} }
+
+}
+
+t match {
+  case Leaf =>
+    Z
+  case Node(left, n, right) =>
+    nat_add(tree_count_nodes(left), S(tree_count_nodes(right)))
+}
+
+Correct

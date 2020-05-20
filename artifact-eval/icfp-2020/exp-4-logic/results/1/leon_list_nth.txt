@@ -1,0 +1,49 @@
+
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Blah {
+  
+sealed abstract class Nat
+case class S(nat: Nat) extends Nat
+case object Z extends Nat
+  
+sealed abstract class NatList
+case class Cons(head: Nat, tail: NatList) extends NatList
+case object Nil extends NatList
+  
+def list_nth(xs: NatList, n: Nat): Nat = { choose { (out:Nat) => 
+
+   (((xs == Nil) && (n == Z)) ==> (out == Z)) &&
+   (((xs == Nil) && (n == S(Z))) ==> (out == Z)) &&
+   (((xs == Cons(S(S(Z)), Nil)) && (n == Z)) ==> (out == S(S(Z)))) &&
+   (((xs == Cons(S(S(Z)), Nil)) && (n == S(Z))) ==> (out == Z)) &&
+   (((xs == Cons(S(Z), Cons(S(S(Z)), Nil))) && (n == Z)) ==> (out == S(Z))) &&
+   (((xs == Cons(S(Z), Cons(S(S(Z)), Nil))) && (n == S(Z))) ==> (out == S(S(Z)))) &&
+   (((xs == Cons(S(Z), Nil)) && (n == Z)) ==> (out == S(Z))) &&
+   (((xs == Cons(S(Z), Nil)) && (n == S(Z))) ==> (out == Z)) &&
+   (((xs == Cons(S(S(Z)), Cons(S(Z), Nil))) && (n == Z)) ==> (out == S(S(Z)))) &&
+   (((xs == Cons(S(S(Z)), Cons(S(Z), Nil))) && (n == S(Z))) ==> (out == S(Z))) &&
+   (((xs == Cons(S(S(S(Z))), Cons(S(S(Z)), Cons(S(Z), Nil)))) && (n == Z)) ==> (out == S(S(S(Z))))) &&
+   (((xs == Cons(S(S(S(Z))), Cons(S(S(Z)), Cons(S(Z), Nil)))) && (n == S(Z))) ==> (out == S(S(Z)))) &&
+   (((xs == Cons(S(S(S(Z))), Cons(S(S(Z)), Cons(S(Z), Nil)))) && (n == S(S(Z)))) ==> (out == S(Z))) &&
+   true
+
+} }
+
+}
+
+xs match {
+  case Nil =>
+    Z
+  case Cons(head, tail) =>
+    n match {
+      case Z =>
+        head
+      case S(nat) =>
+        list_nth(tail, nat)
+    }
+}
+
+Correct

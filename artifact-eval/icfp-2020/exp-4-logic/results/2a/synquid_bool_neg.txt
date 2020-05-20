@@ -1,0 +1,20 @@
+
+data Boolean where
+  T :: Boolean
+  F :: Boolean
+  
+bool_neg :: p:Boolean -> { Boolean | 
+
+   (p == T ==> _v == F) &&
+   (p == F ==> _v == T) &&
+   True
+
+}
+bool_neg = ??
+
+bool_neg = \p .
+match p with
+T -> F
+F -> T
+
+Correct
