@@ -1,0 +1,33 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data Boolean where
+  T :: Boolean
+  F :: Boolean
+  
+nat_iseven :: n:Nat -> { Boolean | 
+
+   (n == Z ==> _v == T) &&
+   (n == (S Z) ==> _v == F) &&
+   (n == (S (S Z)) ==> _v == T) &&
+   (n == (S (S (S Z))) ==> _v == F) &&
+   True
+
+}
+nat_iseven = ??
+
+nat_iseven = \n .
+match n with
+Z -> T
+S x2 ->
+match x2 with
+Z -> F
+S x4 -> nat_iseven x4
+
+Correct

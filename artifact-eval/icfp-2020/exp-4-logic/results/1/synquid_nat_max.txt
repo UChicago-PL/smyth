@@ -1,0 +1,55 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data Boolean where
+  T :: Boolean
+  F :: Boolean
+  
+data Cmp where
+  LT :: Cmp
+  EQ :: Cmp
+  GT :: Cmp
+  
+nat_compare :: Nat -> Nat -> Cmp
+nat_compare = \n1 . \n2 .
+  match n1 with
+    Z ->
+      match n2 with
+        Z   -> EQ
+        S _ -> LT
+    S m1 ->
+      match n2 with
+        Z    -> GT
+        S m2 -> nat_compare m1 m2
+  
+nat_max :: n1:Nat -> n2:Nat -> { Nat | 
+
+   (n1 == Z && n2 == Z ==> _v == Z) &&
+   (n1 == Z && n2 == (S Z) ==> _v == (S Z)) &&
+   (n1 == Z && n2 == (S (S Z)) ==> _v == (S (S Z))) &&
+   (n1 == (S Z) && n2 == Z ==> _v == (S Z)) &&
+   (n1 == (S Z) && n2 == (S Z) ==> _v == (S Z)) &&
+   (n1 == (S Z) && n2 == (S (S Z)) ==> _v == (S (S Z))) &&
+   (n1 == (S (S Z)) && n2 == Z ==> _v == (S (S Z))) &&
+   (n1 == (S (S Z)) && n2 == (S Z) ==> _v == (S (S Z))) &&
+   (n1 == (S (S Z)) && n2 == (S (S Z)) ==> _v == (S (S Z))) &&
+   True
+
+}
+nat_max = ??
+
+nat_max = \n1 . \n2 .
+match n1 with
+Z -> n2
+S x2 ->
+match n2 with
+Z -> n1
+S x4 -> S (nat_max x2 x4)
+
+Correct

@@ -16,7 +16,7 @@ bool_band = ??
 
 bool_band = \p . \q .
 match p with
-F -> p
 T -> q
+F -> p
 
 Correct

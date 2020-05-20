@@ -1,0 +1,44 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data Boolean where
+  T :: Boolean
+  F :: Boolean
+  
+data BooleanTree where
+  Leaf :: BooleanTree
+  Node :: BooleanTree -> Boolean -> BooleanTree -> BooleanTree
+
+termination measure sizeTree :: BooleanTree -> {Int | _v >= 0} where
+  Leaf -> 0
+  Node left x right -> 1 + sizeTree left + sizeTree right
+  
+nat_add :: Nat -> Nat -> Nat
+nat_add = \n1 . \n2 .
+  match n1 with
+    Z   -> n2
+    S m -> S (nat_add m n2)
+  
+tree_count_leaves :: t:BooleanTree -> { Nat | 
+
+   (t == Leaf ==> _v == (S Z)) &&
+   (t == (Node Leaf T Leaf) ==> _v == (S (S Z))) &&
+   (t == (Node (Node Leaf T Leaf) T Leaf) ==> _v == (S (S (S Z)))) &&
+   (t == (Node Leaf T (Node Leaf T Leaf)) ==> _v == (S (S (S Z)))) &&
+   (t == (Node (Node (Node Leaf T Leaf) T Leaf) T Leaf) ==> _v == (S (S (S (S Z))))) &&
+   (t == (Node (Node Leaf T Leaf) T (Node Leaf T Leaf)) ==> _v == (S (S (S (S Z))))) &&
+   (t == (Node (Node Leaf T Leaf) T (Node (Node Leaf T Leaf) T (Node Leaf T Leaf))) ==> _v == (S (S (S (S (S (S Z))))))) &&
+   True
+
+}
+tree_count_leaves = ??
+
+Terminated due to timeout of 120 seconds
+
+Error

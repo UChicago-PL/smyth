@@ -1,0 +1,56 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatList where
+  Nil :: NatList
+  Cons :: Nat -> NatList -> NatList
+
+termination measure len :: NatList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+data Cmp where
+  LT :: Cmp
+  EQ :: Cmp
+  GT :: Cmp
+  
+nat_compare :: Nat -> Nat -> Cmp
+nat_compare = \n1 . \n2 .
+  match n1 with
+    Z ->
+      match n2 with
+        Z   -> EQ
+        S _ -> LT
+    S m1 ->
+      match n2 with
+        Z    -> GT
+        S m2 -> nat_compare m1 m2
+  
+list_sorted_insert :: xs:NatList -> n:Nat -> { NatList | 
+
+   (xs == Nil && n == Z ==> _v == (Cons Z Nil)) &&
+-- (xs == Nil && n == (S Z) ==> _v == (Cons (S Z) Nil)) &&
+-- (xs == Nil && n == (S (S Z)) ==> _v == (Cons (S (S Z)) Nil)) &&
+-- (xs == (Cons Z Nil) && n == Z ==> _v == (Cons Z Nil)) &&
+-- (xs == (Cons Z Nil) && n == (S Z) ==> _v == (Cons Z (Cons (S Z) Nil))) &&
+-- (xs == (Cons (S Z) Nil) && n == Z ==> _v == (Cons Z (Cons (S Z) Nil))) &&
+   (xs == (Cons (S Z) Nil) && n == (S Z) ==> _v == (Cons (S Z) Nil)) &&
+   (xs == (Cons (S Z) Nil) && n == (S (S Z)) ==> _v == (Cons (S Z) (Cons (S (S Z)) Nil))) &&
+   (xs == (Cons (S (S Z)) Nil) && n == Z ==> _v == (Cons Z (Cons (S (S Z)) Nil))) &&
+   (xs == (Cons (S (S Z)) Nil) && n == (S Z) ==> _v == (Cons (S Z) (Cons (S (S Z)) Nil))) &&
+   (xs == (Cons Z (Cons (S Z) Nil)) && n == Z ==> _v == (Cons Z (Cons (S Z) Nil))) &&
+   (xs == (Cons Z (Cons (S Z) Nil)) && n == (S (S Z)) ==> _v == (Cons Z (Cons (S Z) (Cons (S (S Z)) Nil)))) &&
+   True
+
+}
+list_sorted_insert = ??
+
+Terminated due to timeout of 120 seconds
+
+Error

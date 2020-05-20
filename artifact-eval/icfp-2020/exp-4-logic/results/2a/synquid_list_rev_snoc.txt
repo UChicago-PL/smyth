@@ -1,0 +1,43 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatList where
+  Nil :: NatList
+  Cons :: Nat -> NatList -> NatList
+
+termination measure len :: NatList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+list_snoc :: NatList -> Nat -> NatList
+list_snoc = \xs . \n .
+  match xs with
+    Nil            -> Cons n Nil
+    Cons head tail -> Cons head (list_snoc tail n)
+  
+list_rev_snoc :: xs:NatList -> { NatList | 
+
+   (xs == Nil ==> _v == Nil) &&
+-- (xs == (Cons Z Nil) ==> _v == (Cons Z Nil)) &&
+-- (xs == (Cons (S Z) Nil) ==> _v == (Cons (S Z) Nil)) &&
+   (xs == (Cons Z (Cons (S Z) Nil)) ==> _v == (Cons (S Z) (Cons Z Nil))) &&
+   (xs == (Cons Z (Cons Z (Cons (S Z) Nil))) ==> _v == (Cons (S Z) (Cons Z (Cons Z Nil)))) &&
+   True
+
+}
+list_rev_snoc = ??
+
+/var/www/comcom/tmp/Synquid/6227679831888680/Synquid.sq:34: Error:
+Cannot match shape 'Nat'
+with shape 'NatList'
+when checking Z :: NatList in
+\xs .
+match list_snoc Z ?? with
+
+Error

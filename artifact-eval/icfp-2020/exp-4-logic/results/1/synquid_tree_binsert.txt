@@ -1,0 +1,64 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatTree where
+  Leaf :: NatTree
+  Node :: NatTree -> Nat -> NatTree -> NatTree
+
+termination measure sizeTree :: NatTree -> {Int | _v >= 0} where
+  Leaf -> 0
+  Node left x right -> 1 + sizeTree left + sizeTree right
+  
+data Cmp where
+  LT :: Cmp
+  EQ :: Cmp
+  GT :: Cmp
+  
+nat_compare :: Nat -> Nat -> Cmp
+nat_compare = \n1 . \n2 .
+  match n1 with
+    Z ->
+      match n2 with
+        Z   -> EQ
+        S _ -> LT
+    S m1 ->
+      match n2 with
+        Z    -> GT
+        S m2 -> nat_compare m1 m2
+  
+tree_binsert :: t:NatTree -> n:Nat -> { NatTree | 
+
+   (t == Leaf && n == Z ==> _v == (Node Leaf Z Leaf)) &&
+   (t == Leaf && n == (S Z) ==> _v == (Node Leaf (S Z) Leaf)) &&
+   (t == Leaf && n == (S (S Z)) ==> _v == (Node Leaf (S (S Z)) Leaf)) &&
+   (t == (Node Leaf (S Z) Leaf) && n == Z ==> _v == (Node (Node Leaf Z Leaf) (S Z) Leaf)) &&
+   (t == (Node Leaf (S Z) Leaf) && n == (S Z) ==> _v == (Node Leaf (S Z) Leaf)) &&
+   (t == (Node Leaf (S Z) Leaf) && n == (S (S Z)) ==> _v == (Node Leaf (S Z) (Node Leaf (S (S Z)) Leaf))) &&
+   (t == (Node Leaf Z Leaf) && n == Z ==> _v == (Node Leaf Z Leaf)) &&
+   (t == (Node Leaf Z Leaf) && n == (S Z) ==> _v == (Node Leaf Z (Node Leaf (S Z) Leaf))) &&
+   (t == (Node Leaf Z Leaf) && n == (S (S Z)) ==> _v == (Node Leaf Z (Node Leaf (S (S Z)) Leaf))) &&
+   (t == (Node Leaf (S (S Z)) Leaf) && n == Z ==> _v == (Node (Node Leaf Z Leaf) (S (S Z)) Leaf)) &&
+   (t == (Node Leaf (S (S Z)) Leaf) && n == (S Z) ==> _v == (Node (Node Leaf (S Z) Leaf) (S (S Z)) Leaf)) &&
+   (t == (Node Leaf (S (S Z)) Leaf) && n == (S (S Z)) ==> _v == (Node Leaf (S (S Z)) Leaf)) &&
+   (t == (Node (Node Leaf Z Leaf) (S Z) Leaf) && n == Z ==> _v == (Node (Node Leaf Z Leaf) (S Z) Leaf)) &&
+   (t == (Node (Node Leaf Z Leaf) (S Z) Leaf) && n == (S Z) ==> _v == (Node (Node Leaf Z Leaf) (S Z) Leaf)) &&
+   (t == (Node (Node Leaf Z Leaf) (S Z) Leaf) && n == (S (S Z)) ==> _v == (Node (Node Leaf Z Leaf) (S Z) (Node Leaf (S (S Z)) Leaf))) &&
+   (t == (Node Leaf Z (Node Leaf (S Z) Leaf)) && n == (S (S Z)) ==> _v == (Node Leaf Z (Node Leaf (S Z) (Node Leaf (S (S Z)) Leaf)))) &&
+   (t == (Node (Node Leaf (S Z) Leaf) (S (S Z)) Leaf) && n == Z ==> _v == (Node (Node (Node Leaf Z Leaf) (S Z) Leaf) (S (S Z)) Leaf)) &&
+   (t == (Node Leaf (S Z) (Node Leaf (S (S Z)) Leaf)) && n == Z ==> _v == (Node (Node Leaf Z Leaf) (S Z) (Node Leaf (S (S Z)) Leaf))) &&
+   (t == (Node Leaf (S Z) (Node Leaf (S (S Z)) Leaf)) && n == (S Z) ==> _v == (Node Leaf (S Z) (Node Leaf (S (S Z)) Leaf))) &&
+   (t == (Node (Node Leaf (S Z) Leaf) (S (S Z)) Leaf) && n == Z ==> _v == (Node (Node (Node Leaf Z Leaf) (S Z) Leaf) (S (S Z)) Leaf)) &&
+   True
+
+}
+tree_binsert = ??
+
+Terminated due to timeout of 120 seconds
+
+Error

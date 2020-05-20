@@ -28,9 +28,6 @@ list_tl = ??
 list_tl = \xs .
 match xs with
 Nil -> xs
-Cons x3 x4 ->
-match x4 with
-Nil -> x4
-Cons x7 x8 -> Cons Z Nil
+Cons x3 x4 -> x4
 
-Incorrect
+Correct

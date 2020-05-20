@@ -1,0 +1,33 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatList where
+  Nil :: NatList
+  Cons :: Nat -> NatList -> NatList
+
+termination measure len :: NatList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+list_length :: xs:NatList -> { Nat | 
+
+   (xs == Nil ==> _v == Z) &&
+   (xs == (Cons Z Nil) ==> _v == (S Z)) &&
+   (xs == (Cons Z (Cons Z Nil)) ==> _v == (S (S Z))) &&
+   True
+
+}
+list_length = ??
+
+list_length = \xs .
+match xs with
+Nil -> Z
+Cons x3 x4 -> S (list_length x4)
+
+Correct

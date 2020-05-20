@@ -25,11 +25,9 @@ list_hd :: xs:NatList -> { Nat |
 }
 list_hd = ??
 
-/var/www/comcom/tmp/Synquid/4912301894044712/Synquid.sq:26: Error:
-Cannot match shape 'Nat'
-with shape 'NatList'
-when checking Z :: NatList in
-\xs .
-match Cons Z Z with
- 
-Datatype Axioms
+list_hd = \xs .
+match xs with
+Nil -> Z
+Cons x3 x4 -> x3
+
+Correct

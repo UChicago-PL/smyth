@@ -1,0 +1,50 @@
+
+data Boolean where
+  T :: Boolean
+  F :: Boolean
+  
+data BooleanTree where
+  Leaf :: BooleanTree
+  Node :: BooleanTree -> Boolean -> BooleanTree -> BooleanTree
+
+termination measure sizeTree :: BooleanTree -> {Int | _v >= 0} where
+  Leaf -> 0
+  Node left x right -> 1 + sizeTree left + sizeTree right
+  
+data BooleanList where
+  Nil :: BooleanList
+  Cons :: Boolean -> BooleanList -> BooleanList
+
+termination measure len :: BooleanList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+list_append :: BooleanList -> BooleanList -> BooleanList
+list_append = \l1 . \l2 .
+  match l1 with
+    Nil            -> l2
+    Cons head tail -> Cons head (list_append tail l2)
+  
+tree_collect_leaves :: t:BooleanTree -> { BooleanList | 
+
+   (t == Leaf ==> _v == Nil) &&
+-- (t == (Node Leaf T Leaf) ==> _v == (Cons T Nil)) &&
+-- (t == (Node Leaf F Leaf) ==> _v == (Cons F Nil)) &&
+   (t == (Node (Node Leaf T Leaf) F Leaf) ==> _v == (Cons T (Cons F Nil))) &&
+-- (t == (Node (Node Leaf F Leaf) T Leaf) ==> _v == (Cons F (Cons T Nil))) &&
+   (t == (Node Leaf F (Node Leaf T Leaf)) ==> _v == (Cons F (Cons T Nil))) &&
+   True
+
+}
+tree_collect_leaves = ??
+
+tree_collect_leaves = \t .
+match t with
+Leaf -> Nil
+Node x4 x5 x6 ->
+match x4 with
+Leaf -> Cons x5 (Cons T Nil)
+Node x14 x15 x16 -> Cons x15 (Cons x5
+Nil)
+
+Incorrect

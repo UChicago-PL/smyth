@@ -1,0 +1,39 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatList where
+  Nil :: NatList
+  Cons :: Nat -> NatList -> NatList
+
+termination measure len :: NatList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+list_pairwise_swap :: xs:NatList -> { NatList | 
+
+   (xs == Nil ==> _v == Nil) &&
+-- (xs == (Cons Z Nil) ==> _v == Nil) &&
+   (xs == (Cons (S Z) Nil) ==> _v == Nil) &&
+-- (xs == (Cons Z (Cons (S Z) Nil)) ==> _v == (Cons (S Z) (Cons Z Nil))) &&
+   (xs == (Cons (S Z) (Cons Z Nil)) ==> _v == (Cons Z (Cons (S Z) Nil))) &&
+   (xs == (Cons (S Z) (Cons Z (Cons (S Z) Nil))) ==> _v == Nil) &&
+   (xs == (Cons Z (Cons (S Z) (Cons Z (Cons (S Z) Nil)))) ==> _v == (Cons (S Z) (Cons Z (Cons (S Z) (Cons Z Nil))))) &&
+   True
+
+}
+list_pairwise_swap = ??
+
+/var/www/comcom/tmp/Synquid/6535434313496091/Synquid.sq:30: Error:
+Cannot match shape 'Nat'
+with shape 'NatList'
+when checking Z :: NatList in
+\xs .
+match Cons Z Z with
+
+Error

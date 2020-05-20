@@ -32,13 +32,24 @@ list_inc :: xs:NatList -> { NatList |
 }
 list_inc = ??
 
-list_map = \xs . \f .
-match xs with
-Nil -> Nil
-Cons head tail -> Cons (f head)
-(list_map tail f)
- 
-synquid: src/Synquid/Program.hs:(71,1)-(72,72): Non-exhaustive patterns in
-function symbolList
+-e=True
 
-Datatype Axioms
+list_inc = \xs .
+match xs with
+Nil -> xs
+Cons x3 x4 ->
+match x4 with
+Nil -> x4
+Cons x7 x8 -> Cons x7 (Cons (S x7) x8)
+
+-e=False
+
+list_inc = \xs .
+match xs with
+Nil -> xs
+Cons x3 x4 ->
+match x4 with
+Nil -> x4
+Cons x7 x8 -> Cons x7 (Cons (S x7) x8)
+
+Incorrect

@@ -1,0 +1,35 @@
+
+data Boolean where
+  T :: Boolean
+  F :: Boolean
+  
+data BooleanList where
+  Nil :: BooleanList
+  Cons :: Boolean -> BooleanList -> BooleanList
+
+termination measure len :: BooleanList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+list_even_parity :: xs:BooleanList -> { Boolean | 
+
+   (xs == Nil ==> _v == T) &&
+   (xs == (Cons F Nil) ==> _v == T) &&
+   (xs == (Cons T Nil) ==> _v == F) &&
+   (xs == (Cons F (Cons F Nil)) ==> _v == T) &&
+   (xs == (Cons F (Cons T Nil)) ==> _v == F) &&
+   (xs == (Cons T (Cons F Nil)) ==> _v == F) &&
+   (xs == (Cons T (Cons T Nil)) ==> _v == T) &&
+   True
+
+}
+list_even_parity = ??
+
+/var/www/comcom/tmp/Synquid/1897593237233807/Synquid.sq:26: Error:
+Cannot match shape 'Boolean'
+with shape 'BooleanList'
+when checking T :: BooleanList in
+\xs .
+match Cons T T with
+
+Error

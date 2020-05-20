@@ -1,0 +1,55 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatList where
+  Nil :: NatList
+  Cons :: Nat -> NatList -> NatList
+
+termination measure len :: NatList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+list_rev_tailcall :: xs:NatList -> acc:NatList -> { NatList | 
+
+   (xs == Nil && acc == Nil ==> _v == Nil) &&
+   (xs == Nil && acc == (Cons Z Nil) ==> _v == (Cons Z Nil)) &&
+   (xs == Nil && acc == (Cons (S Z) Nil) ==> _v == (Cons (S Z) Nil)) &&
+   (xs == Nil && acc == (Cons (S Z) (Cons Z Nil)) ==> _v == (Cons (S Z) (Cons Z Nil))) &&
+   (xs == (Cons Z Nil) && acc == Nil ==> _v == (Cons Z Nil)) &&
+   (xs == (Cons (S Z) Nil) && acc == Nil ==> _v == (Cons (S Z) Nil)) &&
+   (xs == (Cons (S Z) Nil) && acc == (Cons Z Nil) ==> _v == (Cons (S Z) (Cons Z Nil))) &&
+   (xs == (Cons Z (Cons (S Z) Nil)) && acc == Nil ==> _v == (Cons (S Z) (Cons Z Nil))) &&
+   True
+
+}
+list_rev_tailcall = ??
+
+-e=True
+
+list_rev_tailcall = \xs . \acc .
+match acc with
+Nil ->
+match xs with
+Nil -> acc
+Cons x3 x4 -> list_rev_tailcall x4 (Cons
+x3 acc)
+Cons x11 x12 ->
+match xs with
+Nil -> acc
+Cons x15 x16 -> Cons x15 acc
+
+-e=False
+
+list_rev_tailcall = \xs . \acc .
+match xs with
+Nil -> acc
+Cons x3 x4 -> list_rev_tailcall x4 (Cons
+x3 acc)
+
+Correct (e=False)

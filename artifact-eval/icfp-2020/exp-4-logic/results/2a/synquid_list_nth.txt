@@ -34,3 +34,7 @@ list_nth :: xs:NatList -> n:Nat -> { Nat |
 
 }
 list_nth = ??
+
+Terminated due to timeout of 120 seconds
+
+Error

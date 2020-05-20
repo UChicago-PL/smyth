@@ -1,0 +1,42 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data Boolean where
+  T :: Boolean
+  F :: Boolean
+  
+data BooleanTree where
+  Leaf :: BooleanTree
+  Node :: BooleanTree -> Boolean -> BooleanTree -> BooleanTree
+
+termination measure sizeTree :: BooleanTree -> {Int | _v >= 0} where
+  Leaf -> 0
+  Node left x right -> 1 + sizeTree left + sizeTree right
+  
+tree_nodes_at_level :: t:BooleanTree -> n:Nat -> { Nat | 
+
+   (t == Leaf && n == Z ==> _v == Z) &&
+   (t == Leaf && n == (S Z) ==> _v == Z) &&
+   (t == (Node Leaf T Leaf) && n == Z ==> _v == (S Z)) &&
+   (t == (Node Leaf T Leaf) && n == (S Z) ==> _v == Z) &&
+   (t == (Node (Node Leaf T Leaf) T Leaf) && n == Z ==> _v == (S Z)) &&
+   (t == (Node (Node Leaf T Leaf) T Leaf) && n == (S Z) ==> _v == (S Z)) &&
+   (t == (Node (Node Leaf T Leaf) T (Node Leaf T Leaf)) && n == Z ==> _v == (S Z)) &&
+   (t == (Node (Node Leaf T Leaf) T (Node Leaf T Leaf)) && n == (S Z) ==> _v == (S (S Z))) &&
+   (t == (Node (Node Leaf T Leaf) T (Node Leaf T Leaf)) && n == (S (S Z)) ==> _v == Z) &&
+   (t == (Node (Node (Node Leaf T Leaf) T (Node Leaf T Leaf)) T Leaf) && n == Z ==> _v == (S Z)) &&
+   (t == (Node (Node (Node Leaf T Leaf) T (Node Leaf T Leaf)) T Leaf) && n == (S Z) ==> _v == (S Z)) &&
+   True
+
+}
+tree_nodes_at_level = ??
+
+Terminated due to timeout of 120 seconds
+
+Error

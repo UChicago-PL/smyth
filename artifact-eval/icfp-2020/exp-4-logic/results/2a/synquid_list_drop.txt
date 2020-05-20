@@ -1,0 +1,38 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatList where
+  Nil :: NatList
+  Cons :: Nat -> NatList -> NatList
+
+termination measure len :: NatList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+list_drop :: xs:NatList -> n:Nat -> { NatList | 
+
+   (xs == Nil && n == Z ==> _v == Nil) &&
+-- (xs == Nil && n == (S Z) ==> _v == Nil) &&
+-- (xs == (Cons Z Nil) && n == Z ==> _v == (Cons Z Nil)) &&
+-- (xs == (Cons Z Nil) && n == (S Z) ==> _v == Nil) &&
+   (xs == (Cons (S Z) Nil) && n == Z ==> _v == (Cons (S Z) Nil)) &&
+   (xs == (Cons (S Z) Nil) && n == (S Z) ==> _v == Nil) &&
+-- (xs == (Cons (S Z) (Cons Z Nil)) && n == Z ==> _v == (Cons (S Z) (Cons Z Nil))) &&
+   (xs == (Cons (S Z) (Cons Z Nil)) && n == (S Z) ==> _v == (Cons Z Nil)) &&
+-- (xs == (Cons Z (Cons (S Z) Nil)) && n == Z ==> _v == (Cons Z (Cons (S Z) Nil))) &&
+-- (xs == (Cons Z (Cons (S Z) Nil)) && n == (S Z) ==> _v == (Cons (S Z) Nil)) &&
+   (xs == (Cons Z (Cons (S Z) Nil)) && n == (S (S Z)) ==> _v == Nil) &&
+   True
+
+}
+list_drop = ??
+
+Terminated due to timeout of 120 seconds
+
+Error
