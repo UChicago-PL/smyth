@@ -55,6 +55,9 @@ and exp : exp -> string =
                   | ECtor ("None", [], ETuple []) ->
                       "None"
 
+                  | EVar name ->
+                      "'" ^ name ^ "'"
+
                   | _ ->
                       unsupported
                 end
