@@ -1,0 +1,53 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatList where
+  Nil :: NatList
+  Cons :: Nat -> NatList -> NatList
+
+termination measure len :: NatList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+data NatTree where
+  Leaf :: NatTree
+  Node :: NatTree -> Nat -> NatTree -> NatTree
+
+termination measure sizeTree :: NatTree -> {Int | _v >= 0} where
+  Leaf -> 0
+  Node left x right -> 1 + sizeTree left + sizeTree right
+  
+list_append :: NatList -> NatList -> NatList
+list_append = \l1 . \l2 .
+  match l1 with
+    Nil            -> l2
+    Cons head tail -> Cons head (list_append tail l2)
+  
+tree_preorder :: t:NatTree -> { NatList | 
+
+   (t == Leaf ==> _v == Nil) &&
+-- (t == (Node Leaf (S Z) Leaf) ==> _v == (Cons (S Z) Nil)) &&
+-- (t == (Node Leaf (S (S Z)) Leaf) ==> _v == (Cons (S (S Z)) Nil)) &&
+   (t == (Node (Node Leaf (S Z) Leaf) (S (S Z)) Leaf) ==> _v == (Cons (S (S Z)) (Cons (S Z) Nil))) &&
+   (t == (Node Leaf (S Z) (Node Leaf (S (S Z)) Leaf)) ==> _v == (Cons (S Z) (Cons (S (S Z)) Nil))) &&
+   True
+
+}
+tree_preorder = ??
+
+tree_preorder = \t .
+match t with
+Leaf -> Nil
+Node x4 x5 x6 ->
+match x4 with
+Leaf -> Cons x5 (Cons (S x5) Nil)
+Node x15 x16 x17 -> Cons x5 (Cons x16
+Nil)
+
+Incorrect

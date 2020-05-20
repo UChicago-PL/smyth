@@ -1,0 +1,34 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+nat_add :: in1:Nat -> in2:Nat -> { Nat | 
+
+   (in1 == Z && in2 == Z ==> _v == Z) &&
+   (in1 == Z && in2 == (S Z) ==> _v == (S Z)) &&
+-- (in1 == Z && in2 == (S (S Z)) ==> _v == (S (S Z))) &&
+-- (in1 == (S Z) && in2 == Z ==> _v == (S Z)) &&
+-- (in1 == (S Z) && in2 == (S Z) ==> _v == (S (S Z))) &&
+   (in1 == (S Z) && in2 == (S (S Z)) ==> _v == (S (S (S Z)))) &&
+   (in1 == (S (S Z)) && in2 == Z ==> _v == (S (S Z))) &&
+-- (in1 == (S (S Z)) && in2 == (S Z) ==> _v == (S (S (S Z)))) &&
+-- (in1 == (S (S Z)) && in2 == (S (S Z)) ==> _v == (S (S (S (S Z))))) &&
+   True
+
+}
+nat_add = ??
+
+nat_add = \in1 . \in2 .
+match in1 with
+Z -> in2
+S x2 ->
+match x2 with
+Z -> S in2
+S x5 -> in1
+
+Incorrect

@@ -28,6 +28,6 @@ list_hd = ??
 list_hd = \xs .
 match xs with
 Nil -> Z
-Cons x3 x4 -> S Z
+Cons x3 x4 -> x3
 
-Incorrect
+Correct

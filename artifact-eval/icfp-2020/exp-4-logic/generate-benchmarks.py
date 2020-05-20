@@ -213,7 +213,7 @@ class Synquid:
         Nil ->
           Cons n Nil
         Cons head tail ->
-          match nat_compare n head of
+          match nat_compare n head with
             LT -> Cons n xs
             EQ -> xs
             GT -> Cons head (list_insert tail n)

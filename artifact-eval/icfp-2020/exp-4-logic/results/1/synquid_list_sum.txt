@@ -37,7 +37,7 @@ list_sum :: xs:NatList -> { Nat |
 }
 list_sum = ??
 
-/var/www/comcom/tmp/Synquid/9540958239524920/Synquid.sq:19: Error:
+/var/www/comcom/tmp/Synquid/0253224069195262/Synquid.sq:19: Error:
 Cannot find sufficiently strong refinements
 when checking acc ::
 {Nat|dec _v >= 0 && dec _v < dec acc} in
@@ -46,4 +46,4 @@ match xs with
 Cons head tail -> f (list_fold f acc ??)
 ??
 
-Datatype Axioms
+Error

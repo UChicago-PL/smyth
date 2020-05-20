@@ -1,0 +1,53 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatList where
+  Nil :: NatList
+  Cons :: Nat -> NatList -> NatList
+
+termination measure len :: NatList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+data NatListList where
+  LNil :: NatListList
+  LCons :: NatList -> NatListList -> NatListList
+
+termination measure llen :: NatListList -> {Int | _v >= 0} where
+  LNil -> 0
+  LCons x xs -> 1 + llen xs
+  
+list_append :: NatList -> NatList -> NatList
+list_append = \l1 . \l2 .
+  match l1 with
+    Nil            -> l2
+    Cons head tail -> Cons head (list_append tail l2)
+  
+list_concat :: xss:NatListList -> { NatList | 
+
+   (xss == LNil ==> _v == Nil) &&
+   (xss == (LCons Nil LNil) ==> _v == Nil) &&
+   (xss == (LCons (Cons Z Nil) LNil) ==> _v == (Cons Z Nil)) &&
+   (xss == (LCons (Cons Z Nil) (LCons (Cons Z Nil) LNil)) ==> _v == (Cons Z (Cons Z Nil))) &&
+   (xss == (LCons (Cons (S Z) Nil) LNil) ==> _v == (Cons (S Z) Nil)) &&
+   (xss == (LCons (Cons (S Z) Nil) (LCons (Cons (S Z) Nil) LNil)) ==> _v == (Cons (S Z) (Cons (S Z) Nil))) &&
+   True
+
+}
+list_concat = ??
+
+list_concat = \xss .
+match xss with
+LNil -> Nil
+LCons x3 x4 ->
+match x3 with
+Nil -> x3
+Cons x7 x8 -> Cons x7 (list_concat x4)
+
+Incorrect

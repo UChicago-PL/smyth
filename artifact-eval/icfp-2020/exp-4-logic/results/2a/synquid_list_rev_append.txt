@@ -1,0 +1,38 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatList where
+  Nil :: NatList
+  Cons :: Nat -> NatList -> NatList
+
+termination measure len :: NatList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+list_append :: NatList -> NatList -> NatList
+list_append = \l1 . \l2 .
+  match l1 with
+    Nil            -> l2
+    Cons head tail -> Cons head (list_append tail l2)
+  
+list_rev_append :: l1:NatList -> l2:NatList -> { NatList | 
+
+   (l1 == Nil ==> _v == Nil) &&
+   (l1 == (Cons Z Nil) ==> _v == (Cons Z Nil)) &&
+-- (l1 == (Cons (S Z) Nil) ==> _v == (Cons (S Z) Nil)) &&
+-- (l1 == (Cons Z (Cons (S Z) Nil)) ==> _v == (Cons (S Z) (Cons Z Nil))) &&
+   (l1 == (Cons Z (Cons Z (Cons (S Z) Nil))) ==> _v == (Cons (S Z) (Cons Z (Cons Z Nil)))) &&
+   True
+
+}
+list_rev_append = ??
+
+Terminated due to timeout of 120 seconds
+
+Error

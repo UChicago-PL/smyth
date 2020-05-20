@@ -33,3 +33,12 @@ list_take :: n:Nat -> xs:NatList -> { NatList |
 
 }
 list_take = ??
+
+/var/www/comcom/tmp/Synquid/8689339106183630/Synquid.sq:35: Error:
+Cannot find sufficiently strong refinements
+when checking Z ::
+{Nat|dec _v >= 0 && dec _v < dec n} in
+\n . \xs .
+match list_take Z ?? with
+
+Error

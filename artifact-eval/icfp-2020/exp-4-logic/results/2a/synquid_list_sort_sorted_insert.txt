@@ -1,0 +1,69 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatList where
+  Nil :: NatList
+  Cons :: Nat -> NatList -> NatList
+
+termination measure len :: NatList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+data Cmp where
+  LT :: Cmp
+  EQ :: Cmp
+  GT :: Cmp
+  
+nat_compare :: Nat -> Nat -> Cmp
+nat_compare = \n1 . \n2 .
+  match n1 with
+    Z ->
+      match n2 with
+        Z   -> EQ
+        S _ -> LT
+    S m1 ->
+      match n2 with
+        Z    -> GT
+        S m2 -> nat_compare m1 m2
+  
+list_insert :: NatList -> Nat -> NatList
+list_insert = \xs . \n .
+  match xs with
+    Nil ->
+      Cons n Nil
+    Cons head tail ->
+      match nat_compare n head with
+        LT -> Cons n xs
+        EQ -> xs
+        GT -> Cons head (list_insert tail n)
+  
+list_sort_sorted_insert :: xs:NatList -> { NatList | 
+
+   (xs == Nil ==> _v == Nil) &&
+-- (xs == (Cons Z Nil) ==> _v == (Cons Z Nil)) &&
+-- (xs == (Cons (S Z) Nil) ==> _v == (Cons (S Z) Nil)) &&
+-- (xs == (Cons Z (Cons Z Nil)) ==> _v == (Cons Z Nil)) &&
+-- (xs == (Cons (S Z) (Cons Z Nil)) ==> _v == (Cons Z (Cons (S Z) Nil))) &&
+   (xs == (Cons (S Z) (Cons (S Z) Nil)) ==> _v == (Cons (S Z) Nil)) &&
+   (xs == (Cons Z (Cons (S Z) (Cons (S Z) Nil))) ==> _v == (Cons Z (Cons (S Z) Nil))) &&
+   True
+
+}
+list_sort_sorted_insert = ??
+
+list_sort_sorted_insert = \xs .
+match xs with
+Nil -> xs
+Cons x3 x4 ->
+match x3 with
+Z -> Cons x3 (list_sort_sorted_insert
+x4)
+S x9 -> x4
+
+Incorrect

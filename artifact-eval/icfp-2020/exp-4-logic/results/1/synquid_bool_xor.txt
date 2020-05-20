@@ -15,11 +15,11 @@ bool_xor :: p:Boolean -> q:Boolean -> { Boolean |
 bool_xor = ??
 
 bool_xor = \p . \q .
-match q with
-F -> p
-T ->
 match p with
-F -> q
+T ->
+match q with
 T -> F
+F -> p
+F -> q
 
 Correct

@@ -1,0 +1,61 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatList where
+  Nil :: NatList
+  Cons :: Nat -> NatList -> NatList
+
+termination measure len :: NatList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+list_nth :: xs:NatList -> n:Nat -> { Nat | 
+
+   (xs == Nil && n == Z ==> _v == Z) &&
+   (xs == Nil && n == (S Z) ==> _v == Z) &&
+   (xs == (Cons (S (S Z)) Nil) && n == Z ==> _v == (S (S Z))) &&
+   (xs == (Cons (S (S Z)) Nil) && n == (S Z) ==> _v == Z) &&
+   (xs == (Cons (S Z) (Cons (S (S Z)) Nil)) && n == Z ==> _v == (S Z)) &&
+   (xs == (Cons (S Z) (Cons (S (S Z)) Nil)) && n == (S Z) ==> _v == (S (S Z))) &&
+   (xs == (Cons (S Z) Nil) && n == Z ==> _v == (S Z)) &&
+   (xs == (Cons (S Z) Nil) && n == (S Z) ==> _v == Z) &&
+   (xs == (Cons (S (S Z)) (Cons (S Z) Nil)) && n == Z ==> _v == (S (S Z))) &&
+   (xs == (Cons (S (S Z)) (Cons (S Z) Nil)) && n == (S Z) ==> _v == (S Z)) &&
+   (xs == (Cons (S (S (S Z))) (Cons (S (S Z)) (Cons (S Z) Nil))) && n == Z ==> _v == (S (S (S Z)))) &&
+   (xs == (Cons (S (S (S Z))) (Cons (S (S Z)) (Cons (S Z) Nil))) && n == (S Z) ==> _v == (S (S Z))) &&
+   (xs == (Cons (S (S (S Z))) (Cons (S (S Z)) (Cons (S Z) Nil))) && n == (S (S Z)) ==> _v == (S Z)) &&
+   True
+
+}
+list_nth = ??
+
+-e=True
+
+list_nth = \xs . \n .
+match n with
+Z ->
+match xs with
+Nil -> n
+Cons x3 x4 -> x3
+S x6 ->
+match xs with
+Nil -> x6
+Cons x9 x10 -> list_nth x10 x6
+
+-e=False
+
+list_nth = \xs . \n .
+match xs with
+Nil -> Z
+Cons x3 x4 ->
+match n with
+Z -> x3
+S x6 -> list_nth x4 x6
+
+Correct (e=False)

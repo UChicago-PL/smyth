@@ -20,6 +20,6 @@ nat_pred = ??
 nat_pred = \n .
 match n with
 Z -> n
-S x2 -> S Z
+S x2 -> x2
 
-Incorrect
+Correct

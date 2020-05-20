@@ -32,13 +32,11 @@ list_inc :: xs:NatList -> { NatList |
 }
 list_inc = ??
 
-list_map = \xs . \f .
-match xs with
-Nil -> Nil
-Cons head tail -> Cons (f head)
-(list_map tail f)
- 
-synquid: src/Synquid/Program.hs:(71,1)-(72,72): Non-exhaustive patterns in
-function symbolList
+/var/www/comcom/tmp/Synquid/2740779682871320/Synquid.sq:33: Error:
+Cannot match shape 'Nat'
+with shape 'NatList'
+when checking Z :: NatList in
+\xs .
+match list_map Z ?? with
 
-Datatype Axioms
+Error

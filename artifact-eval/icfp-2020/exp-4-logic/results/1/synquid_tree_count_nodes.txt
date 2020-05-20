@@ -1,0 +1,59 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatTree where
+  Leaf :: NatTree
+  Node :: NatTree -> Nat -> NatTree -> NatTree
+
+termination measure sizeTree :: NatTree -> {Int | _v >= 0} where
+  Leaf -> 0
+  Node left x right -> 1 + sizeTree left + sizeTree right
+  
+nat_add :: Nat -> Nat -> Nat
+nat_add = \n1 . \n2 .
+  match n1 with
+    Z   -> n2
+    S m -> S (nat_add m n2)
+  
+tree_count_nodes :: t:NatTree -> { Nat | 
+
+   (t == Leaf ==> _v == Z) &&
+   (t == (Node Leaf Z Leaf) ==> _v == (S Z)) &&
+   (t == (Node (Node Leaf Z Leaf) Z Leaf) ==> _v == (S (S Z))) &&
+   (t == (Node Leaf Z (Node Leaf Z Leaf)) ==> _v == (S (S Z))) &&
+   (t == (Node (Node Leaf Z (Node Leaf Z Leaf)) Z Leaf) ==> _v == (S (S (S Z)))) &&
+   (t == (Node Leaf Z (Node Leaf Z (Node Leaf Z Leaf))) ==> _v == (S (S (S Z)))) &&
+   True
+
+}
+tree_count_nodes = ??
+
+-e=True
+
+tree_count_nodes = \t .
+match t with
+Leaf -> Z
+Node x4 x5 x6 ->
+match x4 with
+Leaf -> S (tree_count_nodes x6)
+Node x12 x13 x14 -> S (tree_count_nodes
+x4)
+
+-e=False
+
+tree_count_nodes = \t .
+match t with
+Leaf -> Z
+Node x4 x5 x6 ->
+match x4 with
+Leaf -> S (tree_count_nodes x6)
+Node x12 x13 x14 -> S (tree_count_nodes
+x4)
+
+Incorrect

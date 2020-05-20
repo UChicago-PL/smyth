@@ -39,7 +39,7 @@ list_rev_fold :: xs:NatList -> { NatList |
 }
 list_rev_fold = ??
 
-/var/www/comcom/tmp/Synquid/3793204312260612/Synquid.sq:19: Error:
+/var/www/comcom/tmp/Synquid/9226949454793440/Synquid.sq:19: Error:
 Cannot find sufficiently strong refinements
 when checking acc ::
 {Nat|dec _v >= 0 && dec _v < dec acc} in
@@ -48,4 +48,4 @@ match xs with
 Cons head tail -> f (list_fold f acc ??)
 ??
 
-Datatype Axioms
+Error

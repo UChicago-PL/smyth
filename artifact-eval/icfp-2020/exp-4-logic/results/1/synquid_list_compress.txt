@@ -1,0 +1,62 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatList where
+  Nil :: NatList
+  Cons :: Nat -> NatList -> NatList
+
+termination measure len :: NatList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+data Cmp where
+  LT :: Cmp
+  EQ :: Cmp
+  GT :: Cmp
+  
+nat_compare :: Nat -> Nat -> Cmp
+nat_compare = \n1 . \n2 .
+  match n1 with
+    Z ->
+      match n2 with
+        Z   -> EQ
+        S _ -> LT
+    S m1 ->
+      match n2 with
+        Z    -> GT
+        S m2 -> nat_compare m1 m2
+  
+list_compress :: xs:NatList -> { NatList | 
+
+   (xs == Nil ==> _v == Nil) &&
+   (xs == (Cons Z Nil) ==> _v == (Cons Z Nil)) &&
+   (xs == (Cons (S Z) Nil) ==> _v == (Cons (S Z) Nil)) &&
+   (xs == (Cons Z (Cons Z Nil)) ==> _v == (Cons Z Nil)) &&
+   (xs == (Cons (S Z) (Cons (S Z) Nil)) ==> _v == (Cons (S Z) Nil)) &&
+   (xs == (Cons (S (S Z)) (Cons Z Nil)) ==> _v == (Cons (S (S Z)) (Cons Z Nil))) &&
+   (xs == (Cons (S Z) (Cons Z (Cons Z Nil))) ==> _v == (Cons (S Z) (Cons Z Nil))) &&
+   (xs == (Cons Z (Cons (S Z) (Cons (S Z) Nil))) ==> _v == (Cons Z (Cons (S Z) Nil))) &&
+   (xs == (Cons (S (S Z)) (Cons (S Z) (Cons Z (Cons Z Nil)))) ==> _v == (Cons (S (S Z)) (Cons (S Z) (Cons Z Nil)))) &&
+   (xs == (Cons (S (S Z)) (Cons (S (S Z)) (Cons (S Z) (Cons Z (Cons Z Nil))))) ==> _v == (Cons (S (S Z)) (Cons (S Z) (Cons Z Nil)))) &&
+   (xs == (Cons (S (S Z)) (Cons (S (S Z)) (Cons Z Nil))) ==> _v == (Cons (S (S Z)) (Cons Z Nil))) &&
+   (xs == (Cons (S (S Z)) (Cons (S (S Z)) (Cons (S (S Z)) (Cons Z Nil)))) ==> _v == (Cons (S (S Z)) (Cons Z Nil))) &&
+   (xs == (Cons (S Z) (Cons (S (S Z)) (Cons (S (S Z)) (Cons (S (S Z)) (Cons Z Nil))))) ==> _v == (Cons (S Z) (Cons (S (S Z)) (Cons Z Nil)))) &&
+   True
+
+}
+list_compress = ??
+
+/var/www/comcom/tmp/Synquid/5613859907379607/Synquid.sq:53: Error:
+Cannot match shape 'NatList'
+with shape 'Nat'
+when checking Nil :: Nat in
+\xs .
+match nat_compare Z Nil with
+
+Error

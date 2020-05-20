@@ -1,0 +1,47 @@
+\\
+bool\_band&\leonquidCorrect&\leonquidCorrect&\leonquidCorrect&\leonquidCorrect\\
+bool\_bor&\leonquidCorrect&\leonquidCorrect&\leonquidCorrect&\leonquidCorrect\\
+bool\_impl&\leonquidCorrect&\leonquidCorrect&\leonquidCorrect&\leonquidCorrect\\
+bool\_neg&\leonquidCorrect&\leonquidCorrect \highlightBlue{$\Rightarrow$} \leonquidBlank&\leonquidCorrect&\leonquidCorrect \highlightBlue{$\Rightarrow$} \leonquidBlank\\
+bool\_xor&\leonquidCorrect&\leonquidIncorrect \highlightBlue{$\Rightarrow$} \leonquidBlank&\leonquidCorrect&\leonquidCorrect \highlightBlue{$\Rightarrow$} \leonquidBlank\\
+\\
+list\_append&\leonquidCorrect&\leonquidIncorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidCorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidIncorrect\\
+list\_compress&\leonquidError&\leonquidBlank&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError&\leonquidBlank\\
+list\_concat&\leonquidCorrect&\leonquidIncorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidIncorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidIncorrect\\
+list\_drop&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidCorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidError\\
+list\_even\_parity&\leonquidCorrect&\leonquidIncorrect \highlightBlue{$\Rightarrow$} \leonquidBlank&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidBlank\\
+list\_filter&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X\\
+list\_fold&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X\\
+list\_hd&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidCorrect&\leonquidIncorrect \highlightBlue{$\Rightarrow$} \leonquidCorrect\\
+list\_inc&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidIncorrect\\
+list\_last&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidCorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidError\\
+list\_length&\leonquidCorrect&\leonquidBlank&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidCorrect&\leonquidBlank\\
+list\_map&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X\\
+list\_nth&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidCorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidError\\
+list\_pairwise\_swap&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidError\\
+list\_rev\_append&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidError\\
+list\_rev\_fold&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError\\
+list\_rev\_snoc&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidIncorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidError\\
+list\_rev\_tailcall&\leonquidIncorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidCorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidIncorrect\\
+list\_snoc&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidCorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidError\\
+list\_sort\_sorted\_insert&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidIncorrect\\
+list\_sorted\_insert&\leonquidError&\leonquidError&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidError\\
+list\_stutter&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidCorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidIncorrect\\
+list\_sum&\leonquidCorrect&\leonquidIncorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError\\
+list\_take&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidCorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidError\\
+list\_tl&\leonquidCorrect&\leonquidCorrect&\leonquidIncorrect \highlightBlue{$\Rightarrow$} \leonquidCorrect&\leonquidIncorrect \highlightBlue{$\Rightarrow$} \leonquidCorrect\\
+\\
+nat\_add&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidCorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidIncorrect\\
+nat\_iseven&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidCorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidError\\
+nat\_max&\leonquidIncorrect&\leonquidBlank&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidCorrect&\leonquidBlank\\
+nat\_pred&\leonquidCorrect&\leonquidCorrect&\leonquidIncorrect \highlightBlue{$\Rightarrow$} \leonquidCorrect&\leonquidIncorrect \highlightBlue{$\Rightarrow$} \leonquidCorrect\\
+\\
+tree\_binsert&\leonquidError&\leonquidBlank&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError&\leonquidBlank\\
+tree\_collect\_leaves&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidIncorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidIncorrect\\
+tree\_count\_leaves&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidError\\
+tree\_count\_nodes&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidIncorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidError\\
+tree\_inorder&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidIncorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidError\\
+tree\_map&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X&\leonHigherOrderFunc \highlightBlue{$\Rightarrow$} X\\
+tree\_nodes\_at\_level&\leonquidError&\leonquidBlank&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError&\leonquidBlank\\
+tree\_postorder&\leonquidCorrect&\leonquidBlank&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidError&\leonquidBlank\\
+tree\_preorder&\leonquidCorrect&\leonquidCorrect&\synquidDatatypeAxioms \highlightBlue{$\Rightarrow$} \leonquidIncorrect&\synquidNotTraceComplete \highlightBlue{$\Rightarrow$} \leonquidIncorrect\\

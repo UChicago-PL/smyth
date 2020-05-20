@@ -21,3 +21,12 @@ nat_iseven :: n:Nat -> { Boolean |
 
 }
 nat_iseven = ??
+
+/var/www/comcom/tmp/Synquid/8416844159184886/Synquid.sq:23: Error:
+Cannot find sufficiently strong refinements
+when checking Z ::
+{Nat|dec _v >= 0 && dec _v < dec n} in
+\n .
+match nat_iseven Z with
+
+Error

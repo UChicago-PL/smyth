@@ -1,0 +1,43 @@
+
+data Nat where
+  Z :: Nat
+  S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+  
+data NatList where
+  Nil :: NatList
+  Cons :: Nat -> NatList -> NatList
+
+termination measure len :: NatList -> {Int | _v >= 0} where
+  Nil -> 0
+  Cons x xs -> 1 + len xs
+  
+data NatOpt where
+  None :: NatOpt
+  Some :: Nat -> NatOpt
+  
+list_last :: xs:NatList -> { NatOpt | 
+
+   (xs == Nil ==> _v == None) &&
+   (xs == (Cons (S Z) Nil) ==> _v == (Some (S Z))) &&
+   (xs == (Cons (S (S Z)) Nil) ==> _v == (Some (S (S Z)))) &&
+   (xs == (Cons (S (S Z)) (Cons (S Z) Nil)) ==> _v == (Some (S Z))) &&
+   (xs == (Cons (S Z) (Cons (S (S Z)) Nil)) ==> _v == (Some (S (S Z)))) &&
+   (xs == (Cons (S (S (S Z))) (Cons (S (S Z)) (Cons (S Z) Nil))) ==> _v == (Some (S Z))) &&
+   True
+
+}
+list_last = ??
+
+list_last = \xs .
+match xs with
+Nil -> None
+Cons x3 x4 ->
+match x4 with
+Nil -> Some x3
+Cons x8 x9 -> list_last x4
+
+Correct

@@ -139,7 +139,7 @@ figure_10 = \
 
 
 ################################################################################
-## Load dictionaries of data for Figures 1 through TODO for artifact evaluation.
+## Load dictionaries of data for Tables 1 through 4 for artifact evaluation.
 
 def load_data_1(filename):
     def handle_columns(table, columns):
@@ -175,6 +175,13 @@ def load_data_2b_3b(filename):
 
     return data_loader(filename, 3, handle_columns)
 
+def load_data_4(filename):
+    def handle_columns(table, columns):
+        [benchmark, result] = columns
+        table[benchmark] = { "Result" : result }
+
+    return data_loader(filename, 2, handle_columns)
+
 def load_data_123(prefix):
     return \
         { "1" : load_data_1(prefix + "summaries/1.txt")
@@ -190,14 +197,23 @@ our_data = \
 your_data = \
     load_data_123("../../../experiments/")
 
+data_4_prefix = "../exp-4-logic/results/summaries/"
+data_4 = \
+    { "Leon1" : load_data_4(data_4_prefix + "exp-4-leon-1.csv")
+    , "Leon2a" : load_data_4(data_4_prefix + "exp-4-leon-2a.csv")
+    , "Synquid1" : load_data_4(data_4_prefix + "exp-4-synquid-1.csv")
+    , "Synquid2a" : load_data_4(data_4_prefix + "exp-4-synquid-2a.csv")
+    }
+
 
 ################################################################################
-## Write table data for Tables 1 through TODO for artifact evaluation.
+## Write table data for Tables 1 through 4 for artifact evaluation.
 
 output_tables = \
     { "1" : open("generated/table-1-data.tex", "w+")
     , "2" : open("generated/table-2-data.tex", "w+")
     , "3" : open("generated/table-3-data.tex", "w+")
+    , "4" : open("generated/table-4-data.tex", "w+")
     }
 
 def write_tables():
@@ -208,68 +224,112 @@ def write_tables():
 
         for benchmark in benchmarks:
 
-            write_row \
+            write_row_123 \
                 ( output_tables["1"]
                 , benchmark
                 , ( figure_10[benchmark]["Experiment1"]["Expert"]
-                  , try_lookup(our_data["1"], benchmark, "Expert")
-                  , try_lookup(your_data["1"], benchmark, "Expert")
+                  , try_lookup_123(our_data["1"], benchmark, "Expert")
+                  , try_lookup_123(your_data["1"], benchmark, "Expert")
                   )
                 , ( figure_10[benchmark]["Experiment1"]["Time"]
-                  , try_lookup(our_data["1"], benchmark, "Time")
-                  , try_lookup(your_data["1"], benchmark, "Time")
+                  , try_lookup_123(our_data["1"], benchmark, "Time")
+                  , try_lookup_123(your_data["1"], benchmark, "Time")
                   )
                 )
 
-            write_row \
+            write_row_123 \
                 ( output_tables["2"]
                 , benchmark
                 , ( figure_10[benchmark]["Experiment2a"]["Expert"]
-                  , try_lookup(our_data["2a"], benchmark, "Expert")
-                  , try_lookup(your_data["2a"], benchmark, "Expert")
+                  , try_lookup_123(our_data["2a"], benchmark, "Expert")
+                  , try_lookup_123(your_data["2a"], benchmark, "Expert")
                   )
                 , ( figure_10[benchmark]["Experiment2b"]["Random"]
-                  , try_lookup(our_data["2b"], benchmark, "Random")
-                  , try_lookup(your_data["2b"], benchmark, "Random")
+                  , try_lookup_123(our_data["2b"], benchmark, "Random")
+                  , try_lookup_123(your_data["2b"], benchmark, "Random")
                   )
                 )
 
-            write_row \
+            write_row_123 \
                 ( output_tables["3"]
                 , benchmark
                 , ( figure_10[benchmark]["Experiment3a"]["Expert"]
-                  , try_lookup(our_data["3a"], benchmark, "Expert")
-                  , try_lookup(your_data["3a"], benchmark, "Expert")
+                  , try_lookup_123(our_data["3a"], benchmark, "Expert")
+                  , try_lookup_123(your_data["3a"], benchmark, "Expert")
                   )
                 , ( figure_10[benchmark]["Experiment3b"]["Random"]
-                  , try_lookup(our_data["3b"], benchmark, "Random")
-                  , try_lookup(your_data["3b"], benchmark, "Random")
+                  , try_lookup_123(our_data["3b"], benchmark, "Random")
+                  , try_lookup_123(your_data["3b"], benchmark, "Random")
                   )
                 )
 
-def try_lookup(table, benchmark, column):
-    try:
-        return table[benchmark][column]
-    except:
-        return "$\\bullet$"
+            write_row_4 \
+                ( output_tables["4"]
+                , benchmark
+                , ( figure_10[benchmark]["Experiment4"]["Leon"]["1"]
+                  , try_lookup_4(data_4["Leon1"], benchmark, "Result")
+                  )
+                , ( figure_10[benchmark]["Experiment4"]["Leon"]["2a"]
+                  , try_lookup_4(data_4["Leon2a"], benchmark, "Result")
+                  )
+                , ( figure_10[benchmark]["Experiment4"]["Synquid"]["1"]
+                  , try_lookup_4(data_4["Synquid1"], benchmark, "Result")
+                  )
+                , ( figure_10[benchmark]["Experiment4"]["Synquid"]["2a"]
+                  , try_lookup_4(data_4["Synquid2a"], benchmark, "Result")
+                  )
+                )
+
+def make_try_lookup(default):
+    def try_lookup(table, benchmark, column):
+        try:
+            return table[benchmark][column]
+        except:
+            return default
+    return try_lookup
+
+try_lookup_123 = \
+    make_try_lookup("$\\bullet$")
+
+try_lookup_4 = \
+    make_try_lookup("X") ## TODO
 
 def escape_LaTeX(string):
     string = string.replace("_", "\\_")
     string = string.replace("%", "\\%")
     return string
 
-def write_row(f, name, triple1, triple2):
+def write_row_123(f, name, triple1, triple2):
+    def show(triple):
+        [s1, s2, s3] = triple
+        out2 = s2 if s1 == s2 else "\\highlightBlue{" + s2 + "}"
+        out3 = s3 if s2 == s3 else "\\highlightRed{" + s3 + "}"
+        return [s1, out2, out3]
+
     f.write (escape_LaTeX
         ( name + "&"
-        + "&".join(show_three_with_highlights(triple1)) + "&"
-        + "&".join(show_three_with_highlights(triple2)) + "\\\\\n"
+        + "&".join(show(triple1)) + "&"
+        + "&".join(show(triple2)) + "\\\\\n"
         )
     )
 
-def show_three_with_highlights(triple):
-    [s1, s2, s3] = triple
-    out2 = s2 if s1 == s2 else "\\highlightBlue{" + s2 + "}"
-    out3 = s3 if s2 == s3 else "\\highlightRed{" + s3 + "}"
-    return [s1, out2, out3]
+def write_row_4(f, name, pair1, pair2, pair3, pair4):
+    def show(pair):
+        [s1, s2] = pair
+        if s1 == s2:
+            return [s1]
+        else:
+            # out2 = "\\highlightBlue{" + s2 + "}"
+            # return [s1, out2]
+            return [s1, "\\highlightBlue{$\\Rightarrow$}", s2]
+
+    f.write (escape_LaTeX
+        ( name + "&"
+        + " ".join(show(pair1)) + "&"
+        + " ".join(show(pair2)) + "&"
+        + " ".join(show(pair3)) + "&"
+        + " ".join(show(pair4)) + "\\\\\n"
+        )
+    )
 
 write_tables()

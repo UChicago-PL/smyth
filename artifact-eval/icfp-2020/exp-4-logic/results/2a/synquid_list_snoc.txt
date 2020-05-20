@@ -29,3 +29,7 @@ list_snoc :: xs:NatList -> n:Nat -> { NatList |
 
 }
 list_snoc = ??
+
+Terminated due to timeout of 120 seconds
+
+Error
