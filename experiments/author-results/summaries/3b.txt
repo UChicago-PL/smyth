@@ -1,11 +1,11 @@
 (3b; N=50; t=1) Running list_append... completed.
 (3b; N=50; t=1) Running list_concat... completed.
 (3b; N=50; t=1) Running list_drop... completed.
-(3b; N=50; t=1) Running list_even_parity... failed! Trying again:
 (3b; N=50; t=1) Running list_even_parity... completed.
 (3b; N=50; t=1) Running list_last... completed.
 (3b; N=50; t=1) Running list_length... completed.
 (3b; N=50; t=1) Running list_nth... completed.
+(3b; N=50; t=1) Running list_rev_append... failed! Trying again:
 (3b; N=50; t=1) Running list_rev_append... completed.
 (3b; N=50; t=1) Running list_rev_snoc... completed.
 (3b; N=50; t=1) Running list_rev_tailcall... completed.

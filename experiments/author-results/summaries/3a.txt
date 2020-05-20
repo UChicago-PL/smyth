@@ -1,29 +1,29 @@
 Experiment 3a
 % Replications = 10
-list_append.elm,0.0154703,20,1,false,true
-! failure: list_concat.elm,0.0173411,20,1,false,false
-list_drop.elm,0.0088712,20,2,false,true
-! failure: list_even_parity.elm,0.0724163,15,7,false,false
-! failure: list_filter.elm,0.0738366,15,3,false,false
-list_fold.elm,1.4868105,15,3,true,true
-list_last.elm,0.0065987,20,2,false,true
-list_length.elm,0.0037897,5,1,false,true
-list_map.elm,0.3409306,15,2,false,true
-list_nth.elm,0.0103304,20,13,true,true
-list_rev_append.elm,0.0528296,15,2,true,true
-list_rev_snoc.elm,0.054756,15,1,false,true
-list_rev_tailcall.elm,0.0169095,20,1,false,true
-! failure: list_snoc.elm,0.0081661,20,1,false,false
-list_sort_sorted_insert.elm,0.0496469,20,1,false,true
-list_sorted_insert.elm,0.1326443,20,7,true,true
-list_stutter.elm,0.0051945,10,1,true,true
-list_take.elm,0.0162508,20,3,true,true
-nat_add.elm,0.007889,9,1,false,true
-nat_iseven.elm,0.0026053,4,2,false,true
-nat_max.elm,0.0374722,15,4,true,true
-tree_collect_leaves.elm,0.0241165,20,2,false,true
-tree_count_leaves.elm,0.0850892,15,1,false,true
-tree_count_nodes.elm,0.0829014,15,2,true,true
-tree_inorder.elm,0.0260392,15,2,false,true
-tree_map.elm,0.8261496,15,3,true,true
-tree_preorder.elm,0.0290814,15,2,true,true
+list_append.elm,0.0145702,20,1,false,true
+% ! failure: list_concat.elm,0.0175445,20,1,false,false
+list_drop.elm,0.0094705,20,2,false,true
+% ! failure: list_even_parity.elm,0.0733645,15,7,false,false
+list_filter.elm,0.0709536,20,4,true,true
+list_fold.elm,1.5671723,20,3,true,true
+list_last.elm,0.0059999,20,2,false,true
+list_length.elm,0.0034793,5,1,false,true
+list_map.elm,0.3383936,20,2,false,true
+list_nth.elm,0.0083262,20,2,false,true
+list_rev_append.elm,0.0510595,15,2,true,true
+list_rev_snoc.elm,0.0532643,15,1,false,true
+list_rev_tailcall.elm,0.016415,20,1,false,true
+list_snoc.elm,0.0217861,20,1,true,true
+list_sort_sorted_insert.elm,0.0489933,20,1,false,true
+list_sorted_insert.elm,0.1292914,20,7,true,true
+list_stutter.elm,0.0049659,10,1,true,true
+list_take.elm,0.0162276,20,3,true,true
+nat_add.elm,0.0081281,9,1,false,true
+nat_iseven.elm,0.002838,4,2,false,true
+nat_max.elm,0.0370658,15,4,true,true
+tree_collect_leaves.elm,0.0238291,20,2,false,true
+tree_count_leaves.elm,0.0838311,15,1,false,true
+tree_count_nodes.elm,0.0788686,15,2,true,true
+tree_inorder.elm,0.0268679,15,2,false,true
+tree_map.elm,0.8010863,20,3,true,true
+tree_preorder.elm,0.0268873,15,2,true,true

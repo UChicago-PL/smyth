@@ -7,11 +7,9 @@ Experiment 2b
 (2b; N=50; t=1) Running list_append... completed.
 (2b; N=50; t=1) Running list_concat... completed.
 (2b; N=50; t=1) Running list_drop... completed.
-(2b; N=50; t=1) Running list_even_parity... failed! Trying again:
-(2b; N=50; t=1) Running list_even_parity... failed again! Moving on...
+(2b; N=50; t=1) Running list_even_parity... completed.
 (2b; N=50; t=1) Running list_hd... completed.
 (2b; N=50; t=1) Running list_inc... completed.
-(2b; N=50; t=1) Running list_last... failed! Trying again:
 (2b; N=50; t=1) Running list_last... completed.
 (2b; N=50; t=1) Running list_length... completed.
 (2b; N=50; t=1) Running list_nth... completed.
