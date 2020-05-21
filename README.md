@@ -67,6 +67,12 @@ Once this script is complete, you can take a look at the results with any
 phenomena of note explained in
 `experiments/latex-tables/smyth-experiment-tables.pdf`.
 
+*Note:* Rarely, due to timing issues with the UNIX Timer API, one of the
+benchmarks might crash with a "Timeout" exception during Experiments 2b and 3b.
+Even more rarely, a stack overflow error might occur. To combat these
+situations, the Experiment 2b and 3b scripts automatically retry a benchmark on
+unexpected failure.
+
 ### 2. Inspecting the output of the synthesis procedure
 
 To interact with the synthesizer more directly, you can run the `./smyth forge`
