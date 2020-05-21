@@ -1,0 +1,26 @@
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Insert {
+  sealed abstract class Nat
+  case class S(nat: Nat) extends Nat
+  case object Z extends Nat
+
+  def max(x : Nat, y : Nat): Nat = {
+    x match {
+      case Z => y
+      case S(x_) =>
+        y match {
+          case Z => x
+          case S(y_) =>
+            ???[Nat] // returns: S(max(x_, y_))
+        }
+    }
+  } ensuring { (out:Nat) =>
+    ((x == S(Z) && y == S(Z)) ==> (out == S(Z))) &&
+    ((x == S(Z) && y == S(S(Z))) ==> (out == S(S(Z)))) &&
+    ((x == S(S(S(Z))) && y == S(Z)) ==> (out == S(S(S(Z)))))
+  }
+}
+
