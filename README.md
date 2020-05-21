@@ -1,6 +1,8 @@
 # Artifact Evaluation
 
-_Program Sketching with Live Bidirectional Evaluation_
+### Program Sketching with Live Bidirectional Evaluation
+
+_Justin Lubin, Nick Collins, Cyrus Omar, and Ravi Chugh._
 
 This repository contains all the code used for the implementation and evaluation
 of Smyth, the programming-by-example tool detailed in our ICFP submission.
