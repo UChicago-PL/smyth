@@ -2120,10 +2120,11 @@ Computing Machinery]
     \lineskip=1pc\noindent
     \addresses\let\and\@typeset@author@bx\and\par\bigskip\egroup}
 \def\@mkauthorsaddresses{%
-  \ifnum\num@authors>1\relax
-  Authors' \else Author's \fi
-  \ifnum\num@authorgroups>1\relax
-  addresses: \else address: \fi
+  %%
+  %% \ifnum\num@authors>1\relax
+  %% \else Author's \fi
+  %% \ifnum\num@authorgroups>1\relax
+  %% \else address: \fi
   \bgroup
   \def\streetaddress##1{\unskip\@addpunct, ##1}%
   \def\postcode##1{\unskip\@addpunct, ##1}%

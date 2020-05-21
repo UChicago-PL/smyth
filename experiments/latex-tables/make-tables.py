@@ -291,7 +291,7 @@ try_lookup_123 = \
     make_try_lookup("$\\bullet$")
 
 try_lookup_4 = \
-    make_try_lookup("X") ## TODO
+    make_try_lookup("X")
 
 def escape_LaTeX(string):
     string = string.replace("_", "\\_")
@@ -316,6 +316,10 @@ def write_row_4(f, name, pair1, pair2, pair3, pair4):
     def show(pair):
         [s1, s2] = pair
         if s1 == s2:
+            return [s1]
+        ## NOTE: higher-order functions not in exp-4-logic/
+        elif name in ["list_filter", "list_map", "list_fold", "tree_map"] and \
+             s2 == "X":
             return [s1]
         else:
             # out2 = "\\highlightBlue{" + s2 + "}"

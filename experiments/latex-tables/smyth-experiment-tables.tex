@@ -30,25 +30,70 @@
 \begin{document}
 
 \title{Smyth Experiment Tables}
+\subtitle{ICFP 2020 Artifact Evaluation (May 22, 2020)}
 \maketitle
 
-...
-
-Algorithmic improvements:
+\textbf{Changes to \snsMyth{}.}
+%
+Since the submission, we have made two algorithmic improvements:
 
 \begin{enumerate}
 
-\item Change to search order: matches before constructors. This change tends to
-improve performance and also produce more readable solutions for some
-benchmarks.
+\item Change to search order: trying to synthesize case expressions before
+constructors (still subject to the same staging parameters). This change tends
+to improve performance and produce more readable solutions for some benchmarks.
 
-\item Responsive staging parameters...
+\item From Section 6.3: ``Future work should consider how to automatically
+reconfigure staging parameters to account for the structure of user-provided
+sketches.'' We have implemented such ``responsive'' staging parameters.
 
 \end{enumerate}
 
-Elm to OCaml...
+We have also since removed the client-side portion of our implementation that
+had been written in Elm. The new (command-line) interface is written in OCaml.
 
-re-run Synquid...
+\vspace{0.50in}
+\noindent
+\textbf{Changes to \synquid{}.}
+%
+From Section 6.4: ``Discussion with the authors of \synquid{} has revealed an
+implementation issue involving the axiomatization of recursive
+datatypes in the underlying logic.
+%
+As a result, desired solutions for many benchmarks---even non-recursive
+ones---failed to typecheck.
+%
+When this issue is addressed, \synquid{} may very well synthesize many
+of these tasks (conservatively marked \textbf{?}).''
+
+Nadia Polikarpova has recently fixed this issue
+%
+(\url{https://github.com/nadia-polikarpova/synquid/commit/20e6d62e151e314cc0e5b36983fded12e6e6c8c4}),
+%
+so we re-ran the \synquid{} experiments.
+
+
+\vspace{0.50in}
+\noindent
+\textbf{Updated Figure 10 Results.}
+%
+As such, our Figure 10 results have changed slightly.
+%
+The following page replicates Figure 10 from our submission.
+%
+The rest of the document includes Tables 1, 2, 3, and 4, corresponding to the four
+experiments, and describes the differences.
+
+Tables 1, 2, and 3 include a \textit{Revised Artifact (Ours)} column to show our
+updated results, using blue highlights to emphasize differences compared to the
+\textit{Submission}.
+%
+The \textit{Revised Artifact (Yours)} column shows the results that you obtained
+on your machine; differences from ours are highlighted in red.
+%
+If you have not run the experiments, the column should be filled with dots.
+
+
 
 \clearpage
 
