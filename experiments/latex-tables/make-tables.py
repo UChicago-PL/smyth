@@ -191,10 +191,10 @@ def load_data_123(prefix):
         }
 
 our_data = \
-    load_data_123("../../../experiments/author-results/")
+    load_data_123("../author-results/")
 
 your_data = \
-    load_data_123("../../../experiments/")
+    load_data_123("../")
 
 data_4_prefix = "../exp-4-logic/results/summaries/"
 data_4 = \

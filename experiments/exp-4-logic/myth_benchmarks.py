@@ -1,1 +1,1 @@
-../../../experiments/myth_benchmarks.py
+../myth_benchmarks.py
