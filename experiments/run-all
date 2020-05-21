@@ -12,3 +12,6 @@ fi
 
 ./analyze nosketch exp-2b > data/exp-2b/analysis.csv
 ./analyze sketch exp-3b > data/exp-3b/analysis.csv
+
+cd latex-tables
+make
