@@ -4,9 +4,11 @@
 
 _Justin Lubin, Nick Collins, Cyrus Omar, and Ravi Chugh._
 
-The `smyth/` directory contains all the code used for the implementation and
-evaluation of Smyth, the programming-by-example tool detailed in our ICFP
-submission.
+Thank you for taking the time to review our artifact!
+
+Unzipping the `smyth.tar.gz` file will yield a directory named `smyth/`, which
+contains all the code used for the implementation and evaluation of Smyth, the
+programming-by-example tool detailed in our ICFP submission.
 
 If you are using the virtual machine image that we have provided, then please
 skip the installation instructions, as Smyth has already been installed.
