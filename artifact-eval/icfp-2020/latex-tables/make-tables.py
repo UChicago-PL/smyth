@@ -73,8 +73,7 @@ def data_loader(filename, expected_columns, handle_columns):
         for line in open(filename):
             line = line.strip()
             columns = line.split(",")
-            # TODO
-            if line.startswith("! failure"):
+            if line.startswith("%"):
                 print "[" + filename + "] ignoring line:", columns
             elif len(columns) != expected_columns:
                 print "[" + filename + "] ignoring line:", columns

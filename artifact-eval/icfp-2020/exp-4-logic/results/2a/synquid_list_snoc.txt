@@ -19,7 +19,7 @@ list_snoc :: xs:NatList -> n:Nat -> { NatList |
 
    (xs == Nil && n == Z ==> _v == (Cons Z Nil)) &&
    (xs == Nil && n == (S Z) ==> _v == (Cons (S Z) Nil)) &&
-   (xs == (Cons Z Nil) && n == Z ==> _v == (Cons Z (Cons Z Nil))) &&
+-- (xs == (Cons Z Nil) && n == Z ==> _v == (Cons Z (Cons Z Nil))) &&
 -- (xs == (Cons Z Nil) && n == (S Z) ==> _v == (Cons Z (Cons (S Z) Nil))) &&
 -- (xs == (Cons (S Z) (Cons Z Nil)) && n == Z ==> _v == (Cons (S Z) (Cons Z (Cons Z Nil)))) &&
 -- (xs == (Cons (S Z) (Cons Z Nil)) && n == (S Z) ==> _v == (Cons (S Z) (Cons Z (Cons (S Z) Nil)))) &&
