@@ -31,7 +31,7 @@ bool_benchmarks = \
       [ (True, [True, True], False)
       , (True, [True, False], True)
       , (True, [False, True], True)
-      , (False, [False, False], False)
+      , (True, [False, False], False)
       ]
     )
   ]
@@ -188,7 +188,7 @@ list_benchmarks = \
   , ("list_snoc", ["Nat", "NatList"], [("xs", "NatList"), ("n", "Nat")], "NatList",
       [ (True, [[], 0], [0])
       , (True, [[], 1], [1])
-      , (True, [[0], 0], [0, 0])
+      , (False, [[0], 0], [0, 0])
       , (False, [[0], 1], [0, 1])
       , (False, [[1, 0], 0], [1, 0, 0])
       , (False, [[1, 0], 1], [1, 0, 1])

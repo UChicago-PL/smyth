@@ -10,8 +10,8 @@ one() {
   name=$1
   shift
   echo "(\"$name\", $*,"
-  ../smyth assertion-export \
-    ../suites/no-sketch/specifications/$name.elm \
+  ../smyth export-assertions \
+    ../suites/myth/examples/$name.elm \
     ../suites/no-sketch/examples/$name.elm
   echo "    )"
 }
