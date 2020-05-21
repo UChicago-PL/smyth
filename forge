@@ -6,7 +6,7 @@ if [[ -f forge_temp_file ]]; then
 fi
 
 if [[ $# -ne 3 ]]; then
-  echo "usage:" $0 "<show-option> <suite-name> <sketch-name>"
+  echo "usage:" $0 "<top1|top1r|top3> <suite-name> <sketch-name>"
   exit 1
 fi
 
