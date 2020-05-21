@@ -1,0 +1,46 @@
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Insert {
+
+sealed abstract class Nat
+case class S(nat: Nat) extends Nat
+case object Z extends Nat
+
+sealed abstract class NatList
+case class Cons(head: Nat, tail: NatList) extends NatList
+case object Nil extends NatList
+
+def append(xs: NatList, ys: NatList): NatList = {
+  xs match {
+    case Nil           => ys
+    case Cons(x, tail) => Cons (x, append(tail, ys))
+  }
+}
+
+def replicate(n: Nat, x: Nat): NatList = {
+  n match {
+    case Z    => ???[NatList]  // Nil
+    case S(m) => ???[NatList]  // Cons (x, replicate(m, x))
+  }
+}
+
+def stutter_n(n: Nat, xs: NatList): NatList = {
+  xs match {
+    case Nil            => Nil
+    case Cons (x, tail) => append(replicate(n, x), stutter_n(n, tail))
+  }
+} ensuring { (out:NatList) =>
+
+// stutter_n 1 [1,0] == [1,0]
+   (((n == S(Z)) && (xs == Cons(S(Z), Cons(Z, Nil)))) ==> (out == Cons(S(Z), Cons(Z, Nil)))) &&
+//
+// stutter_n 2 [3,3] == [3,0]
+   (((n == S(S(Z))) && (xs == Cons(S(S(S(Z))), Nil))) ==> (out == Cons(S(S(S(Z))), Cons(S(S(S(Z))), Nil)))) &&
+//
+   true
+
+}
+
+}

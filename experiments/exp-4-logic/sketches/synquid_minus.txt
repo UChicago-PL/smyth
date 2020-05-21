@@ -1,0 +1,47 @@
+data Nat where
+    Z :: Nat
+    S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+
+hole0 :: Nat
+hole0 = ??
+
+minus ::
+  m : Nat ->
+  n : Nat ->
+  { Nat
+      |  ( (m == S (S Z) && n == Z) ==>
+           _v == S (S Z)
+         )
+      && ( (m == S (S (S Z)) && n == S (S Z)) ==>
+          _v == S Z
+         )
+      && ( (m == S (S (S Z)) && n == S Z) ==>
+          _v == S (S Z)
+         )
+  }
+minus = \m . \n .
+  match m with
+    Z -> hole0
+    S m_ ->
+      match n with
+        Z -> hole0
+        S n_ -> minus ?? ??
+
+----------------------------------------------------------------------
+
+/var/www/comcom/tmp/Synquid/2991302625194455/Synquid.sq:26: Error:
+Cannot find sufficiently strong refinements
+when checking hole0 ::
+{Nat|((m == (S ((S (Z)))) && n == (Z) ==> _v == (S ((S (Z))))) && (m == (S ((S
+((S (Z)))))) && n == (S ((S (Z)))) ==> _v == (S (Z)))) && (m == (S ((S ((S
+(Z)))))) && n == (S (Z)) ==> _v == (S ((S (Z)))))}
+in
+\m . \n .
+match m with
+S m_ ->
+match n with
+Z -> hole0

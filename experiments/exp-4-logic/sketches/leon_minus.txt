@@ -1,0 +1,31 @@
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Insert {
+  sealed abstract class Nat
+  case class S(nat: Nat) extends Nat
+  case object Z extends Nat
+
+  def minus(x : Nat, y : Nat): Nat =  {
+    val hole0 = ???[Nat]
+    val hole1 = ???[Nat]
+    val hole2 = ???[Nat]
+    x match {
+      case Z =>
+        hole0
+      case S(x_) =>
+        y match {
+          case Z =>
+            hole0
+          case S(y_) =>
+            minus(hole1, hole2) // fails
+        }
+    }
+  } ensuring { (out : Nat) =>
+    (x == S(S(Z)) && y == Z) ==> (out == S(S(Z))) &&
+    (x == S(S(S(Z))) && y == S(S(Z))) ==> (out == S(Z)) &&
+    (x == S(S(S(Z))) && y == S(Z)) ==> (out == S(S(Z)))
+  }
+}
+

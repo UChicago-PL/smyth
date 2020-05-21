@@ -14,41 +14,27 @@
 ##   2. paste in web editor
 ##   3. copy solution at end of (already-opened) synquid_$F.txt buffer
 ##   4. add classification label on last line
+##
+## So, our labeled results are in:
+##   results/1/leon_*.txt*
+##   results/2a/leon_*.txt*
+##   results/1/synquid_*.txt*
+##   results/2a/synquid_*.txt*
 
-echo ""
-echo "Leon (1 Expert Examples)"
-echo "----------------------------"
-echo "#Correct     " `grep '^Correct.*$' results/1/leon_*.txt* | wc -l`
-echo "#Incorrect   " `grep '^Incorrect.*$' results/1/leon_*.txt* | wc -l`
-echo "#Error       " `grep '^Error.*$' results/1/leon_*.txt* | wc -l`
-echo "#TODO        " `grep '^TODO.*$' results/1/leon_*.txt* | wc -l`
-echo "#Total       " `grep '^Correct.*\|^Incorrect.*\|^Error.*\|^TODO\|^N/A$' results/1/leon_*.txt* | wc -l` "/" `ls -l results/1/leon_*.txt | wc -l`
+show() {
+  FILES="results/$3/$2_*.txt*"
+  echo ""
+  echo "$1 $4"
+  echo "-----------------------------------"
+  echo "#Correct     " `grep '^Correct.*$' $FILES | wc -l`
+  echo "#Incorrect   " `grep '^Incorrect.*$' $FILES | wc -l`
+  echo "#Error       " `grep '^Error.*$' $FILES | wc -l`
+  echo "#TODO        " `grep '^TODO.*$' $FILES | wc -l`
+  echo "#N/A         " `grep '^N/A$' $FILES | wc -l`
+  echo "#Total       " `grep '^Correct.*\|^Incorrect.*\|^Error.*\|^TODO\|^N/A$' $FILES | wc -l` "/" `ls -l $FILES | wc -l`
+}
 
-echo ""
-echo "Leon (2a Expert Examples)"
-echo "----------------------------"
-echo "#Correct     " `grep '^Correct.*$' results/2a/leon_*.txt* | wc -l`
-echo "#Incorrect   " `grep '^Incorrect.*$' results/2a/leon_*.txt* | wc -l`
-echo "#Error       " `grep '^Error.*$' results/2a/leon_*.txt* | wc -l`
-echo "#TODO        " `grep '^TODO.*$' results/2a/leon_*.txt* | wc -l`
-echo "#N/A         " `grep '^N/A$' results/2a/leon_*.txt* | wc -l`
-echo "#Total       " `grep '^Correct.*\|^Incorrect.*\|^Error.*\|^TODO\|^N/A$' results/2a/leon_*.txt* | wc -l` "/" `ls -l results/2a/leon_*.txt | wc -l`
-
-echo ""
-echo "Synquid (1 Expert Examples)"
-echo "----------------------------"
-echo "#Correct     " `grep '^Correct.*$' results/1/synquid_*.txt* | wc -l`
-echo "#Incorrect   " `grep '^Incorrect.*$' results/1/synquid_*.txt* | wc -l`
-echo "#Error       " `grep '^Error.*$' results/1/synquid_*.txt* | wc -l`
-echo "#TODO        " `grep '^TODO.*$' results/1/synquid_*.txt* | wc -l`
-echo "#Total       " `grep '^Correct.*\|^Incorrect.*\|^Error.*\|^TODO\|^N/A$' results/1/synquid_*.txt* | wc -l` "/" `ls -l results/1/synquid_*.txt | wc -l`
-
-echo ""
-echo "Synquid (2a Expert Examples)"
-echo "----------------------------"
-echo "#Correct     " `grep '^Correct.*$' results/2a/synquid_*.txt* | wc -l`
-echo "#Incorrect   " `grep '^Incorrect.*$' results/2a/synquid_*.txt* | wc -l`
-echo "#Error       " `grep '^Error.*$' results/2a/synquid_*.txt* | wc -l`
-echo "#TODO        " `grep '^TODO.*$' results/2a/synquid_*.txt* | wc -l`
-echo "#N/A         " `grep '^N/A$' results/2a/synquid_*.txt* | wc -l`
-echo "#Total       " `grep '^Correct.*\|^Incorrect.*\|^Error.*\|^TODO\|^N/A$' results/2a/synquid_*.txt* | wc -l` "/" `ls -l results/2a/synquid_*.txt | wc -l`
+show Leon    leon    1  '(1: Myth Expert Examples)'
+show Leon    leon    2a '(2a: Smyth Expert Examples)'
+show Synquid synquid 1  '(1: Expert Examples)'
+show Synquid synquid 2a '(2a: Smyth Expert Examples)'

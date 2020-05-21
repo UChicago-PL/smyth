@@ -1,0 +1,41 @@
+data Nat where
+    Z :: Nat
+    S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+
+data B where
+    F :: B
+    T :: B
+
+odd :: Nat -> B
+odd = \n .
+  match n with
+    Z -> F
+    S n1 ->
+      match n1 with
+        Z -> T
+        S n2 -> odd n2
+
+data MaybeNat where
+  Nothing :: MaybeNat
+  Just :: Nat -> MaybeNat
+
+unJust :: MaybeNat -> Nat
+unJust = \mx .
+  match mx with
+    Nothing -> Z
+    Just x -> x
+        
+x :: { B | _v == T }
+x = odd (unJust ??)
+
+----------------------------------------------------------------------
+
+/var/www/comcom/tmp/Synquid/9188108022177678/Synquid.sq:33: Error:
+Cannot find sufficiently strong refinements
+when checking odd ::
+x0:_ -> {B|_v == (T)} in
+odd ??

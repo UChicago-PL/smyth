@@ -52,7 +52,7 @@ sketches.'' We have implemented such ``responsive'' staging parameters.
 We have also since removed the client-side portion of our implementation that
 had been written in Elm. The new (command-line) interface is written in OCaml.
 
-\vspace{0.50in}
+\vspace{0.30in}
 \noindent
 \textbf{Changes to \synquid{}.}
 %
@@ -73,7 +73,7 @@ Nadia Polikarpova has recently fixed this issue
 so we re-ran the \synquid{} experiments.
 
 
-\vspace{0.50in}
+\vspace{0.30in}
 \noindent
 \textbf{Updated Figure 10 Results.}
 %
@@ -94,6 +94,39 @@ on your machine; differences from ours are highlighted in red.
 If you have not run the experiments, the column should be filled with dots.
 
 
+\vspace{0.30in}
+%
+\noindent
+%
+\textbf{\leon{} and \synquid{} Benchmarks (\texttt{experiments/exp-4-logic/}):}
+%
+For Experiment 4, we wrote a script
+%
+(\texttt{generate-benchmarks.py})
+%
+to generate \leon{} and \synquid{} tasks
+%
+(\texttt{generated/}),
+%
+which we copied and pasted into the respective web editors.
+%
+Our labeled results are in \texttt{results/}.
+%
+The helper script \texttt{show-results.sh} summarizes the labels,
+and also includes comments with some shell commands we found useful during
+this experiment.
+%
+The sketching benchmarks we tried (discussed on lines 1033-1034 of the
+submission) can be found in \texttt{sketches/}.
+
+\leon{}: If \url{https://leon.epfl.ch/} doesn't work, you might try
+\url{https://leon.epfl.ch/}, a URL that Viktor Kuncak provided. In either case,
+look for the ``Synthesis'' menu on the right and click ``Search.''
+
+\synquid{}: The web editor \url{http://comcom.csail.mit.edu/comcom/#Synquid}
+currently server the version with Nadia's recent changes. Nadia suggested
+running our benchmarks with the \texttt{-e=True} flag; we found that
+\texttt{-e=False} was needed for a few benchmarks to succeed.
 
 \clearpage
 

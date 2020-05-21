@@ -1,0 +1,41 @@
+data Nat where
+    Z :: Nat
+    S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+
+max ::
+  m : Nat ->
+  n : Nat ->
+  { Nat
+      |  ( (m == S Z && n == S Z) ==>
+           _v == S Z
+         )
+      && ( (m == S Z && n == S (S Z)) ==>
+          _v == S (S Z)
+         )
+      && ( (m == S (S (S Z)) && n == S Z) ==>
+          _v == S (S (S Z))
+         )
+  }
+max = \m . \n .
+  match m with
+    Z -> n
+    S m_ ->
+      match n with
+        Z -> m
+        S n_ -> ??
+
+----------------------------------------------------------------------
+
+/var/www/comcom/tmp/Synquid/1318803628243619/Synquid.sq:23: Error:
+Cannot find sufficiently strong refinements
+when checking max Z Z ::
+{Nat|dec _v >= 0 && dec _v < dec m} in
+\m . \n .
+match m with
+S m_ ->
+match n with
+S n_ -> max (max (max Z Z) ??) ??

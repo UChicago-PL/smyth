@@ -1,0 +1,26 @@
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Insert {
+  sealed abstract class Nat
+  case class S(nat: Nat) extends Nat
+  case object Z extends Nat
+
+  def plus(p : Nat, q : Nat): Nat = {
+    p match {
+      case Z => q
+      case S(p_) => S(plus(p_, q))
+    }
+  }
+
+  def mult(p : Nat, q : Nat): Nat = {
+    p match {
+      case Z => Z
+      case S(p_) => plus(???[Nat], mult(???[Nat], ???[Nat]))
+    }
+  } ensuring { (out : Nat) =>
+    (((p == S(S(Z))) && (q == S(Z))) ==> (out == S(S(Z)))) &&
+    (((p == S(S(S(Z)))) && (q == S(S(Z)))) ==> (out == S(S(S(S(S(S(Z))))))))
+  }
+}

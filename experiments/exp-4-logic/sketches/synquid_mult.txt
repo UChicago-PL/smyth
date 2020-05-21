@@ -1,0 +1,42 @@
+data Nat where
+    Z :: Nat
+    S :: Nat -> Nat
+
+termination measure dec :: Nat -> {Int | _v >= 0} where
+  Z -> 0
+  S m -> 1 + dec m
+
+plus :: Nat -> Nat -> Nat
+plus = \m . \n .
+  match m with
+    Z -> n
+    S m_ -> S (plus m_ n)
+
+mult ::
+  m : Nat ->
+  n : Nat ->
+  { Nat
+      |  ( (m == S (S Z) && n == S Z) ==>
+           _v == S (S Z)
+         )
+      && ( (m == S (S (S Z)) && n == S (S Z)) ==>
+          _v == S (S (S (S (S (S Z)))))
+        )
+  }
+mult = \m . \n .
+  match m with
+    Z -> Z
+    S m_ -> plus ?? (mult ?? ??)
+
+----------------------------------------------------------------------
+
+/var/www/comcom/tmp/Synquid/2154855822931178/Synquid.sq:26: Error:
+Cannot find sufficiently strong refinements
+when checking plus ::
+x2:_ -> x1:_ -> {Nat|(m == (S ((S (Z)))) && n == (S (Z)) ==> _v == (S ((S
+(Z))))) && (m == (S ((S ((S (Z)))))) && n == (S ((S (Z)))) ==> _v == (S ((S ((S
+((S ((S ((S (Z)))))))))))))}
+in
+\m . \n .
+match m with
+S m_ -> plus ?? ??

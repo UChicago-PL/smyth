@@ -1,0 +1,42 @@
+import leon.lang._
+import leon.lang.synthesis._
+import leon.annotation._
+
+object Insert {
+  sealed abstract class Bool
+  case object T extends Bool
+  case object F extends Bool
+
+  sealed abstract class Nat
+  case class S(nat: Nat) extends Nat
+  case object Z extends Nat
+
+  sealed abstract class MaybeNat
+  case class JustNat(nat: Nat) extends MaybeNat
+  case object NothingNat extends MaybeNat
+
+  def odd(n : Nat): Bool = {
+    n match {
+      case Z => F
+      case S(n_) =>
+        n_ match {
+          case Z => T
+          case S(n__) =>
+            odd(n__)
+        }
+    }
+  }
+
+  def unJust(mx : MaybeNat): Nat = {
+    mx match {
+      case NothingNat => Z
+      case JustNat(x) => x
+    }
+  }
+
+  def myValue(): MaybeNat = {
+    ???[MaybeNat] // returns: JustNat(S(Z))
+  } ensuring { (out : MaybeNat) =>
+    odd(unJust(out)) == T
+  }
+}
