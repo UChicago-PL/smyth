@@ -11,3 +11,5 @@ experiments/latex-tables/smyth-experiment-tables.aux
 experiments/latex-tables/smyth-experiment-tables.log
 experiments/latex-tables/smyth-experiment-tables.out
 experiments/exp-4-logic/myth_benchmarks.pyc
+generated/
+smyth-experiment-tables.pdf
