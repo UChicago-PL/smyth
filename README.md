@@ -39,16 +39,21 @@ installed:
 
 ## Things to Try Out
 
-We believe there are three main areas of exploration that will be help you best
-evaluate Smyth. They are:
+We believe there are several main areas of exploration to help best evaluate
+Smyth:
 
-1. Running the benchmark suite
-2. Inspecting the output of the synthesis procedure
-3. Skimming the codebase
+1. Viewing the updated experimental results
+2. Running the benchmark suite
+3. Inspecting the output of the synthesis procedure
+4. Skimming the codebase
 
-Here's how to do each of the following:
+### 1. Viewing the updated experimental results
 
-### 1. Running the benchmark suite
+The `smyth/experiments/latex-tables/smyth-experiment-tables-ours.pdf` document
+describes our latest experimental results, described in detail with respect to
+Figure 10 in our submission.
+
+### 2. Running the benchmark suite
 
 _*Quick summary*: navigate to `smyth/experiments/`, run `./run-all 10`, look at
 `smyth/experiments/latex-tables/smyth-experiment-tables.pdf`_
@@ -77,7 +82,7 @@ Even more rarely, a stack overflow error might occur. To combat these
 situations, the Experiment 2b and 3b scripts automatically retry a benchmark on
 unexpected failure.
 
-### 2. Inspecting the output of the synthesis procedure
+### 3. Inspecting the output of the synthesis procedure
 
 To interact with the synthesizer more directly, you can navigate to the `smyth/`
 directory and run the `./smyth forge` command. This command takes one argument:
@@ -109,7 +114,7 @@ So, for example, you could run
 to see the top result of running the `list_sorted_insert` benchmark from the
 `no-sketch` suite.
 
-### 3. Skimming the codebase
+### 4. Skimming the codebase
 
 The following table provides a roadmap of where each concept/figure in the paper
 can be found in the codebase, in order of presentation in the paper.
