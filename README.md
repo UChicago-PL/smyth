@@ -123,7 +123,7 @@ To see how these all fit together with actual code, you can view the "synthesis
 pipeline" in [`endpoint.ml`](smyth/lib/smyth/endpoint.ml) (specifically, the `solve`
 function).
 
-| Concept/Figure                              | File (in [`lib/smyth/`](smyth/lib/smyth/))
+| Concept/Figure                              | File (in [`smyth/lib/smyth/`](smyth/lib/smyth/))
 | ------------------------------------------- | ------------------------------
 | Syntax of Core Smyth                        | [`lang.ml`](smyth/lib/smyth/lang.ml)
 | Type checking                               | [`type.mli`](smyth/lib/smyth/type.mli)/[`type.ml`](smyth/lib/smyth/type.ml)
