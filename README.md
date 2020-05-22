@@ -13,6 +13,9 @@ programming-by-example tool detailed in our ICFP submission.
 If you are using the virtual machine image that we have provided, then please
 skip the installation instructions, as Smyth has already been installed.
 
+We recommend installing Smyth on your local machine (rather than running it in
+the VM) for best performance.
+
 ## Installation
 
 1. Install `opam`, the OCaml package manager:
@@ -77,10 +80,10 @@ phenomena of note explained in
 `smyth/experiments/latex-tables/smyth-experiment-tables.pdf`.
 
 *Note:* Rarely, due to timing issues with the UNIX Timer API, one of the
-benchmarks might crash with a "Timeout" exception during Experiments 2b and 3b.
-Even more rarely, a stack overflow error might occur. To combat these
-situations, the Experiment 2b and 3b scripts automatically retry a benchmark on
-unexpected failure.
+benchmarks that is not indicated as a failure might crash with a "Timeout"
+exception during Experiments 2b and 3b.  Even more rarely, a stack overflow
+error might occur. To combat these situations, the Experiment 2b and 3b scripts
+automatically retry a benchmark on unexpected failure.
 
 ### 3. Inspecting the output of the synthesis procedure
 
