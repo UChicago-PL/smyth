@@ -120,26 +120,26 @@ The following table provides a roadmap of where each concept/figure in the paper
 can be found in the codebase, in order of presentation in the paper.
 
 To see how these all fit together with actual code, you can view the "synthesis
-pipeline" in [`endpoint.ml`](lib/smyth/endpoint.ml) (specifically, the `solve`
+pipeline" in [`endpoint.ml`](smyth/lib/smyth/endpoint.ml) (specifically, the `solve`
 function).
 
-| Concept/Figure                              | File (in [`lib/smyth/`](lib/smyth/))
+| Concept/Figure                              | File (in [`lib/smyth/`](smyth/lib/smyth/))
 | ------------------------------------------- | ------------------------------
-| Syntax of Core Smyth                        | [`lang.ml`](lib/smyth/lang.ml)
-| Type checking                               | [`type.mli`](lib/smyth/type.mli)/[`type.ml`](lib/smyth/type.ml)
-| Expression evaluation                       | [`eval.mli`](lib/smyth/eval.mli)/[`eval.ml`](lib/smyth/eval.ml)
-| Resumption                                  | [`eval.mli`](lib/smyth/eval.mli)/[`eval.ml`](lib/smyth/eval.ml)
-| Example satisfaction                        | [`example.mli`](lib/smyth/example.mli)/[`example.ml`](lib/smyth/example.ml)
-| Constraint satisfaction                     | [`constraints.mli`](lib/smyth/constraints.mli)/[`constraints.ml`](lib/smyth/constraints.ml)
-| Constraint merging                          | [`constraints.mli`](lib/smyth/constraints.mli)/[`constraints.ml`](lib/smyth/constraints.ml)
-| Live bidirectional example checking         | [`uneval.mli`](lib/smyth/uneval.mli)/[`uneval.ml`](lib/smyth/uneval.ml)
-| Example unevaluation                        | [`uneval.mli`](lib/smyth/uneval.mli)/[`uneval.ml`](lib/smyth/uneval.ml)
-| Program evaluation                          | [`eval.mli`](lib/smyth/eval.mli)/[`eval.ml`](lib/smyth/eval.ml)
-| Result consistency                          | [`res.mli`](lib/smyth/res.mli)/[`res.ml`](lib/smyth/res.ml)
-| Assertion satisfaction and simplification   | [`uneval.mli`](lib/smyth/uneval.mli)/[`uneval.ml`](lib/smyth/uneval.ml)
-| Constraint simplification                   | [`solve.mli`](lib/smyth/solve.mli)/[`solve.ml`](lib/smyth/solve.ml)
-| Constraint solving                          | [`solve.mli`](lib/smyth/solve.mli)/[`solve.ml`](lib/smyth/solve.ml)
-| Type-and-example-eirected hole synthesis    | [`fill.mli`](lib/smyth/fill.mli)/[`fill.ml`](lib/smyth/fill.ml)
-| Type-directed guessing (term generation)    | [`term_gen.mli`](lib/smyth/term_gen.mli)/[`term_gen.ml`](lib/smyth/term_gen.ml)
-| Type-and-example-directed refinement        | [`refine.mli`](lib/smyth/refine.mli)/[`refine.ml`](lib/smyth/refine.ml)
-| Type-and-example-directed branching         | [`branch.mli`](lib/smyth/branch.mli)/[`branch.ml`](lib/smyth/branch.ml)
+| Syntax of Core Smyth                        | [`lang.ml`](smyth/lib/smyth/lang.ml)
+| Type checking                               | [`type.mli`](smyth/lib/smyth/type.mli)/[`type.ml`](smyth/lib/smyth/type.ml)
+| Expression evaluation                       | [`eval.mli`](smyth/lib/smyth/eval.mli)/[`eval.ml`](smyth/lib/smyth/eval.ml)
+| Resumption                                  | [`eval.mli`](smyth/lib/smyth/eval.mli)/[`eval.ml`](smyth/lib/smyth/eval.ml)
+| Example satisfaction                        | [`example.mli`](smyth/lib/smyth/example.mli)/[`example.ml`](smyth/lib/smyth/example.ml)
+| Constraint satisfaction                     | [`constraints.mli`](smyth/lib/smyth/constraints.mli)/[`constraints.ml`](smyth/lib/smyth/constraints.ml)
+| Constraint merging                          | [`constraints.mli`](smyth/lib/smyth/constraints.mli)/[`constraints.ml`](smyth/lib/smyth/constraints.ml)
+| Live bidirectional example checking         | [`uneval.mli`](smyth/lib/smyth/uneval.mli)/[`uneval.ml`](smyth/lib/smyth/uneval.ml)
+| Example unevaluation                        | [`uneval.mli`](smyth/lib/smyth/uneval.mli)/[`uneval.ml`](smyth/lib/smyth/uneval.ml)
+| Program evaluation                          | [`eval.mli`](smyth/lib/smyth/eval.mli)/[`eval.ml`](smyth/lib/smyth/eval.ml)
+| Result consistency                          | [`res.mli`](smyth/lib/smyth/res.mli)/[`res.ml`](smyth/lib/smyth/res.ml)
+| Assertion satisfaction and simplification   | [`uneval.mli`](smyth/lib/smyth/uneval.mli)/[`uneval.ml`](smyth/lib/smyth/uneval.ml)
+| Constraint simplification                   | [`solve.mli`](smyth/lib/smyth/solve.mli)/[`solve.ml`](smyth/lib/smyth/solve.ml)
+| Constraint solving                          | [`solve.mli`](smyth/lib/smyth/solve.mli)/[`solve.ml`](smyth/lib/smyth/solve.ml)
+| Type-and-example-eirected hole synthesis    | [`fill.mli`](smyth/lib/smyth/fill.mli)/[`fill.ml`](smyth/lib/smyth/fill.ml)
+| Type-directed guessing (term generation)    | [`term_gen.mli`](smyth/lib/smyth/term_gen.mli)/[`term_gen.ml`](smyth/lib/smyth/term_gen.ml)
+| Type-and-example-directed refinement        | [`refine.mli`](smyth/lib/smyth/refine.mli)/[`refine.ml`](smyth/lib/smyth/refine.ml)
+| Type-and-example-directed branching         | [`branch.mli`](smyth/lib/smyth/branch.mli)/[`branch.ml`](smyth/lib/smyth/branch.ml)
