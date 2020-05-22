@@ -70,7 +70,7 @@ i5 CPU and 16 GB of RAM.
 
 If you would prefer to get the results faster (at the loss of statistical
 precision), we would recommend running the experiments with `N = 10` (that is,
-`./run-all 10`), which takes about TODO minutes to run on the same Macbook.
+`./run-all 10`), which takes about 30 minutes to run on the same MacBook.
 
 Once this script is complete, you can take a look at the results with any
 phenomena of note explained in
