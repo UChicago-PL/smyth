@@ -5,6 +5,8 @@ if [[ $# -ne 1 ]]; then
   exit 1
 fi
 
+echo "Experiment 2b"
+
 mkdir -p data/exp-3b/csv
 mkdir -p data-backup/exp-3b/csv
 mv data/exp-3b/csv/*.csv data-backup/exp-3b/csv 2> /dev/null
