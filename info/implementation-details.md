@@ -22,6 +22,23 @@ this thesis as "the Myth thesis."
 This section details the implementation details and optimizations that Smyth
 inherits from Myth.
 
+### Termination checking
+
+Myth employs a check during program synthesis to ensure that all recursive calls
+are _structurally decreasing_, that is, that the argument to a recursive
+function recursive call is a strict subterm of the parameter to the recursive
+call.
+
+We employ this same restriction. One limitation of this approach (as
+implemented) arises from the fact that all functions in Smyth have exactly one
+parameter (multi-parameter functions are curried). As a consequence, only
+recursive calls that are structurally decreasing on the "first" argument of
+multi-parameter (curried) functions are accepted as valid.
+
+To get around this issue, some of the sketches in our benchmark suites have
+unconvential ordering of parameters or internal helper functions with one
+argument.
+
 ### Timeouts
 
 Myth cuts off term enumeration after a small amount of time has passed
