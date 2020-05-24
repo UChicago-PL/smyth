@@ -15,7 +15,7 @@ made these choices.
 The theory of Smyth is based on the research detailed in [Peter-Michael
 Osera](https://iampmo.com/)'s PhD thesis, which presents its own implementation
 of a program synthesizer by the name of "Myth." In this document, we refer to
-this thesis as "the Myth thesis".
+this thesis as "the Myth thesis."
 
 ## Strategies inherited from Myth
 
@@ -71,7 +71,7 @@ actually be desirable. For example, synthesis of the function
 `listHead : List a -> a` with the assertion `assert listHead [1, 2] == 1` might
 reasonably be expected to produce the following result:
 
-```
+```elm
 listHead : List a -> a
 listHead xs =
   case xs of
