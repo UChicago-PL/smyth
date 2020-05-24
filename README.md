@@ -98,7 +98,7 @@ We ran these experiments with `N = 50` (that is, `./run-all 50`), which takes
 about 2 to 2.5 hours to run on a Mid 2012 MacBook Pro with a 2.5 GHz Intel Core
 i5 CPU and 16 GB of RAM.
 
-If you would prefer to get the results faster (at the loss of statistical
+If you would prefer to get the results faster (with the loss of statistical
 precision), we would recommend running the experiments with `N = 10` (that is,
 `./run-all 10`), which takes about 30 minutes to run on the same MacBook.
 
