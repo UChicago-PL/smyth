@@ -1,9 +1,10 @@
 # Smyth
 
-Smyth is a program synthesizer that will fill in "holes" in your program when
-given input-output examples, or, more generally, arbitrary assertions about the
-behavior of the code. These assertions are just "normal code" and can serve as
-documentation and unit tests once the synthesis has completed.
+Smyth is a program synthesizer that will fill in "holes" in a program in a
+typed, functional language (approximately [Elm](https://elm-lang.org) in our
+formulation) when given input-output examples, or, more generally, arbitrary
+assertions about the behavior of the code. These assertions are just "normal
+code" and can serve as unit tests once the synthesis has completed.
 
 Evaluation of these assertions internally gives rise to input-output examples
 which, along with the types in the program, guide the synthesis search to fill
@@ -18,8 +19,13 @@ functions (that is, sets of examples that mirror the intended recursive behavior
 of the function to be synthesized), a major limitation of prior work on
 evaluator-based synthesis.
 
+The name "Smyth" is a portmanteau of "sketching" and "Myth" (the
+type-and-example directed program synthesizer upon which the theory of Smyth is
+based). It was coined by [Robert Rand](https://www.cs.umd.edu/~rrand/) who,
+incidentally, also coined the name "Myth" for the original work.
+
 A formal exposition of the system (including its evaluation and underlying
-theory) can be found in our ICFP 2020, _Program Sketching with Live
+theory) can be found in our ICFP 2020 publication, _Program Sketching with Live
 Bidirectional Evaluation_.
 
 ## Installation
@@ -28,9 +34,10 @@ Bidirectional Evaluation_.
 
      https://opam.ocaml.org/doc/Install.html
 
-2. Install OCaml >=4.08.1 with the
-   [flambda](https://caml.inria.fr/pub/docs/manual-ocaml/flambda.html)
-   optimizer by running `opam switch create 4.08.1+flambda`.
+2. Install OCaml 4.08.1 with the
+   [flambda](https://caml.inria.fr/pub/docs/manual-ocaml/flambda.html) optimizer
+   by running `opam switch create 4.08.1+flambda`. OCaml versions after 4.08.1
+   should work fine too, but are untested.
 
 3. Run `make deps` in the root directory of this project to download all the
    necessary `opam` dependencies.
@@ -52,11 +59,11 @@ The `./smyth forge` command takes in a path to a sketch to be completed
 ("forged") and outputs its result.
 
 We have provided the six sketches described in Sections 1 and 2 of our ICFP
-paper in the `examples/` directory so that you can, for example, run `./smyth
-forge examples/stutter.elm` from the `smyth/` directory to see the output. Feel
-free to change the input-output examples on these sketches (or the program
-sketches themselves) to see how `smyth` responds. You can also create your own
-files following the same syntax (mostly Elm) to try out.
+paper in the `examples/` directory so that you can, for example, run
+`./smyth forge examples/stutter.elm` from the root directory of this project to
+see the output. Feel free to change the input-output examples on these sketches
+(or the program sketches themselves) to see how `smyth` responds. You can also
+create your own files following the same syntax (mostly Elm) to try out.
 
 By default `./smyth forge` only shows the top solution, but after all the other
 arguments, you can pass in the flag `--show=top1r` or `--show=top3` to show the
@@ -64,9 +71,9 @@ top recursive solution or top three overall solutions, respectively.
 
 The benchmark sketches from the experimental evaluation of Smyth are stored in
 `suites/SUITE_NAME/sketches` and the input-examples used for those sketches are
-stored in `smyth/suites/SUITE_NAME/examples`. If you want to see the actual
+stored in `suites/SUITE_NAME/examples`. If you want to see the actual
 synthesis output on just one of these sketches, you can use the `forge` helper
-script that we have provided in the `smyth/` directory as follows:
+script that we have provided in the root directory of this project as follows:
 
   `./forge <top1|top1r|top3> <suite-name> <sketch-name>`
 
@@ -80,7 +87,7 @@ to see the top result of running the `list_sorted_insert` benchmark from the
 ## Running the Experimental Evaluation
 
 _*Quick summary*: navigate to `experiments/`, run `./run-all 10`, look at
-`smyth/experiments/latex-tables/smyth-experiment-tables.pdf`_
+`/experiments/latex-tables/smyth-experiment-tables.pdf`_
 
 To run all the data collection and analysis for Smyth as described in our ICFP
 paper, navigate to the `experiments/` directory and run the script `run-all`,
@@ -108,30 +115,37 @@ automatically retry a benchmark on unexpected failure.
 
 ## The Codebase
 
+The [`lib/smyth`](lib/smyth/) directory contains all the code for the core
+implementation of the Smyth synthesis algorithm. The
+[`lib/stdlib2`](lib/stdlib2/) directory contains helper functions that are used
+throughout the codebase. The [`src/`](src/) directory contains the code relevant
+to the command-line interface to Smyth, as well as some code that is used for
+its experimental evaluation.
+
 The following table provides a roadmap of where each concept/figure in the paper
 can be found in the codebase, in order of presentation in the paper.
 
-To see how these all fit together with actual code, you can view the "synthesis
-pipeline" in [`endpoint.ml`](smyth/lib/smyth/endpoint.ml) (specifically, the `solve`
-function).
-
-| Concept/Figure                              | File (in [`smyth/lib/smyth/`](smyth/lib/smyth/))
+| Concept                                     | File (in [`lib/smyth/`](lib/smyth/))
 | ------------------------------------------- | ------------------------------
-| Syntax of Core Smyth                        | [`lang.ml`](smyth/lib/smyth/lang.ml)
-| Type checking                               | [`type.mli`](smyth/lib/smyth/type.mli)/[`type.ml`](smyth/lib/smyth/type.ml)
-| Expression evaluation                       | [`eval.mli`](smyth/lib/smyth/eval.mli)/[`eval.ml`](smyth/lib/smyth/eval.ml)
-| Resumption                                  | [`eval.mli`](smyth/lib/smyth/eval.mli)/[`eval.ml`](smyth/lib/smyth/eval.ml)
-| Example satisfaction                        | [`example.mli`](smyth/lib/smyth/example.mli)/[`example.ml`](smyth/lib/smyth/example.ml)
-| Constraint satisfaction                     | [`constraints.mli`](smyth/lib/smyth/constraints.mli)/[`constraints.ml`](smyth/lib/smyth/constraints.ml)
-| Constraint merging                          | [`constraints.mli`](smyth/lib/smyth/constraints.mli)/[`constraints.ml`](smyth/lib/smyth/constraints.ml)
-| Live bidirectional example checking         | [`uneval.mli`](smyth/lib/smyth/uneval.mli)/[`uneval.ml`](smyth/lib/smyth/uneval.ml)
-| Example unevaluation                        | [`uneval.mli`](smyth/lib/smyth/uneval.mli)/[`uneval.ml`](smyth/lib/smyth/uneval.ml)
-| Program evaluation                          | [`eval.mli`](smyth/lib/smyth/eval.mli)/[`eval.ml`](smyth/lib/smyth/eval.ml)
-| Result consistency                          | [`res.mli`](smyth/lib/smyth/res.mli)/[`res.ml`](smyth/lib/smyth/res.ml)
-| Assertion satisfaction and simplification   | [`uneval.mli`](smyth/lib/smyth/uneval.mli)/[`uneval.ml`](smyth/lib/smyth/uneval.ml)
-| Constraint simplification                   | [`solve.mli`](smyth/lib/smyth/solve.mli)/[`solve.ml`](smyth/lib/smyth/solve.ml)
-| Constraint solving                          | [`solve.mli`](smyth/lib/smyth/solve.mli)/[`solve.ml`](smyth/lib/smyth/solve.ml)
-| Type-and-example-eirected hole synthesis    | [`fill.mli`](smyth/lib/smyth/fill.mli)/[`fill.ml`](smyth/lib/smyth/fill.ml)
-| Type-directed guessing (term generation)    | [`term_gen.mli`](smyth/lib/smyth/term_gen.mli)/[`term_gen.ml`](smyth/lib/smyth/term_gen.ml)
-| Type-and-example-directed refinement        | [`refine.mli`](smyth/lib/smyth/refine.mli)/[`refine.ml`](smyth/lib/smyth/refine.ml)
-| Type-and-example-directed branching         | [`branch.mli`](smyth/lib/smyth/branch.mli)/[`branch.ml`](smyth/lib/smyth/branch.ml)
+| Syntax of Core Smyth                        | [`lang.ml`](lib/smyth/lang.ml)
+| Type checking                               | [`type.mli`](lib/smyth/type.mli)/[`type.ml`](lib/smyth/type.ml)
+| Expression evaluation                       | [`eval.mli`](lib/smyth/eval.mli)/[`eval.ml`](lib/smyth/eval.ml)
+| Resumption                                  | [`eval.mli`](lib/smyth/eval.mli)/[`eval.ml`](lib/smyth/eval.ml)
+| Example satisfaction                        | [`example.mli`](lib/smyth/example.mli)/[`example.ml`](lib/smyth/example.ml)
+| Constraint satisfaction                     | [`constraints.mli`](lib/smyth/constraints.mli)/[`constraints.ml`](lib/smyth/constraints.ml)
+| Constraint merging                          | [`constraints.mli`](lib/smyth/constraints.mli)/[`constraints.ml`](lib/smyth/constraints.ml)
+| Live bidirectional example checking         | [`uneval.mli`](lib/smyth/uneval.mli)/[`uneval.ml`](lib/smyth/uneval.ml)
+| Example unevaluation                        | [`uneval.mli`](lib/smyth/uneval.mli)/[`uneval.ml`](lib/smyth/uneval.ml)
+| Program evaluation                          | [`eval.mli`](lib/smyth/eval.mli)/[`eval.ml`](lib/smyth/eval.ml)
+| Result consistency                          | [`res.mli`](lib/smyth/res.mli)/[`res.ml`](lib/smyth/res.ml)
+| Assertion satisfaction and simplification   | [`uneval.mli`](lib/smyth/uneval.mli)/[`uneval.ml`](lib/smyth/uneval.ml)
+| Constraint simplification                   | [`solve.mli`](lib/smyth/solve.mli)/[`solve.ml`](lib/smyth/solve.ml)
+| Constraint solving                          | [`solve.mli`](lib/smyth/solve.mli)/[`solve.ml`](lib/smyth/solve.ml)
+| Type-and-example-eirected hole synthesis    | [`fill.mli`](lib/smyth/fill.mli)/[`fill.ml`](lib/smyth/fill.ml)
+| Type-directed guessing (term generation)    | [`term_gen.mli`](lib/smyth/term_gen.mli)/[`term_gen.ml`](lib/smyth/term_gen.ml)
+| Type-and-example-directed refinement        | [`refine.mli`](lib/smyth/refine.mli)/[`refine.ml`](lib/smyth/refine.ml)
+| Type-and-example-directed branching         | [`branch.mli`](lib/smyth/branch.mli)/[`branch.ml`](lib/smyth/branch.ml)
+
+To see how these concepts all fit together with actual code, you can take a look
+atthe "synthesis pipeline" in [`lib/smyth/endpoint.ml`](lib/smyth/endpoint.ml)
+(specifically, the `solve` function).
