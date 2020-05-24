@@ -146,5 +146,5 @@ can be found in the codebase, in order of presentation in the paper.
 | Type-and-example-directed branching         | [`branch.mli`](lib/smyth/branch.mli)/[`branch.ml`](lib/smyth/branch.ml)
 
 To see how these concepts all fit together with actual code, you can take a look
-atthe "synthesis pipeline" in [`lib/smyth/endpoint.ml`](lib/smyth/endpoint.ml)
+at the "synthesis pipeline" in [`lib/smyth/endpoint.ml`](lib/smyth/endpoint.ml)
 (specifically, the `solve` function).
