@@ -140,7 +140,7 @@ can be found in the codebase, in order of presentation in the paper.
 | Assertion satisfaction and simplification   | [`uneval.mli`](lib/smyth/uneval.mli)/[`uneval.ml`](lib/smyth/uneval.ml)
 | Constraint simplification                   | [`solve.mli`](lib/smyth/solve.mli)/[`solve.ml`](lib/smyth/solve.ml)
 | Constraint solving                          | [`solve.mli`](lib/smyth/solve.mli)/[`solve.ml`](lib/smyth/solve.ml)
-| Type-and-example-eirected hole synthesis    | [`fill.mli`](lib/smyth/fill.mli)/[`fill.ml`](lib/smyth/fill.ml)
+| Type-and-example-directed hole synthesis    | [`fill.mli`](lib/smyth/fill.mli)/[`fill.ml`](lib/smyth/fill.ml)
 | Type-directed guessing (term generation)    | [`term_gen.mli`](lib/smyth/term_gen.mli)/[`term_gen.ml`](lib/smyth/term_gen.ml)
 | Type-and-example-directed refinement        | [`refine.mli`](lib/smyth/refine.mli)/[`refine.ml`](lib/smyth/refine.ml)
 | Type-and-example-directed branching         | [`branch.mli`](lib/smyth/branch.mli)/[`branch.ml`](lib/smyth/branch.ml)
