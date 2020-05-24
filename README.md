@@ -30,9 +30,8 @@ Bidirectional Evaluation_.
 
 ## Installation
 
-1. Install `opam`, the OCaml package manager:
-
-     https://opam.ocaml.org/doc/Install.html
+1. Install [`opam`](https://opam.ocaml.org/doc/Install.html), the OCaml package
+   manager.
 
 2. Install OCaml 4.08.1 with the
    [flambda](https://caml.inria.fr/pub/docs/manual-ocaml/flambda.html) optimizer
