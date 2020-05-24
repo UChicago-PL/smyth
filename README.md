@@ -22,7 +22,7 @@ evaluator-based synthesis.
 The name "Smyth" is a portmanteau of "sketching" and "Myth" (the
 type-and-example directed program synthesizer upon which the theory of Smyth is
 based). It was coined by [Robert Rand](https://www.cs.umd.edu/~rrand/) who,
-incidentally, also coined the name "Myth" for the original work.
+incidentally, also coined the name "Myth."
 
 A formal exposition of the system (including its evaluation and underlying
 theory) can be found in our ICFP 2020 publication, _Program Sketching with Live
