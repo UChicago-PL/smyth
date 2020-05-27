@@ -1,0 +1,188 @@
+\newcommand{\benchmarkName}[1]
+  {#1}
+\newcommand{\benchmarkNameBool}[1]
+  {\benchmarkName{bool\_#1}}
+\newcommand{\benchmarkNameList}[1]
+  {\benchmarkName{list\_#1}}
+\newcommand{\benchmarkNameNat}[1]
+  {\benchmarkName{nat\_#1}}
+\newcommand{\benchmarkNameTree}[1]
+  {\benchmarkName{tree\_#1}}
+
+%% \newcommand{\benchmarkTypeGap}
+%%   {&&&&&&&&&&}
+
+\definecolor{skippedColor}{HTML}{c0c0c0}
+
+\newcommand{\labelColorSkipped}[1]
+  {\textcolor{skippedColor}{#1}}
+\newcommand{\labelColorFailed}[1]
+  {\textcolor{orange}{#1}}
+\newcommand{\labelTimeout}
+  {\labelColorFailed{timeout}}
+\newcommand{\labelOverspec}
+  {\labelColorFailed{overspec}}
+\newcommand{\labelRandomFailed}
+  %% {\labelColorFailed{failed}}
+  {\labelColorFailed{(---,---)}}
+\newcommand{\labelIncorrect}
+  {\labelColorFailed{incorrect}}
+\newcommand{\labelBlank}
+  %% {---}
+  {$\bullet$}
+\newcommand{\labelBlankOneFailed}
+  {\labelColorSkipped{\labelBlank$^1$}}
+\newcommand{\labelBlankHigherOrder}
+  {\labelColorSkipped{\labelBlank$^2$}}
+\newcommand{\labelBlankNonRec}
+  {\labelColorSkipped{\labelBlank$^3$}}
+\newcommand{\labelBlankSameExpertExamples}
+  {\labelColorSkipped{\labelBlank$^4$}}
+\newcommand{\labelRandomTime}[1]
+  %% {\textcolor{orange}{#1}}
+  %% {#1}
+  {t=#1}
+
+\newcommand{\benchmarkExperimentOne}[3]
+  {&{#1}&{#3}}
+\newcommand{\benchmarkExperimentOneFailedTimeOut}[1]
+  {&{#1}&{\scriptsize{timeout}}}
+\newcommand{\benchmarkExperimentOneFailedOverSpecialized}[1]
+  {&{#1}&{\scriptsize{overspec}}}
+\newcommand{\benchmarkExperimentOneFailedNoSolutions}[1]
+  {&{#1}&{\scriptsize{none}}}
+\newcommand{\benchmarkExperimentThreeFailedTimeOut}
+  {&{\scriptsize{timeout}}}
+\newcommand{\benchmarkExperimentThreeFailedOverSpecialized}
+  {&{\scriptsize{overspec}}}
+\newcommand{\benchmarkExperimentTwo}[9]
+  {&{#1}
+  }
+%% TODO rename: used for experiment three also
+\newcommand{\benchmarkExperimentTwoRand}[3]
+  {&(#1, #2)$^{#3}$}
+\newcommand{\benchmarkExperimentTwoRandFailedHigherOrder}
+  {&\blankEntry}
+\newcommand{\benchmarkExperimentTwoRandFailedTimeout}
+  {&\scriptsize{timeout}}
+%% TODO rename
+\newcommand{\benchmarkExperimentTwoRandFailedNoNinety}
+  {&\scriptsize{failed}}
+\newcommand{\benchmarkExperimentThree}[9]
+  {&{#1}}
+
+\newcommand{\insideOut}
+  %% {*}
+  {}
+\newcommand{\upperBound}
+  {*}
+\newcommand{\blankEntry}
+  {---}
+\newcommand{\benchmarkExperimentTwoBlank}
+  {&\blankEntry}
+\newcommand{\benchmarkExperimentThreeBlank}
+  {&\blankEntry}
+\newcommand{\displayPct}[1]
+  {\phantom{0 (}{#1}\phantom{)}}
+\newcommand{\displayPctUpperBound}[1]
+  {\phantom{0 (}{#1}\upperBound}
+
+\newcommand{\leonquidBlank}
+  {\textcolor{gray}{---}}
+\newcommand{\leonquidCorrectNoPhantom}
+  {\textcolor{gray}{\cmark}}
+\newcommand{\leonquidCorrect}
+  {\textcolor{gray}{\cmark\phantom{$^1$}}}
+\newcommand{\leonquidIncorrect}
+  {\textcolor{orange}{\xmark$^1$}}
+\newcommand{\leonquidError}
+  {\textcolor{orange}{\xmark$^2$}}
+\newcommand{\leonquidHigherOrderFunc}
+  {\textcolor{orange}{\xmark$^3$}}
+\newcommand{\synquidNotTraceComplete}
+  {\textcolor{orange}{\xmark$^4$}}
+\newcommand{\synquidDatatypeAxiomsNoPhantom}
+  {\textcolor{orange}{\textbf{?}}}
+\newcommand{\synquidDatatypeAxioms}
+  {\textcolor{orange}{\textbf{?\ }}}
+
+\begin{figure}
+
+\experimentTableSize
+
+\begin{tabular}{l|cc|cc|cc||cc|cc}
+  \multicolumn{7}{c||}{\textbf{\snsMyth{}}}
+& \multicolumn{2}{c}{\textbf{\leon{}}}
+& \multicolumn{2}{|c}{\textbf{\synquid{}}}
+\\\hline
+\multicolumn{1}{r|}{\textbf{Experiment}} &
+\multicolumn{2}{c|}{\textbf{1}} &
+\textbf{2a} & \textbf{2b} & \textbf{3a} & \textbf{3b}
+& \multicolumn{2}{c|}{\textbf{4}} & \multicolumn{2}{c}{\textbf{4}}
+\\\hline
+\multicolumn{1}{r|}{{Sketch / Objective}} &
+\multicolumn{2}{c|}{\textit{None / Top-1}} &
+\multicolumn{2}{c|}{\textit{None / Top-1}} &
+\multicolumn{2}{c||}{\textit{Base Case / Top-1-R}}
+%% \multicolumn{1}{r|}{{Sketch}} &
+%% \multicolumn{4}{c|}{\textit{None}} &
+%% \multicolumn{2}{c||}{\textit{Base Case}}
+& \multicolumn{2}{c|}{}
+\\\hline
+%% \multicolumn{1}{r|}{{\#Benchmarks}} &
+%% \multicolumn{4}{c|}{\textit{\numBenchmarks{}/\numBenchmarksAll{} \myth{} benchmarks}} &
+%% \multicolumn{2}{c||}{\textit{\numBenchmarksBase{}/\numBenchmarksRecursive{} rec. benchmarks}}
+%% \multicolumn{4}{c|}{\textit{\numBenchmarksAll{} \myth{} benchmarks}} &
+%% \multicolumn{2}{c||}{\textit{\numBenchmarksRecursiveAll{} recursive benchmarks}}
+%% & \multicolumn{2}{c|}{}
+%% \\\hline
+%% \multicolumn{1}{r|}{{Objective}} &
+%% \multicolumn{2}{c|}{\makebox[0.38in]{\textit{Top-1}}} &
+%% \multicolumn{2}{c|}{\makebox[0.38in]{\textit{Top-1}}} &
+%% \multicolumn{2}{c||} {\makebox[0.38in]{\textit{Top-1-R}}}
+%% & \multicolumn{2}{c|}{}
+%% \\\hline
+\textbf{Name} &
+\textbf{Expert} & \textbf{Time} &
+\textbf{Expert} & \textbf{Random} &
+\textbf{Expert} & \textbf{Random} &
+\textbf{1} & \textbf{2a} &
+\textbf{1} & \textbf{2a}
+\\
+&
+& &
+& {(50\%, 90\%)} &
+& {(50\%, 90\%)} &
+& &
+\\
+\input{figure-10-data}
+\hline
+\textbf{Averages} &
+&
+&
+\displayPctUpperBound{\pctFewerExamplesTopOne} &
+&
+\displayPct{\phantom{1+}\pctFewerExamplesBaseCaseStrategy} &
+&&
+\end{tabular}
+
+\vsepBeforeCaption
+  \captionsetup{justification=centering}
+  \caption{
+    Experiments.
+      \textbf{Top-1(-R)}:
+      1st (recursive) solution valid.
+    \textbf{Time}:
+       Average of 10 runs, in seconds.
+    \\
+    \textbf{2a Average}:
+      \pctFewerExamplesTopOne{} for \numBenchmarks{} non-blank rows.
+      (*Upper bound: \pctFewerExamplesTopOneUpperBound{} for all
+     \numBenchmarksAll{} rows.)
+    \\
+    \textbf{3a Average}:
+      \pctFewerExamplesBaseCaseStrategy{} for
+      \numBenchmarksBase{} non-blank, non-error rows.
+  }
+\label{fig:experiments}
+\end{figure}

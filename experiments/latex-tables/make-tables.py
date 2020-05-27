@@ -61,11 +61,7 @@ assert (len(benchmarks) == 43)
 
 
 ################################################################################
-## Load dictionary of data in Figure 10 from submission.
-##
-## The file "latex-tables/figure-10-data.csv" is CSV version of
-## the "latex-tables/figure-10-data.tex" rendered in our submission.
-## The follow functions mirror some of the LaTeX macros.
+## Load dictionaries of data for Figure 10.
 
 def data_loader(filename, expected_columns, handle_columns):
     try:
@@ -84,62 +80,6 @@ def data_loader(filename, expected_columns, handle_columns):
         print "[" + filename + "] not found"
         return None
 
-def load_figure_10():
-    def handle_columns(table, columns):
-        table[columns[0]] = \
-            { "Experiment1" : { "Expert" : columns[1] , "Time" : columns[2] }
-            , "Experiment2a" : { "Expert" : figure_10_2a(columns[3]) }
-            , "Experiment2b" : { "Random" : figure_10_2b_3b(columns[4]) }
-            , "Experiment3a" : { "Expert" : figure_10_3a(columns[5]) }
-            , "Experiment3b" : { "Random" : figure_10_2b_3b(columns[6]) }
-            , "Experiment4" :
-                  { "Leon" : { "1" : columns[7] , "2a" : columns[8] }
-                  , "Synquid" : { "1" : columns[9] , "2a" : columns[10] }
-                  }
-            }
-
-    return data_loader("figure-10-data.csv", 11, handle_columns)
-
-def figure_10_2a(string):
-    return string
-
-def figure_10_3a(string):
-    if string == "FailedOverSpecialized":
-        return "\\scriptsize{overspec}"
-    else:
-        return string
-
-def figure_10_2b_3b(string):
-    if string == "---":
-        return "---"
-    if string == "RandFailedHigherOrder":
-        return "---"
-    elif string == "RandFailedNoNinety":
-        return "\\scriptsize{failed}"
-    elif string == "RandFailedTimeout":
-        return "\\scriptsize{timeout}"
-    else:
-        triple = string[1:-1].split("|")
-        if len(triple) == 3:
-            [k50, k90, t] = triple
-            if k90 == "":
-                return show_rand(k50, "$\\downarrow$", t)
-            else:
-                return show_rand(k50, k90, t)
-        else:
-            # Unexpected format
-            return "XXX " + string
-
-def show_rand(k50, k90, t):
-    return "(" + k50 + "," + k90 + ")$^{" + t + "}$"
-
-figure_10 = \
-    load_figure_10()
-
-
-################################################################################
-## Load dictionaries of data for Tables 1 through 4 for artifact evaluation.
-
 def load_data_1(filename):
     def handle_columns(table, columns):
         [benchmark, time, _, expert, _, _] = columns
@@ -152,11 +92,11 @@ def load_data_1(filename):
 # For Experiment 2a, base_examples = 0.
 # For Experiment 3a, base_examples = 1 (base case is always required).
 #
-def load_data_2a_3a(filename, base_examples):
+def load_data_2a_3a(data_1, filename, base_examples):
     def handle_columns(table, columns):
         [benchmark, _, _, smyth_examples, _, _] = columns
         benchmark = benchmark.replace(".elm", "")
-        myth_examples = figure_10[benchmark]["Experiment1"]["Expert"]
+        myth_examples = data_1[benchmark]["Expert"]
         adjusted_smyth_examples = base_examples + float(smyth_examples)
         pct = str(int(round(100 * adjusted_smyth_examples / float(myth_examples))))
         if base_examples == 0:
@@ -168,9 +108,17 @@ def load_data_2a_3a(filename, base_examples):
     return data_loader(filename, 6, handle_columns)
 
 def load_data_2b_3b(filename):
+    def show_random(k50, k90, t):
+        if k50 == "---" and k90 == "---":
+            return "\\labelRandomFailed"
+        elif k90 == "---":
+          return "\\labelColorFailed{(" + k50 + ",$\\downarrow$)$^{" + t + "}$}"
+        else:
+          return "(" + k50 + "," + k90 + ")$^{" + t + "}$"
+
     def handle_columns(table, columns):
         [benchmark, k50, k90] = columns
-        table[benchmark] = { "Random" : show_rand(k50, k90, "") }
+        table[benchmark] = { "Random" : show_random(k50, k90, "") }
 
     return data_loader(filename, 3, handle_columns)
 
@@ -182,11 +130,12 @@ def load_data_4(filename):
     return data_loader(filename, 2, handle_columns)
 
 def load_data_123(prefix):
+    data_1 = load_data_1(prefix + "summaries/1.txt")
     return \
-        { "1" : load_data_1(prefix + "summaries/1.txt")
-        , "2a" : load_data_2a_3a(prefix + "summaries/2a.txt", 0)
+        { "1" : data_1
+        , "2a" : load_data_2a_3a(data_1, prefix + "summaries/2a.txt", 0)
         , "2b" : load_data_2b_3b(prefix + "data/exp-2b/analysis.csv")
-        , "3a" : load_data_2a_3a(prefix + "summaries/3a.txt", 1)
+        , "3a" : load_data_2a_3a(data_1, prefix + "summaries/3a.txt", 1)
         , "3b" : load_data_2b_3b(prefix + "data/exp-3b/analysis.csv")
         }
 
@@ -206,31 +155,165 @@ data_4 = \
 
 
 ################################################################################
-## Write table data for Tables 1 through 4 for artifact evaluation.
+## Present Figure 10 data with colors and labels where needed.
+
+benchmarks_1_timeout = \
+    [ "list_compress", "tree_binsert", "tree_nodes_at_level", "tree_postorder" ]
+
+benchmarks_1_overspec = \
+    [ "list_even_parity" ]
+
+benchmarks_1_failed = \
+    benchmarks_1_timeout + benchmarks_1_overspec
+
+benchmarks_2b_timeout = \
+    [ "list_pairwise_swap", "list_sorted_insert", "tree_count_leaves" ]
+
+benchmarks_3b_timeout = \
+    [ "list_pairwise_swap", "list_sorted_insert", "tree_count_leaves" ]
+
+benchmarks_higher_order = \
+    [ "list_filter", "list_fold", "list_map", "tree_map" ]
+
+benchmarks_non_recursive = \
+    [ "bool_band", "bool_bor", "bool_impl", "bool_neg", "bool_xor"
+    , "list_hd", "list_inc", "list_rev_fold", "list_sum", "list_tl"
+    , "nat_pred"
+    ]
+
+benchmarks_1_2_same_examples = \
+    [ "bool_neg", "bool_xor", "list_length", "nat_max" ]
+
+def show_1_expert(benchmark):
+    if benchmark == "list_compress": return "13"
+    elif benchmark == "list_even_parity": return "7"
+    elif benchmark == "tree_binsert": return "20"
+    elif benchmark == "tree_nodes_at_level": return "11"
+    elif benchmark == "tree_postorder": return "20"
+    else:
+        try:
+            string = our_data["1"][benchmark]["Expert"]
+            if benchmark == "list_filter":
+                return "\\phantom{*}" + string + "*"
+            else:
+                return  string
+        except KeyError:
+            return "XXX"
+
+def show_1_time(benchmark):
+    try:
+        return our_data["1"][benchmark]["Time"]
+    except KeyError:
+        if benchmark in benchmarks_1_timeout: return "\\labelTimeout"
+        elif benchmark in benchmarks_1_overspec: return "\\labelOverspec"
+        else: return "XXX"
+
+def show_2a(benchmark):
+    try:
+        return our_data["2a"][benchmark]["Expert"]
+    except KeyError:
+        if benchmark in benchmarks_1_failed: return "\\labelBlankOneFailed"
+        else: return "XXX"
+
+def show_2b(benchmark):
+    try:
+        string = our_data["2b"][benchmark]["Random"]
+        if benchmark in ["tree_collect_leaves", "tree_preorder"]:
+            return string + "$^{\\labelRandomTime{3}}$"
+        elif benchmark == "tree_count_nodes":
+            return string + "$^{\\labelRandomTime{10}}$"
+        else:
+            return string
+    except KeyError:
+        if benchmark in benchmarks_1_failed: return "\\labelBlankOneFailed"
+        elif benchmark in benchmarks_higher_order: return "\\labelBlankHigherOrder"
+        elif benchmark in benchmarks_2b_timeout: return "\\labelTimeout"
+        else: return "XXX"
+
+def show_3a(benchmark):
+    try:
+        return our_data["3a"][benchmark]["Expert"]
+    except KeyError:
+        if benchmark in benchmarks_1_failed: return "\\labelBlankOneFailed"
+        elif benchmark in benchmarks_non_recursive: return "\\labelBlankNonRec"
+        elif benchmark == "list_concat": return "\\labelIncorrect"
+        elif benchmark == "list_pairwise_swap": return "\\labelOverspec"
+        else: return "XXX"
+
+def show_3b(benchmark):
+    try:
+        string = our_data["3b"][benchmark]["Random"]
+        if benchmark == "tree_count_nodes":
+            return string + "$^{\\labelRandomTime{10}}$"
+        else:
+            return string
+    except KeyError:
+        if benchmark in benchmarks_1_failed: return "\\labelBlankOneFailed"
+        elif benchmark in benchmarks_higher_order: return "\\labelBlankHigherOrder"
+        elif benchmark in benchmarks_2b_timeout: return "\\labelTimeout"
+        elif benchmark in benchmarks_non_recursive: return "\\labelBlankNonRec"
+        else: return "XXX"
+
+def show_4(tool, experiment, benchmark):
+    try:
+        if benchmark in benchmarks_1_failed:
+            return "\\labelBlankOneFailed"
+        elif benchmark in benchmarks_1_2_same_examples and experiment == "2a":
+            return "\\labelBlankSameExpertExamples"
+        elif benchmark in benchmarks_higher_order:
+            return "\\leonquidHigherOrderFunc"
+        else:
+            return data_4[tool + experiment][benchmark]["Result"]
+    except KeyError:
+        return "XXX"
+
+
+################################################################################
+## Write table data for Tables 1 through 3.
 
 output_tables = \
     { "1" : open("generated/table-1-data.tex", "w+")
     , "2" : open("generated/table-2-data.tex", "w+")
     , "3" : open("generated/table-3-data.tex", "w+")
-    , "4" : open("generated/table-4-data.tex", "w+")
     }
+
+output_figure_10_data = \
+    open("figure-10-data.tex", "w+")
 
 def write_tables():
     for benchmarks in benchmarks_by_type:
+
+        output_figure_10_data.write("&&&&&&&&&&\\\\\n")
 
         for i in output_tables:
             output_tables[i].write("\\\\\n")
 
         for benchmark in benchmarks:
 
+            write_figure_10_row \
+                ( output_figure_10_data
+                , [ benchmark
+                  , show_1_expert(benchmark)
+                  , show_1_time(benchmark)
+                  , show_2a(benchmark)
+                  , show_2b(benchmark)
+                  , show_3a(benchmark)
+                  , show_3b(benchmark)
+                  , show_4("Leon", "1", benchmark)
+                  , show_4("Leon", "2a", benchmark)
+                  , show_4("Synquid", "1", benchmark)
+                  , show_4("Synquid", "2a", benchmark)
+                  ]
+                )
+
             write_row_123 \
                 ( output_tables["1"]
                 , benchmark
-                , ( figure_10[benchmark]["Experiment1"]["Expert"]
+                , ( show_1_expert(benchmark)
                   , try_lookup_123(our_data["1"], benchmark, "Expert")
                   , try_lookup_123(your_data["1"], benchmark, "Expert")
                   )
-                , ( figure_10[benchmark]["Experiment1"]["Time"]
+                , ( show_1_time(benchmark)
                   , try_lookup_123(our_data["1"], benchmark, "Time")
                   , try_lookup_123(your_data["1"], benchmark, "Time")
                   )
@@ -239,11 +322,11 @@ def write_tables():
             write_row_123 \
                 ( output_tables["2"]
                 , benchmark
-                , ( figure_10[benchmark]["Experiment2a"]["Expert"]
+                , ( show_2a(benchmark)
                   , try_lookup_123(our_data["2a"], benchmark, "Expert")
                   , try_lookup_123(your_data["2a"], benchmark, "Expert")
                   )
-                , ( figure_10[benchmark]["Experiment2b"]["Random"]
+                , ( show_2b(benchmark)
                   , try_lookup_123(our_data["2b"], benchmark, "Random")
                   , try_lookup_123(your_data["2b"], benchmark, "Random")
                   )
@@ -252,32 +335,17 @@ def write_tables():
             write_row_123 \
                 ( output_tables["3"]
                 , benchmark
-                , ( figure_10[benchmark]["Experiment3a"]["Expert"]
+                , ( show_3a(benchmark)
                   , try_lookup_123(our_data["3a"], benchmark, "Expert")
                   , try_lookup_123(your_data["3a"], benchmark, "Expert")
                   )
-                , ( figure_10[benchmark]["Experiment3b"]["Random"]
+                , ( show_3b(benchmark)
                   , try_lookup_123(our_data["3b"], benchmark, "Random")
                   , try_lookup_123(your_data["3b"], benchmark, "Random")
                   )
                 )
 
-            write_row_4 \
-                ( output_tables["4"]
-                , benchmark
-                , ( figure_10[benchmark]["Experiment4"]["Leon"]["1"]
-                  , try_lookup_4(data_4["Leon1"], benchmark, "Result")
-                  )
-                , ( figure_10[benchmark]["Experiment4"]["Leon"]["2a"]
-                  , try_lookup_4(data_4["Leon2a"], benchmark, "Result")
-                  )
-                , ( figure_10[benchmark]["Experiment4"]["Synquid"]["1"]
-                  , try_lookup_4(data_4["Synquid1"], benchmark, "Result")
-                  )
-                , ( figure_10[benchmark]["Experiment4"]["Synquid"]["2a"]
-                  , try_lookup_4(data_4["Synquid2a"], benchmark, "Result")
-                  )
-                )
+    output_figure_10_data.write("&&&&&&&&&&\\\\\n")
 
 def make_try_lookup(default):
     def try_lookup(table, benchmark, column):
@@ -290,13 +358,13 @@ def make_try_lookup(default):
 try_lookup_123 = \
     make_try_lookup("$\\bullet$")
 
-try_lookup_4 = \
-    make_try_lookup("X")
-
 def escape_LaTeX(string):
     string = string.replace("_", "\\_")
     string = string.replace("%", "\\%")
     return string
+
+def write_figure_10_row(f, columns):
+    f.write (escape_LaTeX( "&".join(columns) + "\\\\\n"))
 
 def write_row_123(f, name, triple1, triple2):
     def show(triple):
@@ -312,27 +380,78 @@ def write_row_123(f, name, triple1, triple2):
         )
     )
 
-def write_row_4(f, name, pair1, pair2, pair3, pair4):
-    def show(pair):
-        [s1, s2] = pair
-        if s1 == s2:
-            return [s1]
-        ## NOTE: higher-order functions not in exp-4-logic/
-        elif name in ["list_filter", "list_map", "list_fold", "tree_map"] and \
-             s2 == "X":
-            return [s1]
-        else:
-            # out2 = "\\highlightBlue{" + s2 + "}"
-            # return [s1, out2]
-            return [s1, "\\highlightBlue{$\\Rightarrow$}", s2]
-
-    f.write (escape_LaTeX
-        ( name + "&"
-        + " ".join(show(pair1)) + "&"
-        + " ".join(show(pair2)) + "&"
-        + " ".join(show(pair3)) + "&"
-        + " ".join(show(pair4)) + "\\\\\n"
-        )
-    )
-
 write_tables()
+
+
+################################################################################
+## Compute 2a and 3a stats.
+
+def get_pct(string):
+    # Quick-and-dirty undo stringification of load_data_2a_3a
+    string = string.split(" ")[1]
+    string = string[1:-1]
+    string = string[:-1]
+    pct = int(string)
+    return pct
+
+def get_sketch_examples(string):
+    # Quick-and-dirty undo stringification of load_data_2a_3a
+    string = string.split(" ")[0]
+    string = string.split("+")[1]
+    num = int(string)
+    return num
+
+def avg(i, j):
+    return float(i) / float(j)
+
+def compute_2a_stats():
+    succeeded = 0
+    failed = 0
+    total_pct = 0
+
+    for benchmarks in benchmarks_by_type:
+        for benchmark in benchmarks:
+            try:
+                pct = get_pct(our_data["2a"][benchmark]["Expert"])
+                total_pct += pct
+                succeeded += 1
+            except KeyError:
+                failed += 1
+
+    print ""
+    print "Succeeded:", succeeded
+    print "Average:", avg(total_pct, succeeded), "%"
+    print "Average Upper Bound:", avg(total_pct + 100*failed, succeeded + failed), "%"
+
+def compute_3a_stats():
+    succeeded = 0
+    failed = 0
+    total_pct = 0
+    total_pct_2a = 0
+    max_examples = 0
+    total_examples = 0
+
+    for benchmarks in benchmarks_by_type:
+        for benchmark in benchmarks:
+            try:
+                ex = get_sketch_examples(our_data["3a"][benchmark]["Expert"])
+                pct = get_pct(our_data["3a"][benchmark]["Expert"])
+                pct_2a = get_pct(our_data["2a"][benchmark]["Expert"])
+                total_examples += ex
+                if ex > max_examples:
+                    max_examples = ex
+                total_pct += pct
+                total_pct_2a += pct_2a
+                succeeded += 1
+            except KeyError:
+                failed += 1
+
+    print ""
+    print "Succeeded:", succeeded
+    print "Average:", avg(total_pct, succeeded), "%"
+    print "Average of these from 2a:", avg(total_pct_2a, succeeded), "%"
+    print "Max Examples:", max_examples
+    print "Average Examples:", avg(total_examples, succeeded)
+
+compute_2a_stats()
+compute_3a_stats()
