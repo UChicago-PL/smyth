@@ -1,7 +1,7 @@
 experiment = argv(){1};
 name = argv(){2};
 
-nice_experiment = ['Experiment ' strsplit(experiment, '-'){2}]
+nice_experiment = ['Experiment ' strsplit(experiment, '-'){2}];
 
 data = csvread(['data/' experiment '/csv/' name '.csv']);
 

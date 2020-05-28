@@ -1,7 +1,7 @@
 experiment = argv(){1};
 amount = argv(){2};
 
-nice_experiment = ['Experiment ' strsplit(experiment, '-'){2}]
+nice_experiment = ['Experiment ' strsplit(experiment, '-'){2}];
 
 diffs = csvread(['data/' experiment '/histogram/k' amount '.csv']);
 

@@ -39,6 +39,10 @@ with open("data/exp-" + exp_num + "b/analysis.csv") as analysis_file:
 def analyze(p):
     with open("data/exp-" + exp_num + "b/histogram/k" + p + ".csv", "w") as f:
         for key in random[p]:
+            if key not in expert:
+                print("WARNING! Skipping '", key, " for exp-", exp_num, "b, k",
+                        p, sep="")
+                continue
             k_prime = random[p][key] - expert[key]
             f.write(str(k_prime) + "\n")
 
