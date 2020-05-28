@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [[ $# -ne 1 ]]; then
+  echo "usage:" $0 "<experiment-number>"
+  exit 1
+fi
+
+name=exp-${1}b
+
+mkdir -p data/$name/histogram
+mkdir -p data-backup/$name/histogram
+mv data/$name/histogram/* data-backup/$name/histogram 2> /dev/null
+
+./collate-histogram $1
+octave --no-gui smyth_histogram.m $name 50
+octave --no-gui smyth_histogram.m $name 90

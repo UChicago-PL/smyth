@@ -11,6 +11,7 @@ if [[ $# -ne 1 ]]; then
 fi
 
 mkdir -p data/$1/png
+mkdir -p data-backup/$1/png
 mv data/$1/png/*.png data-backup/$1/png 2> /dev/null
 
 shopt -s nullglob

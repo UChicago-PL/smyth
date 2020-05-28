@@ -7,11 +7,14 @@ fi
 
 ./collect-all-data $1
 
+./analyze nosketch exp-2b > data/exp-2b/analysis.csv
+./analyze sketch exp-3b > data/exp-3b/analysis.csv
+
 ./plot exp-2b
 ./plot exp-3b
 
-./analyze nosketch exp-2b > data/exp-2b/analysis.csv
-./analyze sketch exp-3b > data/exp-3b/analysis.csv
+./histogram 2
+./histogram 3
 
 cd latex-tables
 make
