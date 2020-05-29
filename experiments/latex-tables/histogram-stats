@@ -1,0 +1,30 @@
+#!/bin/bash
+
+command -v octave >/dev/null 2>&1 || {
+  echo "Octave not installed; cannot calculate histogram statistics.";
+  exit 1;
+}
+
+if [[ $# -ne 0 ]]; then
+  echo "usage:" $0
+  exit 1
+fi
+
+run() {
+  prefix="f"
+  if [[ $2 -eq 90 ]]; then
+    prefix="n"
+  fi
+  octave --no-gui histogram_stats.m \
+    ../author-results/data/exp-$1/histogram/k$2.csv \
+    $prefix
+}
+
+echo "% Experiment 2b statistics"
+run 2b 50
+run 2b 90
+
+echo ""
+echo "% Experiment 3b statistics"
+run 3b 50
+run 3b 90

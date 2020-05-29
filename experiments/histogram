@@ -1,5 +1,10 @@
 #!/bin/bash
 
+command -v octave >/dev/null 2>&1 || {
+  echo "Octave not installed; skipping histogram generation.";
+  exit 1;
+}
+
 if [[ $# -ne 1 ]]; then
   echo "usage:" $0 "<experiment-number>"
   exit 1
