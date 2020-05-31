@@ -18,6 +18,8 @@ icfp:
 	cp figure-10-stats.tex $(SMYTH_PAPER)
 	cp ../author-results/data/exp-2b/png/*png $(SMYTH_PAPER)/random-graphs/2b/
 	cp ../author-results/data/exp-3b/png/*png $(SMYTH_PAPER)/random-graphs/3b/
+	cp ../author-results/data/exp-2b/histogram/*png $(SMYTH_PAPER)/random-graphs/2b/
+	cp ../author-results/data/exp-3b/histogram/*png $(SMYTH_PAPER)/random-graphs/3b/
 
 clean: 
 	rm -f *aux *out *log
