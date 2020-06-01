@@ -6,11 +6,11 @@ type NatList
   = Nil ()
   | Cons (Nat, NatList)
 
-listStutter : NatList -> NatList
-listStutter xs =
+stutter : NatList -> NatList
+stutter xs =
   ??
 
-specifyFunction listStutter
+specifyFunction stutter
   [ ([], [])
   -- , ([0], [0, 0])
   , ([1, 0], [1, 1, 0, 0])
