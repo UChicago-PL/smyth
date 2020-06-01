@@ -218,6 +218,8 @@ def show_2a(benchmark):
 def show_2b(benchmark):
     try:
         string = our_data["2b"][benchmark]["Random"]
+        ## These special case timeouts c/should be read from
+        ## ../author-results/data/exp-2b/csv/*csv
         if benchmark in ["tree_collect_leaves", "tree_preorder"]:
             return string + "$^{\\labelRandomTime{3}}$"
         elif benchmark == "tree_count_nodes":
@@ -243,8 +245,10 @@ def show_3a(benchmark):
 def show_3b(benchmark):
     try:
         string = our_data["3b"][benchmark]["Random"]
+        ## These special case timeouts c/should be read from
+        ## ../author-results/data/exp-3b/csv/*csv
         if benchmark == "tree_count_nodes":
-            return string + "$^{\\labelRandomTime{10}}$"
+            return string + "$^{\\labelRandomTime{3}}$"
         else:
             return string
     except KeyError:
