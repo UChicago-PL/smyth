@@ -1,0 +1,54 @@
+#!/bin/bash
+
+if [[ $# -ne 1 ]]; then
+  echo "usage:" $0 "<trial-count>"
+  exit 1
+fi
+
+echo "Experiment 5b"
+
+mkdir -p data/exp-5b/csv
+mkdir -p data-backup/exp-5b/csv
+mv data/exp-5b/csv/*.csv data-backup/exp-5b/csv 2> /dev/null
+
+trial_count=$1
+
+run() {
+  echo -n "(5b; N=$trial_count; t=$1) Running $2... "
+  ../poly-fuzz $trial_count $1 poly-no-sketch $2 > data/exp-5b/csv/$2.csv
+  if [ $? -eq 0 ]; then
+    echo "completed."
+  else
+    echo "failed! Trying again:"
+    echo -n "(5b; N=$trial_count; t=$1) Running $2... "
+    ../poly-fuzz $trial_count $1 poly-no-sketch $2 > data/exp-5b/csv/$2.csv
+    if [ $? -eq 0 ]; then
+      echo "completed."
+    else
+      echo "failed again! Moving on..."
+    fi
+  fi
+}
+
+run 1 list_append
+run 1 list_concat
+run 1 list_drop
+# run 1 list_filter
+# run 1 list_fold
+run 1 list_last
+run 1 list_length
+# run 1 list_map
+run 1 list_rev_append
+run 1 list_rev_fold
+run 1 list_rev_snoc
+run 1 list_rev_tailcall
+run 1 list_snoc
+run 1 list_stutter
+run 1 list_take
+run 1 list_tl
+run 1 tree_collect_leaves
+run 1 tree_count_leaves
+run 1 tree_count_nodes
+run 1 tree_inorder
+# run 1 tree_map
+run 1 tree_preorder

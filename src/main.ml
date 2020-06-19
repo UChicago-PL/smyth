@@ -83,11 +83,21 @@ type command =
   | Test
   | SuiteTest
   | Fuzz
+  | PolyFuzz
   | AssertionExport
   | GenerateSpec
+  | GeneratePolySpec
 
 let commands : command list =
-  [ Solve; Test; SuiteTest; Fuzz; AssertionExport; GenerateSpec ]
+  [ Solve
+  ; Test
+  ; SuiteTest
+  ; Fuzz
+  ; PolyFuzz
+  ; AssertionExport
+  ; GenerateSpec
+  ; GeneratePolySpec
+  ]
 
 let command_name : command -> string =
   function
@@ -95,8 +105,10 @@ let command_name : command -> string =
     | Test -> "test"
     | SuiteTest -> "suite-test"
     | Fuzz -> "fuzz"
+    | PolyFuzz -> "poly-fuzz"
     | AssertionExport -> "export-assertions"
     | GenerateSpec -> "generate-spec"
+    | GeneratePolySpec -> "generate-poly-spec"
 
 let command_from_name : string -> command option =
   fun name ->
@@ -121,11 +133,18 @@ let command_description : command -> string =
         "Stress-test a program sketch with examples fuzzed from a built-in "
           ^ "function"
 
+    | PolyFuzz ->
+        "Stress-test a polymorphic program sketch with examples fuzzed from a "
+          ^ "built-in function"
+
     | AssertionExport ->
         "Export a set of assertions to Python code"
 
     | GenerateSpec ->
         "Generate an example specification of a built-in function"
+
+    | GeneratePolySpec ->
+        "Generate a polymorphic example specification of a built-in function"
 
 let command_arguments : command -> (string * string) list =
   function
@@ -153,7 +172,8 @@ let command_arguments : command -> (string * string) list =
           )
         ]
 
-    | Fuzz ->
+    | Fuzz
+    | PolyFuzz ->
         [ ( "trial-count"
           , "The number of trials to run for each size of example set"
           )
@@ -177,7 +197,8 @@ let command_arguments : command -> (string * string) list =
           )
         ]
 
-    | GenerateSpec ->
+    | GenerateSpec
+    | GeneratePolySpec ->
         [ ( "built-in-func"
           , "The built-in function to generate an example specification for"
           )
@@ -609,7 +630,8 @@ let () =
                    print_endline output
                )
 
-    | Fuzz ->
+    | Fuzz
+    | PolyFuzz ->
         let trial_count =
           match int_of_string_opt Sys.argv.(2) with
             | Some n when n > 0 ->
@@ -629,11 +651,14 @@ let () =
         let sketch_path =
           Sys.argv.(5)
         in
+        let poly =
+          command = PolyFuzz
+        in
         let benchmark : (Lang.exp * Lang.exp) list list list =
           match
             List.assoc_opt
               builtin
-              (References.all (Fuzz.experiment_proj trial_count))
+              (References.all (Fuzz.experiment_proj ~poly ~n:trial_count))
           with
             | Some benchmark_thunk ->
                 benchmark_thunk ()
@@ -654,7 +679,7 @@ let () =
                                Endpoint.test_assertions
                                  ~specification:(Io2.read_path [spec_path])
                                  ~sketch:(Io2.read_path [sketch_path])
-                                 ~assertions:assertions
+                                 ~assertions
                              with
                                | Ok { top_success; top_recursive_success; _ } ->
                                    (top_success, top_recursive_success)
@@ -749,14 +774,18 @@ let () =
                 )
         end
 
-    | GenerateSpec ->
+    | GenerateSpec
+    | GeneratePolySpec ->
         let builtin =
           Sys.argv.(2)
+        in
+        let poly =
+          command = GeneratePolySpec
         in
         begin match
           List.assoc_opt
             builtin
-            (References.all Fuzz.specification_proj)
+            (References.all (Fuzz.specification_proj ~poly))
         with
           | Some spec ->
               print_endline spec

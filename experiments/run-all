@@ -10,11 +10,18 @@ fi
 ./analyze nosketch exp-2b > data/exp-2b/analysis.csv
 ./analyze sketch exp-3b > data/exp-3b/analysis.csv
 
+./analyze nosketch exp-5b > data/exp-5b/analysis.csv
+./analyze sketch exp-6b > data/exp-6b/analysis.csv
+
 ./plot exp-2b
 ./plot exp-3b
+./plot exp-5b
+./plot exp-6b
 
 ./histogram 2
 ./histogram 3
+./histogram 5
+./histogram 6
 
 cd latex-tables
 make

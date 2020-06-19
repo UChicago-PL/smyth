@@ -1,0 +1,39 @@
+#!/bin/bash
+
+if [[ $# -ne 0 ]]; then
+  echo "usage:" $0
+  exit 1
+fi
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+mkdir -p specifications/poly
+mkdir -p specifications-backup/poly
+mv specifications/poly/*.elm specifications-backup/poly 2> /dev/null
+
+run() {
+  $DIR/smyth generate-poly-spec $1 > specifications/poly/$1.elm
+}
+
+run list_append
+run list_concat
+run list_drop
+run list_filter
+run list_fold
+run list_last
+run list_length
+run list_map
+run list_rev_append
+run list_rev_fold
+run list_rev_snoc
+run list_rev_tailcall
+run list_snoc
+run list_stutter
+run list_take
+run list_tl
+run tree_collect_leaves
+run tree_count_leaves
+run tree_count_nodes
+run tree_inorder
+run tree_map
+run tree_preorder

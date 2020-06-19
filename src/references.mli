@@ -1,5 +1,3 @@
-open Smyth
-
 type ('i, 'o) reference =
   { function_name : string
   ; k_max : int
@@ -7,6 +5,7 @@ type ('i, 'o) reference =
   ; d_out : 'o Denotation.t
   ; input : 'i Sample2.gen
   ; base_case : 'i Sample2.gen option
+  ; poly_args : Smyth.Lang.typ list
   ; func : 'i -> 'o
   }
 

@@ -165,7 +165,13 @@ let rec typ' : typ printer =
           collection Round state typ' comps
 
       | TData (name, type_args) ->
-          name ^ collection Angle state typ' type_args
+          let type_args_string =
+            if type_args = [] then
+              ""
+            else
+              " " ^ String.concat " " (List.map (typ' state) type_args)
+          in
+          name ^ type_args_string
 
       | TForall (x, t) ->
           "forall " ^ x ^ ". " ^ typ' state t

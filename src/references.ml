@@ -1,5 +1,3 @@
-open Smyth
-
 (* Helpers *)
 
 let rec list_compress : 'a list -> 'a list =
@@ -63,6 +61,7 @@ type ('i, 'o) reference =
   ; d_out : 'o Denotation.t
   ; input : 'i Sample2.gen
   ; base_case : 'i Sample2.gen option
+  ; poly_args : Smyth.Lang.typ list
   ; func : 'i -> 'o
   }
 
@@ -80,6 +79,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.bool
           ; input = Sample2.pair Sample2.bool Sample2.bool
           ; base_case = None
+          ; poly_args = []
           ; func =
               let f : bool * bool -> bool =
                 fun (x, y) ->
@@ -96,6 +96,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.bool
           ; input = Sample2.pair Sample2.bool Sample2.bool
           ; base_case = None
+          ; poly_args = []
           ; func =
               let f : bool * bool -> bool =
                 fun (x, y) ->
@@ -112,6 +113,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.bool
           ; input = Sample2.pair Sample2.bool Sample2.bool
           ; base_case = None
+          ; poly_args = []
           ; func =
               let f : bool * bool -> bool =
                 fun (x, y) ->
@@ -128,6 +130,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.bool
           ; input = Sample2.bool
           ; base_case = None
+          ; poly_args = []
           ; func =
               let f : bool -> bool =
                 fun x ->
@@ -144,6 +147,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.bool
           ; input = Sample2.pair Sample2.bool Sample2.bool
           ; base_case = None
+          ; poly_args = []
           ; func =
               let f : bool * bool -> bool =
                 fun (x, y) ->
@@ -163,6 +167,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.pair Sample2.nat_list Sample2.nat_list
           ; base_case = Some (Sample2.constant ([], []))
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int list * int list -> int list =
                 fun (xs, ys) ->
@@ -179,6 +184,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int list -> int list =
                 fun xs ->
@@ -195,6 +201,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nested_nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int list list -> int list =
                 fun xss ->
@@ -212,6 +219,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.pair Sample2.nat_list Sample2.nat
           ; base_case = Some (Sample2.constant ([], 0))
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int list * int -> int list =
                 fun (xs, n) ->
@@ -228,6 +236,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.bool
           ; input = Sample2.bool_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = []
           ; func =
               let f : bool list -> bool =
                 fun bs ->
@@ -250,6 +259,7 @@ let all : 'a reference_projection -> (string * 'a) list =
                 (Sample2.from ("isEven", ["isNonzero"]))
                 Sample2.nat_list
           ; base_case = Some (Sample2.constant ("isEven", []))
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : string * int list -> int list =
                 fun (fname, xs) ->
@@ -280,6 +290,7 @@ let all : 'a reference_projection -> (string * 'a) list =
                 Sample2.nat
                 Sample2.nat_list
           ; base_case = Some (Sample2.constant ("sum", 0, []))
+          ; poly_args = [snd Denotation.int; snd Denotation.int]
           ; func =
               let f : string * int * int list -> int =
                 fun (fname, acc, xs) ->
@@ -305,6 +316,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = []
           ; func =
               let f : int list -> int =
                 fun xs ->
@@ -326,6 +338,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = []
           ; func =
               let f : int list -> int list =
                 fun xs ->
@@ -342,6 +355,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.opt Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = [snd Denotation.int]
           ; func =
               let rec f : int list -> int option =
                 fun xs ->
@@ -366,6 +380,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int list -> int =
                 fun xs ->
@@ -388,6 +403,7 @@ let all : 'a reference_projection -> (string * 'a) list =
                 (Sample2.from ("inc", ["zero"]))
                 Sample2.nat_list
           ; base_case = Some (Sample2.constant ("inc", []))
+          ; poly_args = [snd Denotation.int; snd Denotation.int]
           ; func =
               let f : string * int list -> int list =
                 fun (fname, xs) ->
@@ -411,6 +427,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.int
           ; input = Sample2.pair Sample2.nat_list Sample2.nat
           ; base_case = Some (Sample2.constant ([], 0))
+          ; poly_args = []
           ; func =
               let rec f : int list * int -> int =
                 fun (xs, n) ->
@@ -435,6 +452,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = []
           ; func =
               let f : int list -> int list =
                 fun xs ->
@@ -456,6 +474,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int list -> int list =
                 fun xs ->
@@ -472,6 +491,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int list -> int list =
                 fun xs ->
@@ -488,6 +508,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int list -> int list =
                 fun xs ->
@@ -507,6 +528,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.pair Sample2.nat_list Sample2.nat_list
           ; base_case = Some (Sample2.constant ([], []))
+          ; poly_args = [snd Denotation.int]
           ; func =
               let rec f : int list * int list -> int list =
                 fun (xs, acc) ->
@@ -529,6 +551,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.pair Sample2.nat_list Sample2.nat
           ; base_case = Some (Sample2.constant ([], 0))
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int list * int -> int list =
                 fun (xs, n) ->
@@ -545,6 +568,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = []
           ; func =
               let f : int list -> int list =
                 fun xs ->
@@ -562,6 +586,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.pair Sample2.nat_list Sample2.nat
           ; base_case = Some (Sample2.constant ([], 0))
+          ; poly_args = []
           ; func =
               let f : int list * int -> int list =
                 fun (xs, n) ->
@@ -578,6 +603,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = [snd Denotation.int]
           ; func =
               let rec f : int list -> int list =
                 fun xs ->
@@ -599,6 +625,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = []
           ; func =
               let f : int list -> int =
                 fun xs ->
@@ -616,6 +643,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.pair Sample2.nat Sample2.nat_list
           ; base_case = Some (Sample2.constant (0, []))
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int * int list -> int list =
                 fun (n, xs) ->
@@ -632,6 +660,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int list -> int list =
                 fun xs ->
@@ -653,6 +682,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.bool
           ; input = Sample2.nat
           ; base_case = Some (Sample2.constant 0)
+          ; poly_args = []
           ; func =
               let rec f : int -> bool =
                 fun x ->
@@ -674,6 +704,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.int
           ; input = Sample2.pair Sample2.nat Sample2.nat
           ; base_case = Some (Sample2.constant (0, 0))
+          ; poly_args = []
           ; func =
               let f : int * int -> int =
                 fun (x, y) ->
@@ -693,6 +724,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.int
           ; input = Sample2.nat
           ; base_case = Some (Sample2.constant 0)
+          ; poly_args = []
           ; func =
               let f : int -> int =
                 fun x ->
@@ -712,6 +744,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.int
           ; input = Sample2.pair Sample2.nat Sample2.nat
           ; base_case = Some (Sample2.constant (0, 0))
+          ; poly_args = []
           ; func =
               let f : int * int -> int =
                 fun (x, y) ->
@@ -729,6 +762,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.tree Denotation.int
           ; input = Sample2.pair Sample2.nat Sample2.nat_tree
           ; base_case = Some (Sample2.constant (0, Tree2.Leaf))
+          ; poly_args = []
           ; func =
               let f : int * int Tree2.t -> int Tree2.t =
                 fun (y, tree) ->
@@ -745,6 +779,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.bool
           ; input = Sample2.bool_tree
           ; base_case = Some (Sample2.constant Tree2.Leaf)
+          ; poly_args = [snd Denotation.bool]
           ; func =
               let f : bool Tree2.t -> bool list =
                 fun tree ->
@@ -761,6 +796,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.int
           ; input = Sample2.bool_tree
           ; base_case = Some (Sample2.constant Tree2.Leaf)
+          ; poly_args = [snd Denotation.bool]
           ; func =
               let f : bool Tree2.t -> int =
                 fun tree ->
@@ -777,6 +813,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.int
           ; input = Sample2.nat_tree
           ; base_case = Some (Sample2.constant Tree2.Leaf)
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int Tree2.t -> int =
                 fun tree ->
@@ -793,6 +830,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nat_tree
           ; base_case = Some (Sample2.constant Tree2.Leaf)
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int Tree2.t -> int list =
                 fun tree ->
@@ -815,6 +853,7 @@ let all : 'a reference_projection -> (string * 'a) list =
                 (Sample2.from ("div2", ["inc"]))
                 Sample2.nat_tree
           ; base_case = Some (Sample2.constant ("div2", Tree2.Leaf))
+          ; poly_args = [snd Denotation.int; snd Denotation.int]
           ; func =
               let f : string * int Tree2.t -> int Tree2.t =
                 fun (fname, t) ->
@@ -838,6 +877,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.int
           ; input = Sample2.pair Sample2.nat Sample2.bool_tree
           ; base_case = Some (Sample2.constant (0, Tree2.Leaf))
+          ; poly_args = []
           ; func =
               let f : int * bool Tree2.t -> int =
                 fun (level, tree) ->
@@ -854,6 +894,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nat_tree
           ; base_case = Some (Sample2.constant Tree2.Leaf)
+          ; poly_args = []
           ; func =
               let f : int Tree2.t -> int list =
                 fun tree ->
@@ -870,6 +911,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nat_tree
           ; base_case = Some (Sample2.constant Tree2.Leaf)
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int Tree2.t -> int list =
                 fun tree ->
