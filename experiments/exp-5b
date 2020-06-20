@@ -46,9 +46,12 @@ run 1 list_snoc
 run 1 list_stutter
 run 1 list_take
 run 1 list_tl
-run 1 tree_collect_leaves
-run 1 tree_count_leaves
-run 1 tree_count_nodes
+# run 1 tree_count_leaves
 run 1 tree_inorder
 # run 1 tree_map
 run 1 tree_preorder
+
+# Benchmarks requiring longer timeout
+
+run 3 tree_collect_leaves
+run 10 tree_count_nodes

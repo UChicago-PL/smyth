@@ -1,0 +1,22 @@
+Experiment 6a
+% Replications = 10
+list_append.elm,0.0084587,20,1,false,true
+list_concat.elm,0.0176212,20,1,true,true
+list_drop.elm,0.0093841,20,2,false,true
+list_filter.elm,0.0474383,20,2,true,true
+list_fold.elm,1.2099049,20,1,true,true
+list_last.elm,0.0059545,20,2,true,true
+list_length.elm,0.0076454,5,1,false,true
+list_map.elm,0.8545059,20,1,false,true
+list_rev_append.elm,0.0332788,15,1,true,true
+list_rev_snoc.elm,0.0103846,15,1,false,true
+list_rev_tailcall.elm,0.0080081,20,1,true,true
+list_snoc.elm,0.0073398,20,1,false,true
+list_stutter.elm,0.0040131,10,1,true,true
+list_take.elm,0.0181248,20,3,true,true
+tree_collect_leaves.elm,0.019424,20,2,true,true
+tree_count_leaves.elm,0.093711,15,1,false,true
+tree_count_nodes.elm,0.0334895,15,2,true,true
+tree_inorder.elm,0.0194924,15,2,true,true
+tree_map.elm,2.0435453,20,2,true,true
+tree_preorder.elm,0.0209115,15,2,true,true

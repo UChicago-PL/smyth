@@ -1,0 +1,18 @@
+Experiment 5b
+(5b; N=50; t=1) Running list_append... completed.
+(5b; N=50; t=1) Running list_concat... completed.
+(5b; N=50; t=1) Running list_drop... completed.
+(5b; N=50; t=1) Running list_last... completed.
+(5b; N=50; t=1) Running list_length... completed.
+(5b; N=50; t=1) Running list_rev_append... completed.
+(5b; N=50; t=1) Running list_rev_fold... completed.
+(5b; N=50; t=1) Running list_rev_snoc... completed.
+(5b; N=50; t=1) Running list_rev_tailcall... completed.
+(5b; N=50; t=1) Running list_snoc... completed.
+(5b; N=50; t=1) Running list_stutter... completed.
+(5b; N=50; t=1) Running list_take... completed.
+(5b; N=50; t=1) Running list_tl... completed.
+(5b; N=50; t=1) Running tree_inorder... completed.
+(5b; N=50; t=1) Running tree_preorder... completed.
+(5b; N=50; t=3) Running tree_collect_leaves... completed.
+(5b; N=50; t=10) Running tree_count_nodes... completed.
