@@ -452,7 +452,7 @@ let all : 'a reference_projection -> (string * 'a) list =
           ; d_out = Denotation.list Denotation.int
           ; input = Sample2.nat_list
           ; base_case = Some (Sample2.constant [])
-          ; poly_args = []
+          ; poly_args = [snd Denotation.int]
           ; func =
               let f : int list -> int list =
                 fun xs ->
