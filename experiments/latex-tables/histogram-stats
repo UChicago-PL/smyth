@@ -28,3 +28,13 @@ echo ""
 echo "% Experiment 3b statistics"
 run 3b 50
 run 3b 90
+
+echo ""
+echo "% Experiment 5b statistics"
+run 5b 50
+run 5b 90
+
+echo ""
+echo "% Experiment 6b statistics"
+run 6b 50
+run 6b 90
