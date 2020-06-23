@@ -140,7 +140,7 @@ def load_data_5a(data_2a, filename): # Copy-paste with load_data_2a_3a
             string = smyth_poly_examples + " (" + pct + "%)"
             table[benchmark] = { "Expert" : string }
         except:
-            table[benchmark] = { "Expert" : str(smyth_poly_examples) }
+            table[benchmark] = { "Expert" : str(smyth_poly_examples) + " (---)" }
 
     return data_loader(filename, 6, handle_columns)
 
@@ -155,7 +155,7 @@ def load_data_6a(data_3a, filename): # Copy-paste with load_data_2a_3a
             string = "1+" + smyth_poly_examples + " (" + pct + "%)"
             table[benchmark] = { "Expert" : string }
         except:
-            string = "1+" + smyth_poly_examples
+            string = "1+" + smyth_poly_examples + " (---)"
             table[benchmark] = { "Expert" : string }
 
     return data_loader(filename, 6, handle_columns)
@@ -467,15 +467,20 @@ def write_tables():
                   )
                 )
 
-            write_figure_10_20_row \
-                ( output_figure_20_data
-                , [ benchmark
-                  , show_5a(benchmark)
-                  , show_5b(benchmark)
-                  , show_6a(benchmark)
-                  , show_6b(benchmark)
-                  ]
-                )
+            if benchmark in benchmarks_1_failed:
+                pass
+            elif benchmark in benchmarks_5_6_not_poly:
+                pass
+            else:
+                write_figure_10_20_row \
+                    ( output_figure_20_data
+                    , [ benchmark
+                      , show_5a(benchmark)
+                      , show_5b(benchmark)
+                      , show_6a(benchmark)
+                      , show_6b(benchmark)
+                      ]
+                    )
 
     output_figure_10_data.write("&&&&&&&&&&\\\\\n")
     output_figure_20_data.write("&&&&\\\\\n")
