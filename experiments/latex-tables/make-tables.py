@@ -61,7 +61,7 @@ assert (len(benchmarks) == 43)
 
 
 ################################################################################
-## Load dictionaries of data for Figure 10.
+## Load dictionaries of data for Figure 10 and Figure 20.
 
 def data_loader(filename, expected_columns, handle_columns):
     try:
@@ -129,6 +129,37 @@ def load_data_4(filename):
 
     return data_loader(filename, 2, handle_columns)
 
+def load_data_5a(data_2a, filename): # Copy-paste with load_data_2a_3a
+    def handle_columns(table, columns):
+        [benchmark, _, _, smyth_poly_examples, _, _] = columns
+        benchmark = benchmark.replace(".elm", "")
+        try:
+            # quick-and-dirty: undo load_data_2a_3a
+            smyth_mono_examples = data_2a[benchmark]["Expert"].split(" ")[0]
+            pct = str(int(round(100 * float(smyth_poly_examples) / float(smyth_mono_examples))))
+            string = smyth_poly_examples + " (" + pct + "%)"
+            table[benchmark] = { "Expert" : string }
+        except:
+            table[benchmark] = { "Expert" : str(smyth_poly_examples) }
+
+    return data_loader(filename, 6, handle_columns)
+
+def load_data_6a(data_3a, filename): # Copy-paste with load_data_2a_3a
+    def handle_columns(table, columns):
+        [benchmark, _, _, smyth_poly_examples, _, _] = columns
+        benchmark = benchmark.replace(".elm", "")
+        try:
+            # quick-and-dirty: undo load_data_2a_3a
+            smyth_mono_examples = data_3a[benchmark]["Expert"].split(" ")[0].split("+")[1]
+            pct = str(int(round(100 * (1 + float(smyth_poly_examples))) / float(1 + float(smyth_mono_examples))))
+            string = "1+" + smyth_poly_examples + " (" + pct + "%)"
+            table[benchmark] = { "Expert" : string }
+        except:
+            string = "1+" + smyth_poly_examples
+            table[benchmark] = { "Expert" : string }
+
+    return data_loader(filename, 6, handle_columns)
+
 def load_data_123(prefix):
     data_1 = load_data_1(prefix + "summaries/1.txt")
     return \
@@ -153,9 +184,21 @@ data_4 = \
     , "Synquid2a" : load_data_4(data_4_prefix + "exp-4-synquid-2a.csv")
     }
 
+our_data["5a"] = \
+    load_data_5a(our_data["2a"], "../author-results/summaries/5a.txt")
+
+our_data["6a"] = \
+    load_data_6a(our_data["3a"], "../author-results/summaries/6a.txt")
+
+our_data["5b"] = \
+    load_data_2b_3b("../author-results/data/exp-5b/analysis.csv")
+
+our_data["6b"] = \
+    load_data_2b_3b("../author-results/data/exp-6b/analysis.csv")
+
 
 ################################################################################
-## Present Figure 10 data with colors and labels where needed.
+## Present Figure 10 and Figure 10 data with colors and labels where needed.
 
 benchmarks_1_timeout = \
     [ "list_compress", "tree_binsert", "tree_nodes_at_level", "tree_postorder" ]
@@ -183,6 +226,21 @@ benchmarks_non_recursive = \
 
 benchmarks_1_2_same_examples = \
     [ "bool_neg", "bool_xor", "list_length", "nat_max" ]
+
+benchmarks_5_6_not_poly = \
+    [ "bool_band", "bool_bor", "bool_impl", "bool_neg", "bool_xor"
+    , "list_hd", "list_inc", "list_nth", "list_sort_sorted_insert", "list_sorted_insert", "list_sum"
+    , "nat_add", "nat_iseven", "nat_max", "nat_pred"
+    ]
+
+benchmarks_5_6_failed = \
+    [ "list_pairwise_swap" ]
+
+benchmarks_5b_timeout = \
+    [ "tree_count_leaves" ]
+
+benchmarks_6b_timeout = \
+    [ "tree_count_leaves" ]
 
 def show_1_expert(benchmark):
     if benchmark == "list_compress": return "13"
@@ -271,9 +329,65 @@ def show_4(tool, experiment, benchmark):
     except KeyError:
         return "XXX"
 
+def show_5a(benchmark):
+    try:
+        return our_data["5a"][benchmark]["Expert"]
+    except KeyError:
+        if benchmark in benchmarks_1_failed: return "\\labelBlankOneFailed"
+        elif benchmark in benchmarks_5_6_not_poly: return "\\labelColorSkipped{---}"
+        elif benchmark in benchmarks_5_6_failed: return "\\labelTimeout"
+        else: return "XXX"
+
+def show_5b(benchmark):
+    try:
+        string = our_data["5b"][benchmark]["Random"]
+        ## These special case timeouts c/should be read from
+        ## ../author-results/data/exp-5b/csv/*csv
+        if benchmark in ["tree_collect_leaves", "tree_preorder"]:
+            return string + "$^{\\labelRandomTime{3}}$"
+        elif benchmark == "tree_count_nodes":
+            return string + "$^{\\labelRandomTime{10}}$"
+        else:
+            return string
+    except KeyError:
+        if benchmark in benchmarks_1_failed: return "\\labelBlankOneFailed"
+        elif benchmark in benchmarks_higher_order: return "\\labelBlankHigherOrder"
+        elif benchmark in benchmarks_5_6_not_poly: return "\\labelColorSkipped{---}"
+        elif benchmark in benchmarks_5_6_failed: return "\\labelTimeout"
+        elif benchmark in benchmarks_5b_timeout : return "\\labelTimeout"
+        else: return "XXX"
+
+def show_6a(benchmark):
+    try:
+        return our_data["6a"][benchmark]["Expert"]
+    except KeyError:
+        if benchmark in benchmarks_1_failed: return "\\labelBlankOneFailed"
+        elif benchmark in benchmarks_non_recursive: return "\\labelBlankNonRec"
+        elif benchmark in benchmarks_5_6_not_poly: return "\\labelColorSkipped{---}"
+        elif benchmark in benchmarks_5_6_failed: return "\\labelTimeout"
+        else: return "XXX"
+
+def show_6b(benchmark):
+    try:
+        string = our_data["6b"][benchmark]["Random"]
+        ## These special case timeouts c/should be read from
+        ## ../author-results/data/exp-6b/csv/*csv
+        if benchmark == "tree_count_nodes":
+            return string + "$^{\\labelRandomTime{3}}$"
+        else:
+            return string
+    except KeyError:
+        if benchmark in benchmarks_1_failed: return "\\labelBlankOneFailed"
+        elif benchmark in benchmarks_higher_order: return "\\labelBlankHigherOrder"
+        elif benchmark in benchmarks_non_recursive: return "\\labelBlankNonRec"
+        elif benchmark in benchmarks_5_6_not_poly: return "\\labelColorSkipped{---}"
+        elif benchmark in benchmarks_5_6_failed: return "\\labelTimeout"
+        elif benchmark in benchmarks_6b_timeout : return "\\labelTimeout"
+        else: return "XXX"
+
 
 ################################################################################
-## Write table data for Tables 1 through 3.
+## Write table data for Figure 10, Tables 1 through 3, and Figure 20.
 
 output_tables = \
     { "1" : open("generated/table-1-data.tex", "w+")
@@ -284,17 +398,21 @@ output_tables = \
 output_figure_10_data = \
     open("figure-10-data.tex", "w+")
 
+output_figure_20_data = \
+    open("figure-20-data.tex", "w+")
+
 def write_tables():
     for benchmarks in benchmarks_by_type:
 
         output_figure_10_data.write("&&&&&&&&&&\\\\\n")
+        output_figure_20_data.write("&&&&\\\\\n")
 
         for i in output_tables:
             output_tables[i].write("\\\\\n")
 
         for benchmark in benchmarks:
 
-            write_figure_10_row \
+            write_figure_10_20_row \
                 ( output_figure_10_data
                 , [ benchmark
                   , show_1_expert(benchmark)
@@ -349,7 +467,18 @@ def write_tables():
                   )
                 )
 
+            write_figure_10_20_row \
+                ( output_figure_20_data
+                , [ benchmark
+                  , show_5a(benchmark)
+                  , show_5b(benchmark)
+                  , show_6a(benchmark)
+                  , show_6b(benchmark)
+                  ]
+                )
+
     output_figure_10_data.write("&&&&&&&&&&\\\\\n")
+    output_figure_20_data.write("&&&&\\\\\n")
 
 def make_try_lookup(default):
     def try_lookup(table, benchmark, column):
@@ -367,7 +496,7 @@ def escape_LaTeX(string):
     string = string.replace("%", "\\%")
     return string
 
-def write_figure_10_row(f, columns):
+def write_figure_10_20_row(f, columns):
     f.write (escape_LaTeX( "&".join(columns) + "\\\\\n"))
 
 def write_row_123(f, name, triple1, triple2):
