@@ -335,7 +335,7 @@ def show_5a(benchmark):
     except KeyError:
         if benchmark in benchmarks_1_failed: return "\\labelBlankOneFailed"
         elif benchmark in benchmarks_5_6_not_poly: return "\\labelColorSkipped{---}"
-        elif benchmark in benchmarks_5_6_failed: return "\\labelTimeout"
+        elif benchmark in benchmarks_5_6_failed: return "\\labelColorFailed{\\scriptsize{failed}}"
         else: return "XXX"
 
 def show_5b(benchmark):
@@ -353,7 +353,7 @@ def show_5b(benchmark):
         if benchmark in benchmarks_1_failed: return "\\labelBlankOneFailed"
         elif benchmark in benchmarks_higher_order: return "\\labelBlankHigherOrder"
         elif benchmark in benchmarks_5_6_not_poly: return "\\labelColorSkipped{---}"
-        elif benchmark in benchmarks_5_6_failed: return "\\labelTimeout"
+        elif benchmark in benchmarks_5_6_failed: return "\\labelColorFailed{\\scriptsize{failed}}"
         elif benchmark in benchmarks_5b_timeout : return "\\labelTimeout"
         else: return "XXX"
 
@@ -364,7 +364,7 @@ def show_6a(benchmark):
         if benchmark in benchmarks_1_failed: return "\\labelBlankOneFailed"
         elif benchmark in benchmarks_non_recursive: return "\\labelBlankNonRec"
         elif benchmark in benchmarks_5_6_not_poly: return "\\labelColorSkipped{---}"
-        elif benchmark in benchmarks_5_6_failed: return "\\labelTimeout"
+        elif benchmark in benchmarks_5_6_failed: return "\\labelColorFailed{\\scriptsize{failed}}"
         else: return "XXX"
 
 def show_6b(benchmark):
@@ -381,7 +381,7 @@ def show_6b(benchmark):
         elif benchmark in benchmarks_higher_order: return "\\labelBlankHigherOrder"
         elif benchmark in benchmarks_non_recursive: return "\\labelBlankNonRec"
         elif benchmark in benchmarks_5_6_not_poly: return "\\labelColorSkipped{---}"
-        elif benchmark in benchmarks_5_6_failed: return "\\labelTimeout"
+        elif benchmark in benchmarks_5_6_failed: return "\\labelColorFailed{\\scriptsize{failed}}"
         elif benchmark in benchmarks_6b_timeout : return "\\labelTimeout"
         else: return "XXX"
 
