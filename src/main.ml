@@ -96,15 +96,19 @@ type command =
   | GeneratePolySpec
 
 let commands : command list =
-  [ Solve
-  ; Test
-  ; SuiteTest
-  ; Fuzz
-  ; PolyFuzz
-  ; AssertionExport
-  ; GenerateSpec
-  ; GeneratePolySpec
-  ]
+  if Compilation2.is_js then
+    [ Solve
+    ]
+  else
+    [ Solve
+    ; Test
+    ; SuiteTest
+    ; Fuzz
+    ; PolyFuzz
+    ; AssertionExport
+    ; GenerateSpec
+    ; GeneratePolySpec
+    ]
 
 let command_name : command -> string =
   function
@@ -397,9 +401,15 @@ let available_options =
       |> String.concat "\n"
   )
 
+let javascript_string =
+  if Compilation2.is_js then
+    " (JavaScript version)"
+  else
+    ""
+
 let help =
   title ^ "\n" ^
-  name ^ " v" ^ Params.version ^ "\n" ^
+  name ^ " v" ^ Params.version ^ javascript_string ^ "\n" ^
   description ^ "\n\n" ^
   usage_prefix ^ " <command> <args> " ^ option_schema ^ "\n\n" ^
   available_commands ^

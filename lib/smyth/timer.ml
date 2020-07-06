@@ -75,9 +75,11 @@ end
 
 exception Timeout of string
 
-(* Does NOT nest!!! *)
+(* Does NOT nest!!! Does NOT work with JavaScript!!! *)
 let itimer_timeout unique_id cutoff f arg default_value =
-  if cutoff <= 0.0 then
+  if Compilation2.is_js then
+    (f arg, 0.0, false)
+  else if cutoff <= 0.0 then
     (default_value, 0.0, true)
   else
     begin

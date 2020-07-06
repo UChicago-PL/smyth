@@ -4,8 +4,8 @@ build:
 bc:
 	dune build src/main.bc
 
-serve:
-	make build && python3 serve.py
+js:
+	dune build src/main.bc.js
 
 repl:
 	dune utop lib/smyth
@@ -15,7 +15,7 @@ clean:
 
 deps:
 	opam install \
-		utop dune yojson ppx_deriving ppx_deriving_yojson bark
+		utop dune yojson ppx_deriving ppx_deriving_yojson bark js_of_ocaml-compiler
 
 loc:
 	find lib src -name "*.ml" | xargs wc -l
