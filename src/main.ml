@@ -20,6 +20,13 @@ type test_criterion =
 let test_criterion : test_criterion ref =
   ref TestTop1
 
+type output_mode =
+  | OutputString
+  | OutputJson
+
+let output_mode : output_mode ref =
+  ref OutputString
+
 (* Information *)
 
 let title = "
@@ -212,9 +219,10 @@ type prog_option =
   | Replications
   | TestAlert
   | Show
+  | OutputMode
 
 let prog_options : prog_option list =
-  [ Debug; MaxTotalTime; Replications; TestAlert; Show ]
+  [ Debug; MaxTotalTime; Replications; TestAlert; Show; OutputMode ]
 
 let prog_option_name : prog_option -> string =
   function
@@ -223,6 +231,7 @@ let prog_option_name : prog_option -> string =
     | Replications -> "replications"
     | TestAlert -> "test-alert"
     | Show -> "show"
+    | OutputMode -> "format"
 
 let prog_option_from_name : string -> prog_option option =
   fun name ->
@@ -262,6 +271,12 @@ let prog_option_info : prog_option -> string * string * string list =
         ( "Set the display method for forge results"
         , "top1"
         , ["<top1|top1r|top3>"]
+        )
+
+    | OutputMode ->
+        ( "Set the output format for forge results"
+        , "string"
+        , ["<string|json>"]
         )
 
 let prog_option_action : prog_option -> string -> bool =
@@ -308,6 +323,13 @@ let prog_option_action : prog_option -> string -> bool =
             | "top1" -> (show_type := ShowTop1; true)
             | "top1r" -> (show_type := ShowTop1R; true)
             | "top3" -> (show_type := ShowTop3; true)
+            | _ -> false
+          end
+
+      | OutputMode ->
+          begin match value with
+            | "string" -> (output_mode := OutputString; true)
+            | "json" -> (output_mode := OutputJson; true)
             | _ -> false
           end
 
@@ -431,6 +453,77 @@ let rec handle_prog_options : int -> string array -> unit =
           end
       end
 
+(* Forge Output *)
+
+let newline_regexp =
+  Str.regexp "\n"
+
+let encode_json_string : string -> string =
+  Str.global_replace newline_regexp "\\n"
+
+
+let show_hf : (Lang.hole_name * Lang.exp) list -> string =
+  fun hole_filling ->
+    let sorted_hole_filling =
+      hole_filling
+        |> List.sort (fun (h1, _) (h2, _) -> Int.compare h1 h2)
+    in
+    match !output_mode with
+      | OutputString ->
+          sorted_hole_filling
+            |> List.map
+                 ( fun (hole_name, exp) ->
+                     "??"
+                       ^ string_of_int hole_name
+                       ^ ": \n\n"
+                       ^ Pretty.exp exp
+                 )
+            |> String.concat "\n\n"
+
+      | OutputJson ->
+          let inner =
+            sorted_hole_filling
+              |> List.map
+                   ( fun (hole_name, exp) ->
+                       "\""
+                         ^ string_of_int hole_name
+                         ^ "\": \""
+                         ^ encode_json_string (Pretty.exp exp)
+                         ^ "\""
+                   )
+              |> String.concat "\n, "
+          in
+          "{ " ^ inner ^ "\n}"
+
+let show_hfs : (Lang.hole_name * Lang.exp) list list -> string =
+  fun hole_fillings ->
+    match !output_mode with
+      | OutputString ->
+          hole_fillings
+            |> List.mapi
+                 ( fun i_ hole_filling ->
+                    String.concat "\n\n"
+                      [ "Solution #"
+                          ^ (string_of_int (i_ + 1))
+                          ^ " (rank "
+                          ^ string_of_int (Rank.rank hole_filling)
+                          ^ "):"
+                      ; show_hf hole_filling
+                      ]
+                )
+            |> String.concat ("\n" ^ divider ^ "\n")
+
+      | OutputJson ->
+          let inner =
+            hole_fillings
+              |> List.map
+                   ( fun hole_filling ->
+                       show_hf hole_filling
+                   )
+              |> String.concat "\n,\n"
+          in
+          "[\n" ^ inner ^ "\n]"
+
 (* Main *)
 
 let () =
@@ -491,17 +584,6 @@ let () =
               exit 1
 
           | Ok solve_result ->
-              let show_one hole_filling =
-                hole_filling
-                  |> List.map
-                       ( fun (hole_name, exp) ->
-                           "??"
-                             ^ string_of_int hole_name
-                             ^ ": \n\n"
-                             ^ Pretty.exp exp
-                       )
-                  |> String.concat "\n\n"
-              in
               let ranked_hole_fillings =
                 solve_result.Endpoint.hole_fillings
                   |> Rank.sort
@@ -510,7 +592,7 @@ let () =
                 | ShowTop1 ->
                     begin match ranked_hole_fillings with
                       | top :: _ ->
-                          print_endline (show_one top)
+                          print_endline (show_hf top)
 
                       | _ ->
                           print_endline "No solutions."
@@ -521,7 +603,7 @@ let () =
                       | Some top_r ->
                           print_endline
                             ( "Top recursive solution:\n\n"
-                            ^ show_one top_r
+                            ^ show_hf top_r
                             )
 
                       | _ ->
@@ -534,18 +616,7 @@ let () =
                     else
                       ranked_hole_fillings
                         |> List2.take 3
-                        |> List.mapi
-                             ( fun i_ hole_filling ->
-                                 String.concat "\n\n"
-                                   [ "Solution #"
-                                       ^ (string_of_int (i_ + 1))
-                                       ^ " (rank "
-                                       ^ string_of_int (Rank.rank hole_filling)
-                                       ^ "):"
-                                   ; show_one hole_filling
-                                   ]
-                             )
-                        |> String.concat ("\n" ^ divider ^ "\n")
+                        |> show_hfs
                         |> print_endline
               end
         end
