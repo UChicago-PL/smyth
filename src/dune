@@ -7,7 +7,7 @@
       stdlib2 smyth
 
       ; opam libraries
-      bark
+      bark js_of_ocaml
   )
   ( flags
       ; (-open Pervasives2)
@@ -16,7 +16,15 @@
   ( ocamlopt_flags
       (-O3)
   )
+  ( js_of_ocaml
+      ( flags
+          --debug-info
+      )
+  )
   ( preprocess
-      (pps ppx_deriving_yojson)
+      ( pps
+          ppx_deriving_yojson
+          js_of_ocaml-ppx
+      )
   )
 )

@@ -536,344 +536,390 @@ let show_hfs : (Lang.hole_name * Lang.exp) list list -> string =
 
 (* Main *)
 
-let () =
-  Random.self_init ();
-  let argv_length =
-    Array.length Sys.argv
-  in
-  begin
-    if argv_length < 2 then
-      begin
-        print_endline help;
-        exit 0
-      end
-    else
-      ()
-  end;
-  let command =
-    match command_from_name Sys.argv.(1) with
-      | Some cmd ->
-          cmd
+let solve : sketch:string -> (string, string) result =
+  fun ~sketch ->
+    match Endpoint.solve ~sketch with
+      | Error e ->
+          Error (Show.error e)
 
-      | None ->
-          begin
-            prerr_endline (command_not_found Sys.argv.(1));
-            exit 1
-          end
-  in
-  begin
-    if argv_length = 3 && Sys.argv.(2) = "--help" then
-      begin
-        print_endline (command_help command);
-        exit 0
-      end
-    else
-      ()
-  end;
-  let correct_arg_count =
-    List.length (command_arguments command)
-  in
-  begin
-    if argv_length - 2 < correct_arg_count then
-      begin
-        prerr_endline (command_help command);
-        exit 1
-      end
-    else
-      ()
-  end;
-  handle_prog_options (correct_arg_count + 2) Sys.argv;
-  begin match command with
-    | Solve ->
-        begin match
-          Endpoint.solve
-            ~sketch:(Io2.read_file Sys.argv.(2))
-        with
-          | Error e ->
-              prerr_endline (Show.error e);
-              exit 1
+      | Ok solve_result ->
+          let ranked_hole_fillings =
+            solve_result.Endpoint.hole_fillings
+              |> Rank.sort
+          in
+          begin match !show_type with
+            | ShowTop1 ->
+                begin match ranked_hole_fillings with
+                  | top :: _ ->
+                      Ok (show_hf top)
 
-          | Ok solve_result ->
-              let ranked_hole_fillings =
-                solve_result.Endpoint.hole_fillings
-                  |> Rank.sort
-              in
-              begin match !show_type with
-                | ShowTop1 ->
-                    begin match ranked_hole_fillings with
-                      | top :: _ ->
-                          print_endline (show_hf top)
+                  | _ ->
+                      Error "No solutions."
+                end
 
-                      | _ ->
-                          print_endline "No solutions."
-                    end
+            | ShowTop1R ->
+                begin match Rank.first_recursive ranked_hole_fillings with
+                  | Some top_r ->
+                      let prefix =
+                        begin match !output_mode with
+                          | OutputString ->
+                              "Top recursive solution:\n\n"
 
-                | ShowTop1R ->
-                    begin match Rank.first_recursive ranked_hole_fillings with
-                      | Some top_r ->
-                          print_endline
-                            ( "Top recursive solution:\n\n"
-                            ^ show_hf top_r
-                            )
+                          | OutputJson ->
+                              ""
+                        end
+                      in
+                      Ok
+                        ( prefix
+                        ^ show_hf top_r
+                        )
 
-                      | _ ->
-                          print_endline "No recursive solutions."
-                    end
+                  | _ ->
+                      Error "No recursive solutions."
+                end
 
-                | ShowTop3 ->
-                    if ranked_hole_fillings = [] then
-                      print_endline "No solutions."
-                    else
-                      ranked_hole_fillings
+            | ShowTop3 ->
+                if ranked_hole_fillings = [] then
+                  Error "No solutions."
+                else
+                  Ok
+                    ( ranked_hole_fillings
                         |> List2.take 3
                         |> show_hfs
-                        |> print_endline
-              end
-        end
-
-    | Test ->
-        begin match
-          Endpoint.test
-            ~specification:(Io2.read_file Sys.argv.(2))
-            ~sketch:(Io2.read_file Sys.argv.(3))
-            ~examples:(Io2.read_file Sys.argv.(4))
-        with
-          | Error e ->
-              prerr_endline (Show.error e);
-              exit 1
-
-          | Ok test_result ->
-              test_result
-                |> Show.test_result
-                |> print_endline
-        end
-
-    | SuiteTest ->
-        let suite_path =
-          Sys.argv.(2)
-        in
-        let benchmark_names =
-          Io2.visible_files (Io2.path [suite_path ; "sketches"])
-        in
-        print_endline ("% Replications = " ^ string_of_int !suite_test_n);
-        benchmark_names
-          |> List.iter
-               ( fun name ->
-                   let output =
-                     begin match
-                       Result2.sequence @@
-                         List.init !suite_test_n
-                           ( fun _ ->
-                               Endpoint.test
-                                 ~specification:
-                                   ( Io2.read_path
-                                       [suite_path; "specifications"; name]
-                                   )
-                                 ~sketch:
-                                   ( Io2.read_path
-                                       [suite_path; "sketches"; name]
-                                   )
-                                 ~examples:
-                                   ( Io2.read_path
-                                       [suite_path; "examples"; name]
-                                   )
-                           )
-                     with
-                       | Error e ->
-                           "? error (" ^ name ^ "): " ^ Show.error e
-
-                       | Ok test_results ->
-                           match summarize test_results with
-                             | Some test_result ->
-                                 let prefix =
-                                   let open Endpoint in
-                                   if
-                                     ( !test_criterion = TestTop1 &&
-                                       not test_result.top_success
-                                     ) ||
-                                     ( !test_criterion = TestTop1R &&
-                                       not test_result.top_recursive_success
-                                     )
-                                   then
-                                     "% ! failure: "
-                                   else
-                                     ""
-                                 in
-                                 prefix
-                                  ^ name
-                                  ^ ","
-                                  ^ Show.test_result test_result
-
-                             | None ->
-                                 "? inconsistent test: " ^ name
-                     end
-                   in
-                   print_endline output
-               )
-
-    | Fuzz
-    | PolyFuzz ->
-        let trial_count =
-          match int_of_string_opt Sys.argv.(2) with
-            | Some n when n > 0 ->
-                n
-
-            | _ ->
-                prerr_endline "Trial count must be a positive integer.\n";
-                prerr_endline (command_help command);
-                exit 1
-        in
-        let builtin =
-          Sys.argv.(3)
-        in
-        let spec_path =
-          Sys.argv.(4)
-        in
-        let sketch_path =
-          Sys.argv.(5)
-        in
-        let poly =
-          command = PolyFuzz
-        in
-        let benchmark : (Lang.exp * Lang.exp) list list list =
-          match
-            List.assoc_opt
-              builtin
-              (References.all (Fuzz.experiment_proj ~poly ~n:trial_count))
-          with
-            | Some benchmark_thunk ->
-                benchmark_thunk ()
-
-            | None ->
-                prerr_endline ("Unknown built-in function '" ^ builtin ^ "'.");
-                exit 1
-        in
-        let results : (int * int) list =
-          List.map
-            ( fun trials ->
-                let (top_successes, top_recursive_successes) =
-                  trials
-                    |> List.map
-                         ( fun assertions ->
-                             let open Endpoint in
-                             match
-                               Endpoint.test_assertions
-                                 ~specification:(Io2.read_path [spec_path])
-                                 ~sketch:(Io2.read_path [sketch_path])
-                                 ~assertions
-                             with
-                               | Ok { top_success; top_recursive_success; _ } ->
-                                   (top_success, top_recursive_success)
-
-                               | Error Endpoint.TimedOut _
-                               | Error Endpoint.NoSolutions ->
-                                   (false, false)
-
-                               | Error e ->
-                                   prerr_endline
-                                     ( "error for '"
-                                         ^ sketch_path
-                                         ^ "': "
-                                         ^ Show.error e
-                                     );
-                                   exit 1
-                         )
-                    |> List.split
-                in
-                ( List2.count identity top_successes
-                , List2.count identity top_recursive_successes
-                )
-            )
-          benchmark
-        in
-        let result_string =
-          builtin
-            ^ "\ntimeout,"
-            ^ Float2.to_string !Params.max_total_time
-            ^ "\ntrial count,"
-            ^ string_of_int trial_count
-            ^ "\n"
-            ^ "example count,top success percent,top recursive success percent"
-            ^ "\n"
-            ^ String.concat "\n"
-                ( List.mapi
-                    ( fun k (top_successes, top_recursive_successes) ->
-                        ( Printf.sprintf "%d,%.4f,%.4f"
-                            k
-                            ( ratio
-                                top_successes
-                                trial_count
-                            )
-                            ( ratio
-                                top_recursive_successes
-                                trial_count
-                            )
-                        )
                     )
-                    results
-                )
-        in
-        print_endline result_string
+          end
 
-    | AssertionExport ->
-        begin match
-          Endpoint.assertion_info
-            ~specification:(Io2.read_file Sys.argv.(2))
-            ~assertions:(Io2.read_file Sys.argv.(3))
-        with
-          | Error e ->
-              print_endline
-                ( "? error ("
-                    ^ name
-                    ^ "): "
-                    ^ Show.error e
-                )
 
-          | Ok info ->
-              let insides =
-                info
-                  |> List.map
-                       ( fun (in_partial, inputs, output) ->
-                           "("
-                             ^ String.concat ", "
-                                 [ if in_partial then
-                                     "True"
-                                   else
-                                     "False"
-                                 ; Python_denotation.exp_collection "[" "]"
-                                     inputs
-                                 ; Python_denotation.exp
-                                     output
-                                 ]
-                             ^ ")"
-                       )
-              in
-              print_endline
-                ( "      [ "
-                    ^ String.concat "\n      , " insides
-                    ^ "\n      ]"
-                )
-        end
+let () =
+  if Compilation2.is_js then
+    begin
+      let open Js_of_ocaml in
 
-    | GenerateSpec
-    | GeneratePolySpec ->
-        let builtin =
-          Sys.argv.(2)
+      output_mode := OutputJson;
+
+      let js_forge js_sketch =
+        let sketch =
+          Js.to_string js_sketch
         in
-        let poly =
-          command = GeneratePolySpec
+        let res =
+          solve ~sketch
+            |> Result2.unwrap identity identity
         in
-        begin match
-          List.assoc_opt
-            builtin
-            (References.all (Fuzz.specification_proj ~poly))
-        with
-          | Some spec ->
-              print_endline spec
+        Js.string res
+      in
+
+      Js.export "Smyth"
+        ( object%js
+            method forge js_sketch =
+              js_forge js_sketch
+          end
+        )
+    end
+  else
+    begin
+      Random.self_init ();
+      let argv_length =
+        Array.length Sys.argv
+      in
+      begin
+        if argv_length < 2 then
+          begin
+            print_endline help;
+            exit 0
+          end
+        else
+          ()
+      end;
+      let command =
+        match command_from_name Sys.argv.(1) with
+          | Some cmd ->
+              cmd
 
           | None ->
-              prerr_endline ("Unknown built-in function '" ^ builtin ^ "'.");
-              exit 1
-        end
-  end;
-  exit 0
+              begin
+                prerr_endline (command_not_found Sys.argv.(1));
+                exit 1
+              end
+      in
+      begin
+        if argv_length = 3 && Sys.argv.(2) = "--help" then
+          begin
+            print_endline (command_help command);
+            exit 0
+          end
+        else
+          ()
+      end;
+      let correct_arg_count =
+        List.length (command_arguments command)
+      in
+      begin
+        if argv_length - 2 < correct_arg_count then
+          begin
+            prerr_endline (command_help command);
+            exit 1
+          end
+        else
+          ()
+      end;
+      handle_prog_options (correct_arg_count + 2) Sys.argv;
+      begin match command with
+        | Solve ->
+            begin match
+              solve
+                ~sketch:(Io2.read_file Sys.argv.(2))
+            with
+              | Ok s ->
+                  print_endline s
+
+              | Error s ->
+                  prerr_endline s;
+                  exit 1
+            end
+
+        | Test ->
+            begin match
+              Endpoint.test
+                ~specification:(Io2.read_file Sys.argv.(2))
+                ~sketch:(Io2.read_file Sys.argv.(3))
+                ~examples:(Io2.read_file Sys.argv.(4))
+            with
+              | Error e ->
+                  prerr_endline (Show.error e);
+                  exit 1
+
+              | Ok test_result ->
+                  test_result
+                    |> Show.test_result
+                    |> print_endline
+            end
+
+        | SuiteTest ->
+            let suite_path =
+              Sys.argv.(2)
+            in
+            let benchmark_names =
+              Io2.visible_files (Io2.path [suite_path ; "sketches"])
+            in
+            print_endline ("% Replications = " ^ string_of_int !suite_test_n);
+            benchmark_names
+              |> List.iter
+                   ( fun name ->
+                       let output =
+                         begin match
+                           Result2.sequence @@
+                             List.init !suite_test_n
+                               ( fun _ ->
+                                   Endpoint.test
+                                     ~specification:
+                                       ( Io2.read_path
+                                           [suite_path; "specifications"; name]
+                                       )
+                                     ~sketch:
+                                       ( Io2.read_path
+                                           [suite_path; "sketches"; name]
+                                       )
+                                     ~examples:
+                                       ( Io2.read_path
+                                           [suite_path; "examples"; name]
+                                       )
+                               )
+                         with
+                           | Error e ->
+                               "? error (" ^ name ^ "): " ^ Show.error e
+
+                           | Ok test_results ->
+                               match summarize test_results with
+                                 | Some test_result ->
+                                     let prefix =
+                                       let open Endpoint in
+                                       if
+                                         ( !test_criterion = TestTop1 &&
+                                           not test_result.top_success
+                                         ) ||
+                                         ( !test_criterion = TestTop1R &&
+                                           not test_result.top_recursive_success
+                                         )
+                                       then
+                                         "% ! failure: "
+                                       else
+                                         ""
+                                     in
+                                     prefix
+                                      ^ name
+                                      ^ ","
+                                      ^ Show.test_result test_result
+
+                                 | None ->
+                                     "? inconsistent test: " ^ name
+                         end
+                       in
+                       print_endline output
+                   )
+
+        | Fuzz
+        | PolyFuzz ->
+            let trial_count =
+              match int_of_string_opt Sys.argv.(2) with
+                | Some n when n > 0 ->
+                    n
+
+                | _ ->
+                    prerr_endline "Trial count must be a positive integer.\n";
+                    prerr_endline (command_help command);
+                    exit 1
+            in
+            let builtin =
+              Sys.argv.(3)
+            in
+            let spec_path =
+              Sys.argv.(4)
+            in
+            let sketch_path =
+              Sys.argv.(5)
+            in
+            let poly =
+              command = PolyFuzz
+            in
+            let benchmark : (Lang.exp * Lang.exp) list list list =
+              match
+                List.assoc_opt
+                  builtin
+                  (References.all (Fuzz.experiment_proj ~poly ~n:trial_count))
+              with
+                | Some benchmark_thunk ->
+                    benchmark_thunk ()
+
+                | None ->
+                    prerr_endline ("Unknown built-in function '" ^ builtin ^ "'.");
+                    exit 1
+            in
+            let results : (int * int) list =
+              List.map
+                ( fun trials ->
+                    let (top_successes, top_recursive_successes) =
+                      trials
+                        |> List.map
+                             ( fun assertions ->
+                                 let open Endpoint in
+                                 match
+                                   Endpoint.test_assertions
+                                     ~specification:(Io2.read_path [spec_path])
+                                     ~sketch:(Io2.read_path [sketch_path])
+                                     ~assertions
+                                 with
+                                   | Ok { top_success; top_recursive_success; _ } ->
+                                       (top_success, top_recursive_success)
+
+                                   | Error Endpoint.TimedOut _
+                                   | Error Endpoint.NoSolutions ->
+                                       (false, false)
+
+                                   | Error e ->
+                                       prerr_endline
+                                         ( "error for '"
+                                             ^ sketch_path
+                                             ^ "': "
+                                             ^ Show.error e
+                                         );
+                                       exit 1
+                             )
+                        |> List.split
+                    in
+                    ( List2.count identity top_successes
+                    , List2.count identity top_recursive_successes
+                    )
+                )
+              benchmark
+            in
+            let result_string =
+              builtin
+                ^ "\ntimeout,"
+                ^ Float2.to_string !Params.max_total_time
+                ^ "\ntrial count,"
+                ^ string_of_int trial_count
+                ^ "\n"
+                ^ "example count,top success percent,top recursive success percent"
+                ^ "\n"
+                ^ String.concat "\n"
+                    ( List.mapi
+                        ( fun k (top_successes, top_recursive_successes) ->
+                            ( Printf.sprintf "%d,%.4f,%.4f"
+                                k
+                                ( ratio
+                                    top_successes
+                                    trial_count
+                                )
+                                ( ratio
+                                    top_recursive_successes
+                                    trial_count
+                                )
+                            )
+                        )
+                        results
+                    )
+            in
+            print_endline result_string
+
+        | AssertionExport ->
+            begin match
+              Endpoint.assertion_info
+                ~specification:(Io2.read_file Sys.argv.(2))
+                ~assertions:(Io2.read_file Sys.argv.(3))
+            with
+              | Error e ->
+                  print_endline
+                    ( "? error ("
+                        ^ name
+                        ^ "): "
+                        ^ Show.error e
+                    )
+
+              | Ok info ->
+                  let insides =
+                    info
+                      |> List.map
+                           ( fun (in_partial, inputs, output) ->
+                               "("
+                                 ^ String.concat ", "
+                                     [ if in_partial then
+                                         "True"
+                                       else
+                                         "False"
+                                     ; Python_denotation.exp_collection "[" "]"
+                                         inputs
+                                     ; Python_denotation.exp
+                                         output
+                                     ]
+                                 ^ ")"
+                           )
+                  in
+                  print_endline
+                    ( "      [ "
+                        ^ String.concat "\n      , " insides
+                        ^ "\n      ]"
+                    )
+            end
+
+        | GenerateSpec
+        | GeneratePolySpec ->
+            let builtin =
+              Sys.argv.(2)
+            in
+            let poly =
+              command = GeneratePolySpec
+            in
+            begin match
+              List.assoc_opt
+                builtin
+                (References.all (Fuzz.specification_proj ~poly))
+            with
+              | Some spec ->
+                  print_endline spec
+
+              | None ->
+                  prerr_endline ("Unknown built-in function '" ^ builtin ^ "'.");
+                  exit 1
+            end
+      end;
+    end

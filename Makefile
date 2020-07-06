@@ -15,7 +15,8 @@ clean:
 
 deps:
 	opam install \
-		utop dune yojson ppx_deriving ppx_deriving_yojson bark js_of_ocaml-compiler
+		utop dune yojson ppx_deriving ppx_deriving_yojson bark \
+		js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx
 
 loc:
 	find lib src -name "*.ml" | xargs wc -l
