@@ -96,11 +96,9 @@
 \newcommand{\leonquidIncorrect}
   {\textcolor{orange}{\xmark$^1$}}
 \newcommand{\leonquidError}
-  {\textcolor{orange}{\xmark$^2$}}
+  {\textcolor{orange}{\xmark$^0$}}
 \newcommand{\leonquidHigherOrderFunc}
-  {\textcolor{orange}{\xmark$^3$}}
-\newcommand{\synquidNotTraceComplete}
-  {\textcolor{orange}{\xmark$^4$}}
+  {\textcolor{orange}{\xmark$^2$}}
 \newcommand{\synquidDatatypeAxiomsNoPhantom}
   {\textcolor{orange}{\textbf{?}}}
 \newcommand{\synquidDatatypeAxioms}
@@ -111,7 +109,7 @@
 \experimentTableSize
 
 \begin{tabular}{l|cc|cc|cc||cc|cc}
-  \multicolumn{7}{c||}{\textbf{\snsMyth{}}}
+& \multicolumn{6}{c||}{\textbf{\snsMyth{}}}
 & \multicolumn{2}{c}{\textbf{\leon{}}}
 & \multicolumn{2}{|c}{\textbf{\synquid{}}}
 \\\hline
@@ -170,6 +168,7 @@
   \captionsetup{justification=centering}
   \caption{
     Experiments.
+    \\
       \textbf{Top-1(-R)}:
       1st (recursive) solution valid.
     \textbf{Time}:

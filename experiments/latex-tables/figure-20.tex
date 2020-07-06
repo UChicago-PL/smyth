@@ -1,0 +1,43 @@
+\begin{figure}[h]
+
+\experimentTableSize
+
+\begin{tabular}{l|cc|cc}
+& \multicolumn{4}{c}{\textbf{\snsMyth{}}}
+\\\hline
+\multicolumn{1}{r|}{\textbf{Experiment}} &
+\textbf{5a} & \textbf{5b} & \textbf{6a} & \textbf{6b}
+\\\hline
+\multicolumn{1}{r|}{{Sketch / Objective}} &
+\multicolumn{2}{c|}{\textit{None / Top-1}} &
+\multicolumn{2}{c}{\textit{Base Case / Top-1-R}}
+\\\hline
+\multicolumn{1}{r|}{Type Specification{}} &
+\multicolumn{2}{c|}{\textit{Polymorphic}} &
+\multicolumn{2}{c}{\textit{Polymorphic}}
+\\\hline
+\textbf{Name} &
+\textbf{Expert} & \textbf{Random} &
+\textbf{Expert} & \textbf{Random}
+\\
+&
+& {(50\%, 90\%)} &
+& {(50\%, 90\%)}
+\\
+\input{figure-20-data}
+\end{tabular}
+
+\vsepBeforeCaption
+  \captionsetup{justification=centering}
+  \caption{
+    Experiments with Polymorphic Types.
+    %% Tasks without polymorphic specifications are marked ``\labelColorSkipped{---}''.
+    \\
+    \textbf{5a}:
+      Percentages w.r.t. to number of examples in Experiment 2a.
+    \\
+    \textbf{6a}:
+      Percentages w.r.t. to total specification size in Experiment 3a.
+  }
+\label{fig:poly-experiments}
+\end{figure}

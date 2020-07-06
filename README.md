@@ -24,9 +24,15 @@ type-and-example directed program synthesizer upon which the theory of Smyth is
 based). It was coined by [Robert Rand](https://www.cs.umd.edu/~rrand/) who,
 incidentally, also coined the name "Myth."
 
-A formal exposition of the system (including its evaluation and underlying
-theory) can be found in our ICFP 2020 publication, _Program Sketching with Live
-Bidirectional Evaluation_.
+## Additional Resources
+
+- A formal exposition of the system (including its evaluation and underlying
+theory) can be found in our ICFP 2020 publication, [_Program Sketching with Live
+Bidirectional Evaluation_](https://arxiv.org/abs/1911.00583).
+
+- Further details about the implementation of Smyth can be found in Justin Lubin's
+undergraduate thesis, [_Forging Smyth: The Implementation of Program Sketching with
+Live Bidirectional Evaluation_](https://jlubin.net/assets/forging-smyth.pdf).
 
 ## Installation
 
