@@ -5,9 +5,182 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Smyth</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"> 
+
+    <!-- Smyth -->
+    <script src="smyth.js"></script>
+
+    <!-- Code Mirror -->
+    <script src="codemirror/codemirror.js"></script>
+    <link rel="stylesheet" href="codemirror/codemirror.css">
+    <script src="codemirror/mode-custom-elm.js"></script>
+    <link rel="stylesheet" href="codemirror/theme-base16-dark.css"></script>
+
+    <!-- Main -->
+    <link rel="stylesheet" href="reset.css" />
+    <link rel="stylesheet" href="main.css" />
+    <script src="main.js"></script>
   </head>
   <body>
-    <p>Hello, <pre>??</pre>!</p>
-    <p><pre>{ ??: "world" }</pre></p>
+    <header>
+      <h1>
+        <span class="system">Smyth</span>
+      </h1>
+    </header>
+
+    <section>
+      <div>
+        <p>
+          <span class="system">Smyth</span> is a tool that completes unfinished
+          programs in a typed, functional language by gathering information from
+          normal code assertions.
+
+
+        <p>
+          Let&rsquo;s see how
+          <span class="system">Smyth</span>
+          can help us finish a program that duplicates each element of a list.
+        </p>
+
+        <p>
+          We&rsquo;ve filled out the types and some unit tests here, but the actual
+          implementation is incomplete.
+          Click the &ldquo;Forge&rdquo; button to have
+          <span class="system">Smyth</span>
+          forge some code for us.
+        </p>
+
+        <div class="smyth">
+<textarea>type Nat
+  = Z ()
+  | S Nat
+
+type NatList
+  = Nil ()
+  | Cons (Nat, NatList)
+
+stutter : NatList -> NatList
+stutter xs =
+  ??
+
+assert stutter []     == []
+assert stutter [1, 0] == [1, 1, 0, 0]</textarea>
+        </div>
+
+        <p>
+          <span class="system">Smyth</span>
+          gathered enough information from our assertions to fill in the hole on
+          line 11 of our program.
+        </p>
+
+        <p>
+          Let&rsquo;s take a look at a more complicated example.
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <div>
+        <p>
+          <span class="system">Smyth</span> is a tool that completes unfinished
+          programs in a typed, functional language by gathering information from
+          normal code assertions.
+
+
+        <p>
+          Let&rsquo;s see how
+          <span class="system">Smyth</span>
+          can help us finish a program that duplicates each element of a list.
+        </p>
+
+        <p>
+          We&rsquo;ve filled out the types and some unit tests here, but the actual
+          implementation is incomplete.
+          Click the &ldquo;Forge&rdquo; button to have
+          <span class="system">Smyth</span>
+          forge some code for us.
+        </p>
+
+        <div class="smyth">
+<textarea>type Nat
+  = Z ()
+  | S Nat
+
+type NatList
+  = Nil ()
+  | Cons (Nat, NatList)
+
+stutter : NatList -> NatList
+stutter xs =
+  ??
+
+assert stutter []     == []
+assert stutter [1, 0] == [1, 1, 0, 0]</textarea>
+        </div>
+
+        <p>
+          <span class="system">Smyth</span>
+          gathered enough information from our assertions to fill in the hole on
+          line 11 of our program.
+        </p>
+
+        <p>
+          Let&rsquo;s take a look at a more complicated example.
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <div>
+        <p>
+          <span class="system">Smyth</span> is a tool that completes unfinished
+          programs in a typed, functional language by gathering information from
+          normal code assertions.
+
+
+        <p>
+          Let&rsquo;s see how
+          <span class="system">Smyth</span>
+          can help us finish a program that duplicates each element of a list.
+        </p>
+
+        <p>
+          We&rsquo;ve filled out the types and some unit tests here, but the actual
+          implementation is incomplete.
+          Click the &ldquo;Forge&rdquo; button to have
+          <span class="system">Smyth</span>
+          forge some code for us.
+        </p>
+
+        <div class="smyth">
+<textarea>type Nat
+  = Z ()
+  | S Nat
+
+type NatList
+  = Nil ()
+  | Cons (Nat, NatList)
+
+stutter : NatList -> NatList
+stutter xs =
+  ??
+
+assert stutter []     == []
+assert stutter [1, 0] == [1, 1, 0, 0]</textarea>
+        </div>
+
+        <p>
+          <span class="system">Smyth</span>
+          gathered enough information from our assertions to fill in the hole on
+          line 11 of our program.
+        </p>
+
+        <p>
+          Let&rsquo;s take a look at a more complicated example.
+        </p>
+      </div>
+    </section>
   </body>
 </html>

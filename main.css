@@ -1,0 +1,171 @@
+:root {
+  --pop: #FF6B35;
+	--pop-dark: #9B1D20;
+  --dark: #1A1D22;
+  --medium: #23272E;
+  --light: #2C313A;
+  --text: #FAEDCA;
+  --faint: rgba(255, 255, 255, 0.05);
+
+  --clip-amount: 50px;
+}
+
+* {
+  box-sizing: border-box;
+
+  -webkit-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+  -o-text-size-adjust: none;
+  text-size-adjust: none;
+
+
+}
+
+body {
+  background-color: var(--medium);
+  font-size: 24px;
+  font-family: "Source Sans Pro";
+  color: var(--text);
+}
+
+section >div {
+  width: 600px;
+  margin: auto;
+}
+
+section:nth-of-type(even) {
+  background-color: var(--dark);
+  clip-path: polygon(0 0, 100% var(--clip-amount), 100% calc(100% - var(--clip-amount)), 0 100%);
+  padding: 75px 0;
+  margin-bottom: 25px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  display: block;
+  font-weight: bold;
+}
+
+header {
+  background-color: var(--dark);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--clip-amount)), 0 100%);
+  padding: 50px;
+  padding-bottom: calc(50px + var(--clip-amount));
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+header h1 {
+  font-weight: bold;
+  font-size: 9rem;
+	letter-spacing: 10px;
+  color: var(--pop);
+	text-align: center;
+  display: inline-block;
+}
+
+
+h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.7rem;
+  margin-top: 20px;
+}
+
+p {
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.system {
+  font-weight: bold;
+  font-variant: small-caps;
+}
+
+.CodeMirror {
+  border: 1px dashed var(--faint);
+  padding: 10px;
+  font-family: "Inconsolata", monospace !important;
+  height: auto;
+  width: 100%;
+}
+
+.CodeMirror-scroll {
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+
+.forge {
+  outline: 0;
+  background: none;
+  border: 1px solid var(--pop);
+  border-radius: 5px;
+  margin: 20px 0;
+  width: 100%;
+  color: var(--pop);
+  font-size: 1.2em;
+  font-family: inherit;
+  padding: 5px;
+  text-align: center;
+  /*
+  margin: 10px 0;
+  padding: 5px 30px;
+  font-size: 1.2em;
+  background-color: white;
+   background-color: rgb(51, 170, 0, 1);
+   color: #FFFFFF;
+   border-bottom: 2px solid rgb(51, 136, 0, 1);
+   border-radius: 5px;
+   */
+  cursor: pointer;
+}
+
+.CodeMirror, .CodeMirror-gutters {
+  background-color: var(--dark) !important;
+}
+
+section:nth-of-type(odd) .CodeMirror,
+section:nth-of-type(odd) .CodeMirror-gutters {
+  background-color: var(--medium) !important;
+}
+
+.output {
+  border-left: 1px dotted var(--pop);
+  border-right: 1px dotted var(--pop);
+  padding: 20px;
+  font-size: 0.7em;
+  width: 100%;
+  overflow-x: scroll;
+  margin-bottom: 20px;
+}
+
+.output:empty {
+  display: none;
+}
+
+.binding {
+  display: flex;
+  margin-bottom: 10px;
+  align-items: flex-start;
+}
+
+.name {
+  padding: 10px;
+  border: 1px solid var(--text);
+  border-radius: 50%;
+  position: relative;
+}
+
+.name span {
+  vertical-align: sub;
+  font-size: smaller;
+}
+
+.mapsto {
+  font-size: 2em;
+  margin: 0 20px;
+}
+
+.expression {
+  flex-grow: 1;
+  flex-shrink: 1;
+}
