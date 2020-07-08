@@ -40,9 +40,13 @@
 
         var char = source.next();
 
-        if (char === '?' && source.eat('?'))
+        if (char === '?' && source.eat('?') && !source.eat('?'))
         {
           return "hole";
+        }
+
+        if (char === '?') {
+          return "builtin";
         }
 
         if (specialRE.test(char))

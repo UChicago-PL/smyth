@@ -1,5 +1,6 @@
 :root {
   --pop: #FF6B35;
+  --pop-translucent: rgba(255, 107, 53, 0.1);
 	--pop-dark: /* #9B1D20; */ #BB2428;
   --dark: #1A1D22;
   --medium: #23272E;
@@ -145,6 +146,10 @@ section:nth-of-type(odd) .CodeMirror-gutters {
   width: 100%;
 }
 
+.output:not(:empty) {
+  margin-bottom: 2rem;
+}
+
 .binding {
   display: flex;
   margin-bottom: 10px;
@@ -165,8 +170,7 @@ section:nth-of-type(odd) .CodeMirror-gutters {
   box-shadow: var(--floating-shadow);
 }
 
-.name span {
-  font-family: "Source Sans Pro", sans-serif;
+sub.hole {
   vertical-align: sub;
   font-size: smaller;
 }
@@ -182,6 +186,7 @@ section:nth-of-type(odd) .CodeMirror-gutters {
 }
 
 code {
+  white-space: pre;
   font-family: "Inconsolata", monospace;
   background-color: var(--faint);
   padding: 2px 5px;
@@ -190,13 +195,22 @@ code {
 
 i {
   font-style: italic;
+  padding: 0 2px;
+  border-radius: 5px;
+  color: var(--pop);
+  background-color: var(--pop-translucent);
+}
+
+em {
+  font-style: italic;
 }
 
 .arrow {
 }
 
 .eval h3,
-.uneval h3 {
+.uneval h3,
+.bieval h2 {
   display: flex;
   align-items: center;
 }
@@ -245,19 +259,36 @@ i {
   transform: rotate(45deg) translateY(-7px);
 }
 
+.bieval .right-arrow {
+  margin: 0;
+  margin-right: 10px;
+}
+
+.bieval .left-arrow {
+  margin: 0;
+  margin-left: 10px;
+}
+
 a {
   color: #6a9fb5;
   text-decoration: underline;
   padding: 0 2px;
+  border-radius: 5px;
 }
 
 a:hover {
   background-color: var(--faint);
-  border-radius: 5px;
 }
 
-.display {
+div.display {
   text-align: center;
+  margin-bottom: 1rem;
+}
+
+code.display {
+  display: block;
+  font-size: 1rem;
+  line-height: 1;
   margin-bottom: 1rem;
 }
 
@@ -267,6 +298,7 @@ a:hover {
   margin-bottom: 1rem;
   padding: 20px;
   padding-left: 50px;
+  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.6);
 }
 
 .nb h4::before {
@@ -327,4 +359,64 @@ a:hover {
 
 .clear-forge:active {
   box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+header .authors {
+  margin-top: 20px;
+}
+
+header .authors a {
+  padding: 5px;
+  display: inline-block;
+}
+
+header .authors li {
+  list-style-type: none;
+  display: inline-block;
+  margin: 0 20px;
+}
+
+section ol {
+  counter-reset: item;
+  font-size: 1rem;
+}
+
+section ol li {
+  display: flex;
+  counter-increment: item;
+  padding-left: 10px;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+section ol li:before {
+  content: counter(item);
+  margin-right: 10px;
+  border: 1px solid var(--text);
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  display: block;
+  border-radius: 50%;
+  font-size: 1rem;
+  flex-grow: 0;
+  flex-shrink: 0;
+  position: relative;
+  top: 1px;
+}
+
+.interest {
+  font-weight: bold;
+  text-transform: uppercase;
+  text-decoration: underline;
+}
+
+p.response {
+  margin-left: 20px;
+  margin-top: -1rem;
+}
+
+p.response::before {
+  content: "⇒ ";
 }

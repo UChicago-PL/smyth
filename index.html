@@ -28,6 +28,12 @@
       <h1>
         <span class="system">Smyth</span>
       </h1>
+      <ol class="authors">
+        <li><a href="https://jlubin.net">Justin Lubin</a></li>
+        <li><a href="https://orcid.org/0000-0001-6578-2005">Nick Collins</a></li>
+        <li><a href="http://web.eecs.umich.edu/~comar/">Cyrus Omar</a></li>
+        <li><a href="http://people.cs.uchicago.edu/~rchugh/">Ravi Chugh</a></li>
+      </ol>
     </header>
 
     <section>
@@ -205,7 +211,7 @@ specifyFunction2 max
 
         <p>
           In order to forge code for us, <span class="system">Smyth</span>
-          needs a way to <i>run</i> these sketches and a way to <i>check</i>
+          needs a way to <em>run</em> these sketches and a way to <em>check</em>
           them against our assertions.
         </p>
         <p>
@@ -238,8 +244,8 @@ specifyFunction2 max
         </p>
 
         <p>
-          Each hole in the output also keeps track of what all the variables
-          are equal to at the time of evaluation. So
+          Each hole in the output also keeps track of what all the variables in
+          the program are equal to at the time of evaluation. So
         </p>
 
         <div class="display">
@@ -248,17 +254,14 @@ specifyFunction2 max
 
         <p>
           live evaluates to
-        </p>
-
-        <div class="display">
           <code>3 + [x ↦ 7] ??</code>.
-        </div>
+        </p>
 
         <p>
           These bindings are very important for
           <span class="system">Smyth</span>
-          when it comes time for it to actually generate the new code that
-          completes a sketch.
+          when it comes time to generate the new code that completes a
+          sketch.
         </p>
       </div>
     </section>
@@ -271,6 +274,188 @@ specifyFunction2 max
           <span class="system">Smyth</span>
           uses an all-new technique we call <i>live unevaluation</i> to check
           sketches against assertions.
+        </p>
+
+        <p>
+          Live unevaluation transfers assertions on code to constraints
+          specifically on holes.
+        </p>
+
+        <p>
+          For example,
+          <code>(3, 4)</code>
+          unevaluates onto
+          <code>(??<sub class="hole">0</sub>, 4)</code>
+          with the constraint
+          <code>??<sub class="hole">0</sub> ⊧ 3</code>.
+        </p>
+
+        <p>
+          In other words,
+          <code>assert (??<sub class="hole">0</sub>, 4) == (3, 4)</code>
+          produces the constraint
+          <code>??<sub class="hole">0</sub> ⊧ 3</code>.
+        </p>
+
+        <p>
+          As with live evaluation,
+          <span class="system">Smyth</span>
+          keeps track of what the variables in the program are equal to, so
+        </p>
+
+        <div class="display">
+          <code>let y = 8 in assert (??<sub class="hole">0</sub>, 4) == (3, 4)</code>
+        </div>
+
+        <p>
+          produces the constraint
+          <code>[y ↦ 8] ??<sub class="hole">0</sub> ⊧ 3</code>.
+        </p>
+      </div>
+    </section>
+
+    <section class="bieval">
+      <div>
+        <h2><span class="right-arrow"></span>Live Bidirectional Evaluation<span class="left-arrow"></span></h2>
+
+        <p>
+          We call the combination of live evaluation and live unevaluation
+          <i>live bidirectional evaluation</i>!
+        </p>
+
+        <p>
+          Live bidirectional evaluation enables
+          <span class="system">Smyth</span>
+          to take sketches with assertions and produce constraints on holes.
+        </p>
+
+        <p>
+          <span class="system">Smyth</span>
+          then feeds these constraints into an augmented version of the
+          <span class="system">
+            <a href="https://www.cis.upenn.edu/~stevez/papers/OZ15.pdf">
+              Myth</a></span>
+          algorithm to generate code that satisfies the hole constraints.
+        </p>
+
+        <div class="nb">
+          <h4>
+            <span class="system">Smyth</span>
+            vs.
+            <span class="system">Myth</span>
+          </h4>
+          <p>
+            The original
+            <span class="system">Myth</span>
+            algorithm only allows for independent top-level holes and requires
+            that assertions be <i>trace-complete</i>. A set of assertions for a
+            function is trace-complete if, when the function is called on each
+            of the asserted examples, all its recursive calls <em>also</em> have
+            an asserted example in the set.
+          </p>
+
+          <p>
+            For example, a trace-complete version of the set of assertions for
+            the <code>stutter</code> function given above would be:
+          </p>
+
+<code class="display">specifyFunction stutter
+  [ ([], [])
+  , ([0], [0, 0])
+  , ([1, 0], [1, 1, 0, 0])
+  ]</code>
+
+          <p>
+            (Notice the extra example for <code>[0]</code>.)
+          </p>
+
+          <p>
+            The two main contributions of <span class="system">Smyth</span> that
+            live bidirectional evaluation enables are thus:
+          </p>
+
+          <ol>
+            <li>Synthesis of recursive functions without trace-complete sets of
+              assertions; and</li>
+            <li>Support for specifying and solve interdependent synthesis goals
+              at arbitrary locations in the program.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div>
+        <h2>Some More Examples</h2>
+
+        <p>
+          Here are some more examples you can play with! TODO
+        </p>
+
+        <div class="smyth">
+<textarea>type Nat     = Z () | S Nat
+type NatList = Nil () | Cons (Nat, NatList)
+
+stutter : NatList -> NatList
+stutter xs =
+  ??
+
+assert stutter []     == []
+assert stutter [1, 0] == [1, 1, 0, 0]</textarea>
+        </div>
+
+        <div class="smyth">
+<textarea>type Nat     = Z () | S Nat
+type NatList = Nil () | Cons (Nat, NatList)
+
+stutter : NatList -> NatList
+stutter xs =
+  ??
+
+assert stutter []     == []
+assert stutter [1, 0] == [1, 1, 0, 0]</textarea>
+        </div>
+
+        <div class="smyth">
+<textarea>type Nat     = Z () | S Nat
+type NatList = Nil () | Cons (Nat, NatList)
+
+stutter : NatList -> NatList
+stutter xs =
+  ??
+
+assert stutter []     == []
+assert stutter [1, 0] == [1, 1, 0, 0]</textarea>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div>
+        <h2>More Information</h2>
+
+        <p>
+          Interested in <span class="interest">code</span>?
+        </p>
+
+        <p class="response">
+          Check out TODO
+        </p>
+
+        <p>
+          Interested in <span class="interest">theory</span>?
+        </p>
+
+        <p class="response">
+          Check out TODO
+        </p>
+
+        <p>
+          Interested in <span class="interest system">Myth</span>?
+        </p>
+
+        <p class="response">
+          Check out TODO
         </p>
       </div>
     </section>

@@ -18,7 +18,7 @@ function holeBinding(container, name, expression) {
 
   let nameEl = document.createElement("div");
   nameEl.className = "name";
-  nameEl.innerHTML = "??<span>" + name + "</span>"
+  nameEl.innerHTML = "??<sub class='hole'>" + name + "</sub>"
   bindingEl.appendChild(nameEl);
 
   let mapsEl = document.createElement("div");
