@@ -20,7 +20,7 @@
 
 .cm-s-base16-dark span.cm-comment { color: #8f5536; }
 .cm-s-base16-dark span.cm-atom { color: #aa759f; }
-.cm-s-base16-dark span.cm-number { color: #aa759f; }
+.cm-s-base16-dark span.cm-number { color: /* #aa759f; */ #f4bf75; }
 
 .cm-s-base16-dark span.cm-property, .cm-s-base16-dark span.cm-attribute { color: #90a959; }
 .cm-s-base16-dark span.cm-keyword { color: #ac4142; }
@@ -38,3 +38,14 @@
 
 .cm-s-base16-dark .CodeMirror-activeline-background { background: #202020; }
 .cm-s-base16-dark .CodeMirror-matchingbracket { text-decoration: underline; color: white !important; }
+
+.cm-s-base16-dark span.cm-hole {
+  color: var(--hole-color);
+  border: 1px solid var(--hole-color);
+  display: inline-block;
+  border-radius: 50%;
+  box-sizing: border-box;
+  font-size: 0.7em;
+  padding: 2px;
+  vertical-align: top;
+}

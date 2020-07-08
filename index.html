@@ -37,7 +37,6 @@
           programs in a typed, functional language by gathering information from
           normal code assertions.
 
-
         <p>
           Let&rsquo;s see how
           <span class="system">Smyth</span>
@@ -45,21 +44,29 @@
         </p>
 
         <p>
-          We&rsquo;ve filled out the types and some unit tests here, but the actual
-          implementation is incomplete.
+          We&rsquo;ve written out the types and some unit tests here, but the
+          actual implementation is incomplete.
           Click the &ldquo;Forge&rdquo; button to have
           <span class="system">Smyth</span>
           forge some code for us.
         </p>
 
-        <div class="smyth">
-<textarea>type Nat
-  = Z ()
-  | S Nat
+        <div class="nb">
+          <h4>Try it yourself!</h4>
+          <p>
+            You can edit all this code in the browser! Just be warned: the
+            web-based version of
+            <span class="system">Smyth</span>
+            is much slower and less robust than the
+            <a href="https://github.com/UChicago-PL">official command-line tool</a>,
+            so check that repo out if you want to try more involved
+            examples.
+          </p>
+        </div>
 
-type NatList
-  = Nil ()
-  | Cons (Nat, NatList)
+        <div class="smyth">
+<textarea>type Nat     = Z () | S Nat
+type NatList = Nil () | Cons (Nat, NatList)
 
 stutter : NatList -> NatList
 stutter xs =
@@ -71,7 +78,7 @@ assert stutter [1, 0] == [1, 1, 0, 0]</textarea>
 
         <p>
           <span class="system">Smyth</span>
-          gathered enough information from our assertions to fill in the hole on
+          gathers enough information from our assertions to fill in the hole on
           line 11 of our program.
         </p>
 
@@ -84,101 +91,186 @@ assert stutter [1, 0] == [1, 1, 0, 0]</textarea>
     <section>
       <div>
         <p>
-          <span class="system">Smyth</span> is a tool that completes unfinished
-          programs in a typed, functional language by gathering information from
-          normal code assertions.
-
-
-        <p>
-          Let&rsquo;s see how
-          <span class="system">Smyth</span>
-          can help us finish a program that duplicates each element of a list.
+          Let&rsquo;s create a function <code>max</code> that returns the
+          greater of its two arguments.
         </p>
 
         <p>
-          We&rsquo;ve filled out the types and some unit tests here, but the actual
-          implementation is incomplete.
-          Click the &ldquo;Forge&rdquo; button to have
-          <span class="system">Smyth</span>
-          forge some code for us.
+          We&rsquo;ll use the <code>specifyFunction2</code> helper function
+          that uses a list of input-output pairs to create assertions about its
+          first argument.
         </p>
 
         <div class="smyth">
-<textarea>type Nat
-  = Z ()
-  | S Nat
+<textarea>type Nat     = Z () | S Nat
+type Boolean = F () | T ()
+type Cmp     = LT () | EQ () | GT ()
 
-type NatList
-  = Nil ()
-  | Cons (Nat, NatList)
+compare : Nat -> Nat -> Cmp
+compare n1 n2 =
+  case n1 of
+    Z _ ->
+      case n2 of
+        Z _ -> EQ ()
+        S _ -> LT ()
+    S m1 ->
+      case n2 of
+        Z _  -> GT ()
+        S m2 -> compare m1 m2
 
-stutter : NatList -> NatList
-stutter xs =
+max : Nat -> Nat -> Nat
+max m n =
   ??
 
-assert stutter []     == []
-assert stutter [1, 0] == [1, 1, 0, 0]</textarea>
+specifyFunction2 max
+  [ (0, 0, 0), (0, 1, 1), (0, 2, 2)
+  , (1, 0, 1), (1, 1, 1), (1, 2, 2)
+  , (2, 0, 2), (2, 1, 2), (2, 2, 2)
+  ]</textarea>
         </div>
 
         <p>
-          <span class="system">Smyth</span>
-          gathered enough information from our assertions to fill in the hole on
-          line 11 of our program.
+          <span class="system">Smyth</span> successfully synthesizes
+          <code>max</code>, but it took a lot of examples! It might even be
+          easier to write the entire function ourselves than specify nine
+          individual examples.
         </p>
 
         <p>
-          Let&rsquo;s take a look at a more complicated example.
+          Sometimes its easier to write code than examples. For example, the
+          case when <code>m = 0</code> is really easy for us to figure out:
+          <code>max(0, n) = n</code>, always!
         </p>
+
+        <p>
+          If we sketch out this branch of the code in <code>max</code>,
+          <span class="system">Smyth</span>
+          can fill in the rest of the code for us with fewer examples.
+        </p>
+
+        <div class="smyth">
+<textarea>type Nat     = Z () | S Nat
+type Boolean = F () | T ()
+type Cmp     = LT () | EQ () | GT ()
+
+compare : Nat -> Nat -> Cmp
+compare n1 n2 =
+  case n1 of
+    Z _ ->
+      case n2 of
+        Z _ -> EQ ()
+        S _ -> LT ()
+    S m1 ->
+      case n2 of
+        Z _  -> GT ()
+        S m2 -> compare m1 m2
+
+max : Nat -> Nat -> Nat
+max m n =
+  case m of
+    Z _ ->
+      n
+
+    S m_ ->
+      ??
+
+specifyFunction2 max
+  -- [ (0, 0, 0), (0, 1, 1), (0, 2, 2)
+  -- , (1, 0, 1), (1, 1, 1), (1, 2, 2)
+  -- , (2, 0, 2), (2, 1, 2), (2, 2, 2)
+  -- ]
+  [ (1, 0, 1)
+  , (1, 1, 1)
+  , (1, 2, 2)
+  , (2, 1, 2)
+  ]</textarea>
+        </div>
       </div>
     </section>
 
     <section>
       <div>
-        <p>
-          <span class="system">Smyth</span> is a tool that completes unfinished
-          programs in a typed, functional language by gathering information from
-          normal code assertions.
-
+        <h2>Sketches</h2>
 
         <p>
-          Let&rsquo;s see how
-          <span class="system">Smyth</span>
-          can help us finish a program that duplicates each element of a list.
+          As in the <code>max</code> example, we can provide
+          partially-completed programs (known as <i>sketches</i>) to
+          <span class="system">Smyth</span> to be completed.
         </p>
 
         <p>
-          We&rsquo;ve filled out the types and some unit tests here, but the actual
-          implementation is incomplete.
-          Click the &ldquo;Forge&rdquo; button to have
-          <span class="system">Smyth</span>
-          forge some code for us.
+          Internally, <span class="system">Smyth</span> uses sketches to keep
+          track of its progress as it builds a full solution for us.
         </p>
 
-        <div class="smyth">
-<textarea>type Nat
-  = Z ()
-  | S Nat
+        <p>
+          In order to forge code for us, <span class="system">Smyth</span>
+          needs a way to <i>run</i> these sketches and a way to <i>check</i>
+          them against our assertions.
+        </p>
+        <p>
+          Let&rsquo;s take a look at how
+          <span class="system">Smyth</span>
+          runs and checks sketches using <i>live evaluation</i> and
+          <i>live unevaluation</i> respectively.
+        </p>
+      </div>
+    </section>
 
-type NatList
-  = Nil ()
-  | Cons (Nat, NatList)
+    <section class="eval">
+      <div>
+        <h3>Live Evaluation <span class="right-arrow"></span></h3>
 
-stutter : NatList -> NatList
-stutter xs =
-  ??
+        <p>
+          <span class="system">Smyth</span>
+          uses a technique called <i>live evaluation</i> invented by the folks
+          behind the <a href="https://hazel.org/">Hazel</a> project to run
+          sketches.
+        </p>
 
-assert stutter []     == []
-assert stutter [1, 0] == [1, 1, 0, 0]</textarea>
+        <p>
+          Live evaluation works by running the code &ldquo;around&rdquo; a
+          hole.
+          For example,
+          <code>1 + 2 + ??</code>
+          live evaluates to
+          <code>3 + ??</code>.
+        </p>
+
+        <p>
+          Each hole in the output also keeps track of what all the variables
+          are equal to at the time of evaluation. So
+        </p>
+
+        <div class="display">
+          <code>let x = 7 in 1 + 2 + ??</code>
         </div>
 
         <p>
-          <span class="system">Smyth</span>
-          gathered enough information from our assertions to fill in the hole on
-          line 11 of our program.
+          live evaluates to
         </p>
 
+        <div class="display">
+          <code>3 + [x ↦ 7] ??</code>.
+        </div>
+
         <p>
-          Let&rsquo;s take a look at a more complicated example.
+          These bindings are very important for
+          <span class="system">Smyth</span>
+          when it comes time for it to actually generate the new code that
+          completes a sketch.
+        </p>
+      </div>
+    </section>
+
+    <section class="uneval">
+      <div>
+        <h3><span class="left-arrow"></span> Live Unevaluation</h3>
+
+        <p>
+          <span class="system">Smyth</span>
+          uses an all-new technique we call <i>live unevaluation</i> to check
+          sketches against assertions.
         </p>
       </div>
     </section>

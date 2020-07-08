@@ -1,6 +1,6 @@
 :root {
   --pop: #FF6B35;
-	--pop-dark: #9B1D20;
+	--pop-dark: /* #9B1D20; */ #BB2428;
   --dark: #1A1D22;
   --medium: #23272E;
   --light: #2C313A;
@@ -8,6 +8,10 @@
   --faint: rgba(255, 255, 255, 0.05);
 
   --clip-amount: 50px;
+
+  --floating-shadow: 0 7px 7px rgba(0, 0, 0, 0.1);
+
+  --hole-color: #DB97CD;
 }
 
 * {
@@ -18,8 +22,9 @@
   -ms-text-size-adjust: none;
   -o-text-size-adjust: none;
   text-size-adjust: none;
+}
 
-
+html {
 }
 
 body {
@@ -64,11 +69,16 @@ header h1 {
   display: inline-block;
 }
 
-
 h2 {
-  font-size: 1.5rem;
-  margin-bottom: 0.7rem;
+  font-size: 2.5rem;
+  margin-bottom: 30px;
   margin-top: 20px;
+  text-align: center;
+}
+
+h3 {
+  font-size: 2rem;
+  margin-bottom: 30px;
 }
 
 p {
@@ -87,6 +97,7 @@ p {
   font-family: "Inconsolata", monospace !important;
   height: auto;
   width: 100%;
+  box-shadow: var(--floating-shadow);
 }
 
 .CodeMirror-scroll {
@@ -106,17 +117,17 @@ p {
   font-family: inherit;
   padding: 5px;
   text-align: center;
-  /*
-  margin: 10px 0;
-  padding: 5px 30px;
-  font-size: 1.2em;
-  background-color: white;
-   background-color: rgb(51, 170, 0, 1);
-   color: #FFFFFF;
-   border-bottom: 2px solid rgb(51, 136, 0, 1);
-   border-radius: 5px;
-   */
+  font-variant: small-caps;
   cursor: pointer;
+  transition: 0.2s box-shadow;
+}
+
+.forge:hover {
+  box-shadow: var(--floating-shadow);
+}
+
+.forge:active {
+  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
 }
 
 .CodeMirror, .CodeMirror-gutters {
@@ -129,17 +140,9 @@ section:nth-of-type(odd) .CodeMirror-gutters {
 }
 
 .output {
-  border-left: 1px dotted var(--pop);
-  border-right: 1px dotted var(--pop);
-  padding: 20px;
+  padding: 0 20px;
   font-size: 0.7em;
   width: 100%;
-  overflow-x: scroll;
-  margin-bottom: 20px;
-}
-
-.output:empty {
-  display: none;
 }
 
 .binding {
@@ -149,13 +152,21 @@ section:nth-of-type(odd) .CodeMirror-gutters {
 }
 
 .name {
-  padding: 10px;
-  border: 1px solid var(--text);
+  width: 50px;
+  line-height: 46px;
+  height: 50px;
+  text-align: center;
+  border: 1px solid var(--hole-color);
+  color: var(--hole-color);
+  font-family: "Inconsolata", monospace;
   border-radius: 50%;
   position: relative;
+  font-size: 1em;
+  box-shadow: var(--floating-shadow);
 }
 
 .name span {
+  font-family: "Source Sans Pro", sans-serif;
   vertical-align: sub;
   font-size: smaller;
 }
@@ -168,4 +179,152 @@ section:nth-of-type(odd) .CodeMirror-gutters {
 .expression {
   flex-grow: 1;
   flex-shrink: 1;
+}
+
+code {
+  font-family: "Inconsolata", monospace;
+  background-color: var(--faint);
+  padding: 2px 5px;
+  border-radius: 5px;
+}
+
+i {
+  font-style: italic;
+}
+
+.arrow {
+}
+
+.eval h3,
+.uneval h3 {
+  display: flex;
+  align-items: center;
+}
+
+.right-arrow {
+  margin-top: 3px;
+  margin-left: 15px;
+  position: relative;
+  height: 10px;
+  border-top: 1px solid var(--text);
+  border-bottom: 1px solid var(--text);
+  flex: 1;
+  margin-right: 4px;
+}
+
+.right-arrow::after {
+  content: "";
+  width: 17px;
+  height: 17px;
+  border-top: 1px solid var(--text);
+  border-right: 1px solid var(--text);
+  position: absolute;
+  right: 4px;
+  transform: rotate(45deg) translateY(-7px);
+}
+
+.left-arrow {
+  margin-top: 3px;
+  margin-right: 15px;
+  margin-left: 6px;
+  position: relative;
+  height: 10px;
+  border-top: 1px solid var(--text);
+  border-bottom: 1px solid var(--text);
+  flex: 1;
+}
+
+.left-arrow::after {
+  content: "";
+  width: 17px;
+  height: 17px;
+  border-bottom: 1px solid var(--text);
+  border-left: 1px solid var(--text);
+  position: absolute;
+  left: -6px;
+  transform: rotate(45deg) translateY(-7px);
+}
+
+a {
+  color: #6a9fb5;
+  text-decoration: underline;
+  padding: 0 2px;
+}
+
+a:hover {
+  background-color: var(--faint);
+  border-radius: 5px;
+}
+
+.display {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.nb {
+  background-color: var(--light);
+  border-radius: 20px;
+  margin-bottom: 1rem;
+  padding: 20px;
+  padding-left: 50px;
+}
+
+.nb h4::before {
+  content: "i";
+  display: inline-block;
+  border: 1px solid var(--text);
+  vertical-align: baseline;
+  font-size: 1rem;
+  line-height: 1.5;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  position: absolute;
+  left: -30px;
+  border-radius: 50%;
+}
+
+.nb > div {
+}
+
+.nb p {
+  margin-left: 0px;
+  font-size: 1rem;
+}
+
+.nb p:last-child {
+  margin-bottom: 0;
+}
+
+.nb h4 {
+  line-height: 0.8;
+  margin-left: 0px;
+  font-size: 24px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.clear-forge {
+  outline: 0;
+  background: none;
+  border: 1px solid var(--pop-dark);
+  border-radius: 5px;
+  display: inline-block;
+  padding: 5px 20px;
+  color: var(--pop-dark);
+  font-size: 1.2em;
+  font-family: inherit;
+  text-align: center;
+  font-variant: small-caps;
+  cursor: pointer;
+  transition: 0.2s box-shadow;
+}
+
+.clear-forge:hover {
+  box-shadow: var(--floating-shadow);
+}
+
+.clear-forge:active {
+  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
 }

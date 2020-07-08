@@ -59,6 +59,7 @@ window.onload = function() {
 
     let outputArea = document.createElement("div");
     outputArea.className = "output";
+    outputArea.style = "--output-height: 0px;"
 
     let forgeButton = document.createElement("button");
     forgeButton.className = "forge";
@@ -71,6 +72,13 @@ window.onload = function() {
       for (const hole in result) {
         holeBinding(outputArea, hole, result[hole]);
       }
+
+      // let clearButton = document.createElement("button");
+      // clearButton.className = "clear-forge";
+      // clearButton.textContent = "Clear Results";
+
+      outputArea.style = "--output-height: auto;";
+      outputArea.style = "--output-height: " + outputArea.clientHeight + "px;";
     });
 
     smythBlock.appendChild(forgeButton);
