@@ -1,3 +1,5 @@
+(** Debugging utilities. *)
+
 open Lang
 
 let debug func =
