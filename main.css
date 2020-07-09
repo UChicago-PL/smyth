@@ -25,17 +25,15 @@
   text-size-adjust: none;
 }
 
-html {
-}
-
 body {
   background-color: var(--medium);
   font-size: 24px;
   font-family: "Source Sans Pro";
   color: var(--text);
+  padding-bottom: 40px;
 }
 
-section >div {
+section > div {
   width: 600px;
   margin: auto;
 }
@@ -90,6 +88,10 @@ p {
 .system {
   font-weight: bold;
   font-variant: small-caps;
+}
+
+.lambda-system {
+  font-weight: bold;
 }
 
 .CodeMirror {
@@ -261,12 +263,12 @@ em {
 
 .bieval .right-arrow {
   margin: 0;
-  margin-right: 10px;
+  margin-right: 20px;
 }
 
 .bieval .left-arrow {
   margin: 0;
-  margin-left: 10px;
+  margin-left: 20px;
 }
 
 a {
@@ -409,14 +411,38 @@ section ol li:before {
 .interest {
   font-weight: bold;
   text-transform: uppercase;
-  text-decoration: underline;
+  padding: 0 2px;
+  border-radius: 5px;
+  color: var(--pop);
+  background-color: var(--pop-translucent);
 }
 
-p.response {
-  margin-left: 20px;
+div.response {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+div.response p {
+  margin-left: 50px;
   margin-top: -1rem;
 }
 
-p.response::before {
+div.response::before {
   content: "⇒ ";
+  position: absolute;
+  line-height: 1.5;
+  left: 10px;
+}
+
+section ul li {
+  list-style-type: disc;
+  margin-left: 40px;
+  padding-left: 10px;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+sup {
+  vertical-align: super;
+  font-size: smaller;
 }
