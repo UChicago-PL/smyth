@@ -1,4 +1,6 @@
-(** Debugging utilities. *)
+(** Debugging utilities.
+
+    Preferences for this module can be set in the {!Params} module. *)
 
 open Lang
 
