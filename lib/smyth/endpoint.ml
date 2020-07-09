@@ -120,11 +120,11 @@ let solve ~sketch =
 (* Test *)
 
 type test_result =
-  { time_taken : float
-  ; specification_assertion_count : int
+  { specification_assertion_count : int
   ; assertion_count : int
   ; top_success : bool
   ; top_recursive_success : bool
+  ; time_taken : float
   }
 
 let check :
