@@ -386,10 +386,11 @@ specifyFunction2 max
 
     <section>
       <div>
-        <h2>Some More Examples</h2>
+        <h2>More Examples</h2>
 
         <p>
-          Here are some more examples you can play with!
+          Let&rsquo;s start with a function that inserts a number into a sorted
+          list:
         </p>
 
         <div class="smyth">
@@ -425,6 +426,10 @@ specifyFunction2 insert
   , ([1, 2, 4], 3, [1, 2, 3, 4])
   ]</textarea>
         </div>
+
+        <p>
+          Now let&rsquo;s use that function to make a sorting function:
+        </p>
 
         <div class="smyth">
 <textarea>type Nat     = Z () | S Nat
@@ -468,6 +473,12 @@ sort xs =
 
 assert sort [5, 1, 6, 5] == [1, 5, 6]</textarea>
         </div>
+
+        <p>
+          Changing gears, we can also work with more complex data structures
+          like trees. Let&rsquo;s make a function that returns an in-order
+          traversal of a tree:
+        </p>
 
         <div class="smyth">
 <textarea>type Nat = Z () | S Nat

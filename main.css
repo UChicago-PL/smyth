@@ -446,3 +446,7 @@ sup {
   vertical-align: super;
   font-size: smaller;
 }
+
+.more-info h2 {
+  margin-bottom: 3rem;
+}
