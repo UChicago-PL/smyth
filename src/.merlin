@@ -1,0 +1,31 @@
+EXCLUDE_QUERY_DIR
+B /Users/jlubin/.opam/4.08.1+flambda/lib/bark
+B /Users/jlubin/.opam/4.08.1+flambda/lib/biniou
+B /Users/jlubin/.opam/4.08.1+flambda/lib/bytes
+B /Users/jlubin/.opam/4.08.1+flambda/lib/easy-format
+B /Users/jlubin/.opam/4.08.1+flambda/lib/js_of_ocaml
+B /Users/jlubin/.opam/4.08.1+flambda/lib/ocaml
+B /Users/jlubin/.opam/4.08.1+flambda/lib/ppx_deriving/runtime
+B /Users/jlubin/.opam/4.08.1+flambda/lib/ppx_deriving_yojson/runtime
+B /Users/jlubin/.opam/4.08.1+flambda/lib/result
+B /Users/jlubin/.opam/4.08.1+flambda/lib/uchar
+B /Users/jlubin/.opam/4.08.1+flambda/lib/yojson
+B ../_build/default/lib/smyth/.smyth.objs/byte
+B ../_build/default/lib/stdlib2/.stdlib2.objs/byte
+B ../_build/default/src/.main.eobjs/byte
+S /Users/jlubin/.opam/4.08.1+flambda/lib/bark
+S /Users/jlubin/.opam/4.08.1+flambda/lib/biniou
+S /Users/jlubin/.opam/4.08.1+flambda/lib/bytes
+S /Users/jlubin/.opam/4.08.1+flambda/lib/easy-format
+S /Users/jlubin/.opam/4.08.1+flambda/lib/js_of_ocaml
+S /Users/jlubin/.opam/4.08.1+flambda/lib/ocaml
+S /Users/jlubin/.opam/4.08.1+flambda/lib/ppx_deriving/runtime
+S /Users/jlubin/.opam/4.08.1+flambda/lib/ppx_deriving_yojson/runtime
+S /Users/jlubin/.opam/4.08.1+flambda/lib/result
+S /Users/jlubin/.opam/4.08.1+flambda/lib/uchar
+S /Users/jlubin/.opam/4.08.1+flambda/lib/yojson
+S ../lib/smyth
+S ../lib/stdlib2
+S .
+FLG -ppx '/Users/jlubin/smyth/_build/default/.ppx/d3c542b0a434f7e21b00b103bee5754e/ppx.exe --as-ppx'
+FLG -open Pervasives2 -w +a-4-9-42-48 -warn-error -a+1..66-3-33

@@ -1,0 +1,4 @@
+EXCLUDE_QUERY_DIR
+B ../../_build/default/lib/stdlib2/.stdlib2.objs/byte
+S .
+FLG -w +a-4-9-42-48 -warn-error -a+1..66-3-33
