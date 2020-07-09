@@ -1,0 +1,12 @@
+opam-version: "2.0"
+synopsis: "Programming-by-example in a typed functional language with sketches"
+maintainer: "Justin Lubin <jlubi333@gmail.com>"
+authors: "Justin Lubin <jlubi333@gmail.com>"
+license: "MIT License"
+homepage: "https://github.com/UChicago-PL/smyth"
+doc: "https://uchicago-pl.github.io/smyth/docs"
+bug-reports: "https://github.com/UChicago-PL/smyth/issues"
+build: make
+dev-repo: "git+https://github.com/UChicago-PL/smyth.git"
+name: "smyth"
+version: "~dev"

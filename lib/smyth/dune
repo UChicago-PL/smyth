@@ -2,6 +2,9 @@
   ( name
       smyth
   )
+  ( public_name
+      smyth
+  )
   ( libraries
       ; user libraries
       stdlib2

@@ -2,6 +2,9 @@
   ( name
       stdlib2
   )
+  ( public_name
+      stdlib2
+  )
   ( wrapped
       false
   )
