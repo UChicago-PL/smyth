@@ -30,6 +30,12 @@ incidentally, also coined the name "Myth."
 theory) can be found in our ICFP 2020 publication, [_Program Sketching with Live
 Bidirectional Evaluation_](https://arxiv.org/abs/1911.00583).
 
+- A non-academic introduction to the Smyth project can be found on the
+[project webpage](https://uchicago-pl.github.io/smyth).
+
+- Code documentation for Smyth can be found
+[here](https://uchicago-pl.github.io/smyth/docs).
+
 - Further details about the implementation of Smyth can be found in Justin Lubin's
 undergraduate thesis, [_Forging Smyth: The Implementation of Program Sketching with
 Live Bidirectional Evaluation_](https://jlubin.net/assets/forging-smyth.pdf).
