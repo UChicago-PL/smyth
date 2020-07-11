@@ -1,7 +1,7 @@
 (** Type-and-example-directed branching.
 
     This module implements type-and-example-directed branching as defined in
-    Figure 8 of the ICFP 2020 paper. *)
+    {b Figure 8} of the ICFP 2020 paper. *)
 
 open Lang
 
