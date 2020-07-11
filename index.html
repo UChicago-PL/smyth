@@ -41,7 +41,9 @@
         <p>
           <span class="system">Smyth</span> is a tool that completes unfinished
           programs in a typed, functional language by gathering information from
-          normal code assertions.
+          normal code assertions. </p><p>Such a tool is known as a
+          <i>program synthesizer</i>.
+        </p>
 
         <p>
           Let&rsquo;s see how
@@ -101,11 +103,21 @@ assert stutter [1, 0] == [1, 1, 0, 0]</textarea>
           greater of its two arguments.
         </p>
 
-        <p>
-          We&rsquo;ll use the <code>specifyFunction2</code> helper function
-          that uses a list of input-output pairs to create assertions about its
-          first argument.
-        </p>
+        <div class="nb">
+          <h4><code>specifyFunction</code></h4>
+          <p>
+            We&rsquo;ll often use the helper function <code>specifyFunction</code>
+            as shorthand for a list of assertions. For example,
+            <code>specifyFunction f [(0, 1), (2, 3)]</code> would yield the
+            assertions <code>assert f 0 == 1</code> and <code>assert f 2 == 3</code>.
+          </p>
+
+          <p>
+            We also define helpers <code>specifyFunction2</code>,
+            <code>specifyFunction3</code>, and so on to specify two- and three-
+            argument functions, respectively (and so on).
+          </p>
+        </div>
 
         <div class="smyth">
 <textarea>type Nat     = Z () | S Nat
@@ -137,15 +149,16 @@ specifyFunction2 max
 
         <p>
           <span class="system">Smyth</span> successfully synthesizes
-          <code>max</code>, but it took a lot of examples! It might even be
-          easier to write the entire function ourselves than specify nine
-          individual examples.
+          <code>max</code>, but it took a lot of examples!
+          Try removing some examples to see if and when
+          <span class="system">Smyth</span>
+          returns overspecialized code.
         </p>
 
         <p>
-          Sometimes its easier to write code than examples. For example, the
-          case when <code>m = 0</code> is really easy for us to figure out:
-          <code>max(0, n) = n</code>, always!
+          The truth is, sometimes it&rsquo;s easier to write code than
+          examples. For example, the case when <code>m = 0</code> is really
+          easy for us to figure out: <code>max(0, n) = n</code>, always!
         </p>
 
         <p>
