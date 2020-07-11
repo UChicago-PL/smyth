@@ -42,6 +42,9 @@ val merge : constraints list -> constraints option
     {!merge_solved} and {!merge_unsolved}. *)
 
 val satisfies : hole_filling -> constraints -> bool
-(** [satisfies hf ks] checks if a hole filling [hf] satisfies
-    a set of uenvaluation constraints [ks] using {!Example.exp_satisfies}
+(** Unevaluation constraint satisfaction as defined by {b Figure 5} of the
+    ICFP 2020 paper.
+
+    [satisfies hf ks] checks if a hole filling [hf] satisfies a set of
+    uenvaluation constraints [ks] using {!Example.exp_satisfies}
     (i.e., the notion of "ground truth" satisfaction). *)
