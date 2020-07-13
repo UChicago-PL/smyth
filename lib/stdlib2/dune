@@ -3,7 +3,7 @@
       stdlib2
   )
   ( public_name
-      stdlib2
+      smyth-stdlib2
   )
   ( wrapped
       false

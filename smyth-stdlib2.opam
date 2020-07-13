@@ -8,5 +8,5 @@ doc: "https://uchicago-pl.github.io/smyth/docs"
 bug-reports: "https://github.com/UChicago-PL/smyth/issues"
 build: make
 dev-repo: "git+https://github.com/UChicago-PL/smyth.git"
-name: "smyth"
+name: "smyth-stdlib2"
 version: "~dev"
