@@ -476,6 +476,7 @@ sup {
   }
 
   .display {
+    padding: 5px;
     overflow-x: scroll;
   }
 }
@@ -490,9 +491,5 @@ sup {
     margin: 0;
     margin-left: 30px;
     overflow-x: hidden;
-  }
-
-  .nb {
-    overflow-x: scroll;
   }
 }
