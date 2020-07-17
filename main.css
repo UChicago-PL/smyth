@@ -457,11 +457,12 @@ sup {
   }
 
   header {
-    padding: 50px;
+    padding: 30px;
+    margin-bottom: 0;
   }
 
   section {
-    padding: 50px 0 !important;
+    padding: 30px 0 !important;
     margin: 0px !important;
   }
 
@@ -472,6 +473,10 @@ sup {
 
   header, section {
     clip-path: none !important;
+  }
+
+  .display {
+    overflow-x: scroll;
   }
 }
 
