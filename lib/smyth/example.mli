@@ -1,4 +1,4 @@
-(** Examples and "ground truth" example satisfaction. *)
+(** Example helpers and "ground truth" example satisfaction. *)
 
 open Lang
 
