@@ -228,7 +228,6 @@ type error =
   | TypeAbstractionParameterNameMismatch of string * string
 
   | AssertionTypeMismatch of typ * typ
-  [@@deriving yojson]
 
 (* returns: type params * arg type * datatype name *)
 let ctor_info :

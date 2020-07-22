@@ -135,6 +135,13 @@ let rec pat' : pat printer =
       | PWildcard ->
           "_"
 
+let pat : pat -> string =
+  pat'
+    { indent = 0
+    ; app_needs_parens = false
+    ; fancy_needs_parens = false
+    }
+
 (* Types *)
 
 let rec typ' : typ printer =

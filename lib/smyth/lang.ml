@@ -1,6 +1,5 @@
 type hole_name =
   int
-  [@@deriving yojson]
 
 module Hole_map =
   Map.Make
@@ -18,23 +17,19 @@ type typ =
   | TData of string * typ list
   | TForall of string * typ
   | TVar of string
-  [@@deriving yojson]
 
 type pat =
   | PVar of string
   | PTuple of pat list
   | PWildcard
-  [@@deriving yojson]
 
 type param =
   | PatParam of pat
   | TypeParam of string
-  [@@deriving yojson]
 
 type exp_arg =
   | EAExp of exp
   | EAType of typ
-  [@@deriving yojson]
 
 and exp =
   | EFix of string option * param * exp
@@ -49,12 +44,10 @@ and exp =
   | EHole of hole_name
   | EAssert of exp * exp
   | ETypeAnnotation of exp * typ
-  [@@deriving yojson]
 
 type res_arg =
   | RARes of res
   | RAType of typ
-  [@@deriving yojson]
 
 and res =
   (* Determinate results *)
@@ -67,52 +60,42 @@ and res =
   | RProj of int * int * res
   | RCase of env * res * (string * (pat * exp)) list
   | RCtorInverse of string * res
-  [@@deriving yojson]
 
 and env =
   (string * res) list * (string * typ) list
-  [@@deriving yojson]
 
 type bind_spec =
   | NoSpec
   | Rec of string
   | Arg of string
   | Dec of string
-  [@@deriving yojson]
 
 type type_binding =
   string * (typ * bind_spec)
-  [@@deriving yojson]
 
 type poly_binding =
   string
-  [@@deriving yojson]
 
 type type_ctx =
   type_binding list * poly_binding list
-  [@@deriving yojson]
 
 type datatype_ctx =
   (string * (string list * (string * typ) list)) list
-  [@@deriving yojson]
 
 (* (hole name, (type context, type, function decrease requirement, match depth))
  *)
 type hole_ctx =
   (hole_name * (type_ctx * typ * string option * int)) list
-  [@@deriving yojson]
 
 type value =
   | VTuple of value list
   | VCtor of string * value
-  [@@deriving yojson]
 
 type example =
   | ExTuple of example list
   | ExCtor of string * example
   | ExInputOutput of value * example
   | ExTop
-  [@@deriving yojson]
 
 type world =
   env * example
@@ -131,11 +114,9 @@ type constraints =
 
 type resumption_assertion =
   res * value
-  [@@deriving yojson]
 
 type resumption_assertions =
   resumption_assertion list
-  [@@deriving yojson]
 
 type gen_goal =
   type_ctx * typ * string option

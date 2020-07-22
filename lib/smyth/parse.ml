@@ -57,7 +57,6 @@ type problem =
   | ZeroArity
 
   | ExpectingEnd
-  [@@deriving yojson]
 
 type context =
   | CType
@@ -98,7 +97,6 @@ type context =
   | CSFuncSpecOutput
 
   | CProgram
-  [@@deriving yojson]
 
 type 'a parser =
   (context, problem, 'a) Bark.parser

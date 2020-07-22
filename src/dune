@@ -23,7 +23,6 @@
   )
   ( preprocess
       ( pps
-          ppx_deriving_yojson
           js_of_ocaml-ppx
       )
   )

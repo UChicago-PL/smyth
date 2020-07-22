@@ -10,7 +10,7 @@
       stdlib2
 
       ; opam libraries
-      unix yojson ppx_deriving_yojson.runtime bark
+      unix bark
   )
   ( flags
       ; (-open Pervasives2)
@@ -18,8 +18,5 @@
   )
   ( ocamlopt_flags
       (-O3)
-  )
-  ( preprocess
-      (pps ppx_deriving_yojson)
   )
 )

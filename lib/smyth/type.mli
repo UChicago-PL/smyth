@@ -73,7 +73,6 @@ type error =
   | TypeAbstractionParameterNameMismatch of string * string
 
   | AssertionTypeMismatch of typ * typ
-  [@@deriving yojson]
 
 val check :
   datatype_ctx -> type_ctx -> exp -> typ -> (hole_ctx, exp * error) result

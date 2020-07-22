@@ -2,8 +2,6 @@
 
     Preferences for this module can be set in the {!Params} module. *)
 
-open Lang
-
 let debug func =
   if !Params.debug_mode then
     func ()
@@ -19,8 +17,7 @@ let print_sep () = debug @@ fun _ ->
 let pause () = debug @@ fun _ ->
   let _ = read_line () in ()
 
-let print_json j = debug @@ fun _ ->
-  println (Yojson.Safe.to_string j)
+(*
 
 let print_hf hf = debug @@ fun _ ->
   hf
@@ -87,6 +84,16 @@ let print_type_ctx (gamma, _) = debug @@ fun _ ->
   in
     println @@ "< " ^ s ^ "\n>"
 
+let print_bind_spec b = debug @@ fun _ ->
+  println @@
+    match b with
+      | NoSpec -> "NoSpec"
+      | Rec r -> "Rec(" ^ r ^ ")"
+      | Arg a -> "Arg(" ^ a ^ ")"
+      | Dec d -> "Dec(" ^ d ^ ")"
+
+*)
+
 let print_int n = debug @@ fun _ ->
   println (string_of_int n)
 
@@ -99,14 +106,6 @@ let print_nondet_len nd = debug @@ fun _ ->
     |> List.length
     |> string_of_int
     |> println
-
-let print_bind_spec b = debug @@ fun _ ->
-  println @@
-    match b with
-      | NoSpec -> "NoSpec"
-      | Rec r -> "Rec(" ^ r ^ ")"
-      | Arg a -> "Arg(" ^ a ^ ")"
-      | Dec d -> "Dec(" ^ d ^ ")"
 
 let print_len xs = debug @@ fun _ ->
   println (string_of_int @@ List.length xs)

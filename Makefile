@@ -29,9 +29,8 @@ clean:
 .PHONY: deps
 deps:
 	opam install \
-		utop dune yojson ppx_deriving ppx_deriving_yojson bark \
-		js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx \
-		odoc
+		utop dune bark \
+		js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx
 
 .PHONY: loc
 loc:

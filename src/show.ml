@@ -84,6 +84,91 @@ let parse_dead_end : (Parse.context, Parse.problem) Bark.dead_end -> string =
       ^ "] "
       ^ parse_problem dead_end.problem
 
+let type_error : Type.error -> string =
+  fun te ->
+    let open Type in
+    match te with
+      | VarNotFound x ->
+          "variable not found: '" ^ x ^ "'"
+
+      | CtorNotFound c ->
+          "variable not found: '" ^ c ^ "'"
+
+      | PatternMatchFailure (tau, pat) ->
+          "pattern match failure: pattern '"
+            ^ Pretty.pat pat
+            ^ "'does not match against type '"
+            ^ Pretty.typ tau
+            ^ "'"
+
+      | WrongNumberOfTypeArguments (expect, got) ->
+          "wrong number of type argument: got "
+            ^ string_of_int got
+            ^ ", expecting "
+            ^ string_of_int expect
+
+      | GotFunctionButExpected tau ->
+          "got function but expecting " ^ Pretty.typ tau
+
+      | GotTupleButExpected tau ->
+          "got tuple but expecting " ^ Pretty.typ tau
+
+      | GotTypeAbstractionButExpected tau ->
+          "got type abstraction but expecting " ^ Pretty.typ tau
+
+      | GotButExpected (got, expect) ->
+          "got " ^ Pretty.typ got ^ " but expecting " ^ Pretty.typ expect
+
+      | BranchMismatch (ctor, data) ->
+          "branch mismatch: no constructor '"
+            ^ ctor ^ "' for datatype '" ^ data ^ "'"
+
+      | CannotInferFunctionType ->
+          "cannot infer type of function"
+
+      | CannotInferCaseType ->
+          "cannot infer type of case expression"
+
+      | CannotInferHoleType ->
+          "cannot infer type of hole expression"
+
+      | ExpectedArrowButGot tau ->
+          "expecting function but got " ^ Pretty.typ tau
+
+      | ExpectedTupleButGot tau ->
+          "expecting tuple but got " ^ Pretty.typ tau
+
+      | ExpectedForallButGot tau ->
+          "expecting forall but got " ^ Pretty.typ tau
+
+      | ExpectedDatatypeButGot tau ->
+          "expecting datatype but got " ^ Pretty.typ tau
+
+      | TupleLengthMismatch tau ->
+          "tuple length mismatch: " ^ Pretty.typ tau
+
+      | ProjectionLengthMismatch tau ->
+          "projection length mismatch: " ^ Pretty.typ tau
+
+      | ProjectionOutOfBounds (max, actual) ->
+          "projection out of bounds: max is "
+            ^ string_of_int max
+            ^ " but got "
+            ^ string_of_int actual
+
+      | TypeAbstractionParameterNameMismatch (exp_name, tau_name) ->
+          "type abstraction expecting variable named '"
+            ^ tau_name
+            ^ "' but got variable named '"
+            ^ exp_name
+            ^ "'"
+
+      | AssertionTypeMismatch (left, right) ->
+          "assertion type mismatch: "
+            ^ Pretty.typ left
+            ^ " and "
+            ^ Pretty.typ right
+            ^ " are not the same type"
 
 let error : error -> string =
   function
@@ -93,7 +178,7 @@ let error : error -> string =
 
     | TypeError (exp, te) ->
         "Type error: "
-          ^ (Yojson.Safe.to_string @@ Type.error_to_yojson te)
+          ^ type_error te
           ^ " in "
           ^ Pretty.exp exp
 
