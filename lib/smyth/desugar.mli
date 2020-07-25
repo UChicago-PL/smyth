@@ -1,4 +1,6 @@
-(** Helper module for working with {!Lang.exp} values. *)
+(** Helper module for constructing {!Lang.exp} values.
+
+    See {!Sugar} for some inverse operations. *)
 
 open Lang
 
@@ -26,7 +28,7 @@ val nat : int -> exp
     {b Precondition:} [n >= 0]. *)
 
 val listt : exp list -> typ list -> exp
-(** [listt [e0, ... eN] taus] constructs the following polymorphic list
+(** [listt [e0, ..., eN] taus] constructs the following polymorphic list
     expression:
 
     {[Cons<taus> (e0, ... Cons<taus> (eN, Nil<taus>))]} *)
