@@ -12,7 +12,9 @@ js:
 
 .PHONY: doc
 doc:
-	dune build @doc && ./misc-utils/modify-odoc-css.sh
+	dune build @doc \
+		&& ./misc-utils/modify-odoc-css.sh \
+		&& ./misc-utils/add-module-overviews.sh
 
 .PHONY: all
 all:

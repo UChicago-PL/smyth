@@ -69,21 +69,9 @@ the following tools installed:
   - Python 2.7
   - Python 3
 
-## Synthesizing a Program
+To modify the documentation, you will also need the following tools installed:
 
-The `./smyth forge` command takes in a path to a sketch to be completed
-("forged") and outputs its result.
-
-We have provided the six sketches described in Sections 1 and 2 of our ICFP
-paper in the `examples/` directory so that you can, for example, run
-`./smyth forge examples/stutter.elm` from the root directory of this project to
-see the output. Feel free to change the input-output examples on these sketches
-(or the program sketches themselves) to see how `smyth` responds. You can also
-create your own files following the same syntax (mostly Elm) to try out.
-
-By default `./smyth forge` only shows the top solution, but after all the other
-arguments, you can pass in the flag `--show=top1r` or `--show=top3` to show the
-top recursive solution or top three overall solutions, respectively.
+  - BeautifulSoup 4
 
 The benchmark sketches from the experimental evaluation of Smyth are stored in
 `suites/SUITE_NAME/sketches` and the input-examples used for those sketches are
