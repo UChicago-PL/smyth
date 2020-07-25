@@ -34,7 +34,10 @@ Bidirectional Evaluation_](https://arxiv.org/abs/1911.00583).
 [project webpage](https://uchicago-pl.github.io/smyth).
 
 - Code documentation for Smyth can be found
-[here](https://uchicago-pl.github.io/smyth/docs).
+[here](https://uchicago-pl.github.io/smyth/docs). The
+documentation for the core Smyth synthesis algorithm as outlined in our ICFP
+2020 publication specifically can be found
+[here](https://uchicago-pl.github.io/smyth/docs/smyth/Smyth/index.html).
 
 - Further details about the implementation of Smyth can be found in Justin Lubin's
 undergraduate thesis, [_Forging Smyth: The Implementation of Program Sketching with
