@@ -1,5 +1,12 @@
+(** Parsing of surface-level syntax.
+
+    {b Note:} if there is a corresponding {!Post_parse} function to the function
+    used for parsing here, it MUST be called afterward to ensure that the parsed
+    value satisfies proper invariants. *)
+
 open Lang
 
+(** The possible parse errors. *)
 type problem =
   | ExpectingLeftParen
   | ExpectingRightParen
@@ -54,6 +61,7 @@ type problem =
 
   | ExpectingEnd
 
+(** The possible parse contexts. *)
 type context =
   | CType
   | CTTuple
@@ -94,11 +102,18 @@ type context =
 
   | CProgram
 
+(** The type of a parser. *)
 type 'a parser =
   (context, problem, 'a) Bark.parser
 
+(** Expression parser. *)
 val exp : exp parser
 
+(** Type parser. *)
 val typ : typ parser
 
+(** Program parser.
+
+    {b Warning:} parses expressions but does NOT call {!Post_parse.exp}
+    (happens in {!Desugar.program}). *)
 val program : Desugar.program parser
