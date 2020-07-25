@@ -1,4 +1,4 @@
-(** Expression helpers *)
+(** Expression helpers. *)
 
 open Lang
 

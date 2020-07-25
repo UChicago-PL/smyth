@@ -1,3 +1,8 @@
+(** Type-and-example-directed hole synthesis.
+
+    This module implements type-and-example-directed branching as defined in
+    {b Figure 8} of the ICFP 2020 paper. *)
+
 open Lang
 
 val fill :
