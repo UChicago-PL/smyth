@@ -20,6 +20,12 @@ doc:
 all:
 	make build; make bc; make js; make doc
 
+.PHONY: publish
+publish:
+	make all; git checkout gh-pages; ./copy.sh; \
+		git add -A; git commit -m "Update webpage"; git push; \
+		git checkout main
+
 .PHONY: repl
 repl:
 	dune utop lib/smyth
