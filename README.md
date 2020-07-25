@@ -38,7 +38,8 @@ Bidirectional Evaluation_](https://arxiv.org/abs/1911.00583).
 documentation for the core synthesis algorithm as outlined in our ICFP
 2020 publication specifically can be found in the
 [smyth/Smyth/](https://uchicago-pl.github.io/smyth/docs/smyth/Smyth/index.html)
-subdirectory.
+subdirectory. The [codebase](#the-codebase) section below gives a high-level
+overview of the system.
 
 - Further details about the implementation of Smyth can be found in Justin Lubin's
 undergraduate thesis, [_Forging Smyth: The Implementation of Program Sketching with
