@@ -23,7 +23,7 @@ all:
 .PHONY: publish
 publish:
 	make all; git checkout gh-pages; ./copy.sh; \
-		git add -A; git commit -m "Update webpage"; git push; \
+		git add -A; git commit -m "Pull updates from 'main'"; git push; \
 		git checkout main
 
 .PHONY: repl
