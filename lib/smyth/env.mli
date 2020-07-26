@@ -5,8 +5,7 @@
 
     Entries closer to the "beginning" of the environment shadow entries
     appearing later. Entries are typically "consed" to the beginning of an
-    environment (for example, with {!add_res}).
-    *)
+    environment (for example, with {!add_res}). *)
 
 open Lang
 
