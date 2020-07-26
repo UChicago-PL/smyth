@@ -1,4 +1,4 @@
-(** The endpoints for clients using the Smyth library.
+(** Endpoints for clients using the {e Smyth} library.
 
     Two main endpoints are exposed: the {!section:solve} endpoint and the
     {!section:test} endpoint.

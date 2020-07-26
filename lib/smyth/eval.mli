@@ -1,7 +1,6 @@
-(** Live evaluation and resumption.
+(** Live evaluation and resumption, as defined in {b Figure 4} of the ICFP 2020
+    paper.
 
-    This module implements live evaluation and resumption as defined in
-    {b Figure 4} of the ICFP 2020 paper.
     {b Figure 7} also defines "program evaluation"; that concept is simply
     included in the definition of live evaluation here. *)
 

@@ -1,7 +1,4 @@
-(** Constraint solving.
-
-    This module implements constraint solving as defined in
-    {b Figure 8} of the ICFP 2020 paper. *)
+(** Constraint solving, as defined in {b Figure 8} of the ICFP 2020 paper. *)
 
 open Lang
 

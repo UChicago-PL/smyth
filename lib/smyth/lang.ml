@@ -1,4 +1,4 @@
-(** The syntax of Core Smyth, as defined in {b Figure 3} of the ICFP 2020
+(** The syntax of {e Core Smyth}, as defined in {b Figure 3} of the ICFP 2020
     paper. *)
 
 (** The type of hole "names," which is used to identify holes for synthesis. *)

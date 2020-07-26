@@ -1,7 +1,5 @@
-(** Type-and-example-directed refinement.
-
-    This module implements type-and-example-directed refinement as defined in
-    {b Figure 9} of the ICFP 2020 paper. *)
+(** Type-and-example-directed refinement, as defined in {b Figure 9} of the
+    ICFP 2020 paper. *)
 
 open Lang
 

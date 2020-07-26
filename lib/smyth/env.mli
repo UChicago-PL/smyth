@@ -1,7 +1,7 @@
 (** Evaluation environments.
 
     This module provides functions that operate on the evaluation environment
-    data structure used in Smyth.
+    data structure used in {e Smyth}.
 
     Entries closer to the "beginning" of the environment shadow entries
     appearing later. Entries are typically "consed" to the beginning of an

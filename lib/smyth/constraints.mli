@@ -2,7 +2,7 @@
     constraints.
 
     This module provides functions that operate on the various constraint data
-    structures used in Smyth. *)
+    structures used in {e Smyth}. *)
 
 open Lang
 
