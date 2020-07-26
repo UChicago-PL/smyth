@@ -767,3 +767,4 @@ h1+.modules, h1+.sel {
 
 b { font-weight: 600; }
 em { font-style: normal; font-variant: small-caps; }
+.content > header + aside { margin-top: -15px; }
