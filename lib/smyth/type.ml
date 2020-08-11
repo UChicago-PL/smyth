@@ -1,6 +1,6 @@
 open Lang
 
-(* Types *)
+(** Helpers *)
 
 let rec equal tau1 tau2 =
   match (tau1, tau2) with
@@ -197,7 +197,7 @@ let substitute_many : bindings:((string * typ) list) -> typ -> typ =
       tau
       bindings
 
-(* Type checking *)
+(** Type checking *)
 
 type error =
   | VarNotFound of string
