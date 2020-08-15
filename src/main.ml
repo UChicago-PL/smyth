@@ -592,7 +592,8 @@ let solve : sketch:string -> (string, string) result =
 
 let () =
   if Compilation2.is_js then
-    begin
+    ()
+    (* begin
       let open Js_of_ocaml in
 
       output_mode := OutputJson;
@@ -614,7 +615,7 @@ let () =
               js_forge js_sketch
           end
         )
-    end
+    end *)
   else
     begin
       Random.self_init ();
@@ -791,7 +792,9 @@ let () =
                     benchmark_thunk ()
 
                 | None ->
-                    prerr_endline ("Unknown built-in function '" ^ builtin ^ "'.");
+                    prerr_endline
+                      ( "Unknown built-in function '" ^ builtin ^ "'."
+                      );
                     exit 1
             in
             let results : (int * int) list =
@@ -808,8 +811,12 @@ let () =
                                      ~sketch:(Io2.read_path [sketch_path])
                                      ~assertions
                                  with
-                                   | Ok { top_success; top_recursive_success; _ } ->
-                                       (top_success, top_recursive_success)
+                                   | Ok
+                                       { top_success
+                                       ; top_recursive_success
+                                       ; _
+                                       } ->
+                                         (top_success, top_recursive_success)
 
                                    | Error Endpoint.TimedOut _
                                    | Error Endpoint.NoSolutions ->
@@ -839,7 +846,8 @@ let () =
                 ^ "\ntrial count,"
                 ^ string_of_int trial_count
                 ^ "\n"
-                ^ "example count,top success percent,top recursive success percent"
+                ^ "example count,top success percent,"
+                ^ "top recursive success percent"
                 ^ "\n"
                 ^ String.concat "\n"
                     ( List.mapi
@@ -918,7 +926,9 @@ let () =
                   print_endline spec
 
               | None ->
-                  prerr_endline ("Unknown built-in function '" ^ builtin ^ "'.");
+                  prerr_endline
+                    ( "Unknown built-in function '" ^ builtin ^ "'."
+                    );
                   exit 1
             end
       end;
