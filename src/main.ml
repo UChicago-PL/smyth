@@ -592,7 +592,8 @@ let solve : sketch:string -> (string, string) result =
 
 let () =
   if Compilation2.is_js then
-    begin
+    ()
+    (* begin
       let open Js_of_ocaml in
 
       output_mode := OutputJson;
@@ -614,7 +615,7 @@ let () =
               js_forge js_sketch
           end
         )
-    end
+    end *)
   else
     begin
       Random.self_init ();
