@@ -156,6 +156,7 @@ let solve_any delta sigma constraints_nd =
           in
           current_solution_count := 0;
           Timer.Multi.reset Timer.Multi.Guess;
+          Eval.user_constraints := snd constraints;
           let solution_nd =
             iter_solve params delta sigma constraints
           in

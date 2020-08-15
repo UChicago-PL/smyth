@@ -8,52 +8,21 @@ let rec from_value v =
     | VCtor (name, v_arg) ->
         ExCtor (name, from_value v_arg)
 
-let rec res_satisfies hf res ex =
-  match (res, ex) with
-    | (_, ExTop) ->
-        true
+let rec to_value ex =
+  match ex with
+    | ExTuple exs ->
+        exs
+          |> List.map to_value
+          |> Option2.sequence
+          |> Option.map (fun vs -> VTuple vs)
 
-    | (RTuple res_components, ExTuple ex_components) ->
-        List.length res_components = List.length ex_components
-          && List.for_all2 (res_satisfies hf) res_components ex_components
+    | ExCtor (name, arg) ->
+        Option.map
+          (fun v_arg -> VCtor (name, v_arg))
+          (to_value arg)
 
-    | (RCtor (r_name, r_arg), ExCtor (ex_name, ex_arg)) ->
-        String.equal r_name ex_name
-          && res_satisfies hf r_arg ex_arg
+    | ExInputOutput (_, _) ->
+        None
 
-    | (_, ExInputOutput (input, output)) ->
-        begin match
-          Eval.resume hf
-            ( RApp
-                ( res
-                , RARes (Res.from_value input)
-                )
-            )
-        with
-          | Ok (r_out, []) ->
-              res_satisfies hf r_out output
-
-          | _ ->
-              false
-        end
-
-    | _ ->
-        false
-
-let exp_satisfies hf exp worlds =
-  List.for_all
-    ( fun (env, ex) ->
-        match Eval.eval env exp with
-          | Ok (r, []) ->
-              begin match Eval.resume hf r with
-                | Ok (r', []) ->
-                    res_satisfies hf r' ex
-
-                | _ ->
-                    false
-              end
-
-          | _ ->
-              false
-    )
-    worlds
+    | ExTop ->
+        None

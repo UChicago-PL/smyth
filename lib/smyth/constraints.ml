@@ -81,6 +81,6 @@ let satisfies hf (f0, us)  =
     in
       Hole_map.for_all
         ( fun hole_name worlds ->
-            Example.exp_satisfies hf_merged (EHole hole_name) worlds
+            Satisfaction.exp hf_merged (EHole hole_name) worlds
         )
         us

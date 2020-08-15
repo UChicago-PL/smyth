@@ -6,6 +6,9 @@ type eval_result =
 type eval_env_result =
   (env * resumption_assertions, string) result
 
+let user_constraints : unsolved_constraints ref =
+  ref Hole_map.empty
+
 (* Note: fuel gets applied at every application. *)
 module FuelLimited = struct
   let rec eval fuel env exp =
@@ -233,7 +236,12 @@ module FuelLimited = struct
                 let+ (env', ks) =
                   resume_env fuel hf env
                 in
-                  ( RHole (env', name)
+                  ( !user_constraints
+                      |> Hole_map.find_opt name
+                      |> Option2.and_then (List.assoc_opt env')
+                      |> Option2.and_then Example.to_value
+                      |> Option2.map Res.from_value
+                      |> Option2.with_default (RHole (env', name))
                   , ks
                   )
           end

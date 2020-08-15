@@ -13,6 +13,11 @@ type eval_result =
     which case they will return a {!type:string} describing the error that
     occurred. *)
 
+val user_constraints : unsolved_constraints ref
+(** The "ground truth" unsolved user constraints that are collected by the
+    initial constraint collection procedure, as described in {b Section 4.1} of
+    the ICFP 2020 paper. *)
+
 val eval : env -> exp -> eval_result
 (** [eval env exp] live evaluates the expression [exp] in the environment
     [env]. *)

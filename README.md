@@ -135,7 +135,7 @@ can be found in the codebase, in order of presentation in the paper.
 | Type checking                               | [`type.mli`](lib/smyth/type.mli)/[`type.ml`](lib/smyth/type.ml)
 | Expression evaluation                       | [`eval.mli`](lib/smyth/eval.mli)/[`eval.ml`](lib/smyth/eval.ml)
 | Resumption                                  | [`eval.mli`](lib/smyth/eval.mli)/[`eval.ml`](lib/smyth/eval.ml)
-| Example satisfaction                        | [`example.mli`](lib/smyth/example.mli)/[`example.ml`](lib/smyth/example.ml)
+| Example satisfaction                        | [`satisfaction.mli`](lib/smyth/satisfaction.mli)/[`satisfaction.ml`](lib/smyth/satisfaction.ml)
 | Constraint satisfaction                     | [`constraints.mli`](lib/smyth/constraints.mli)/[`constraints.ml`](lib/smyth/constraints.ml)
 | Constraint merging                          | [`constraints.mli`](lib/smyth/constraints.mli)/[`constraints.ml`](lib/smyth/constraints.ml)
 | Live bidirectional example checking         | [`uneval.mli`](lib/smyth/uneval.mli)/[`uneval.ml`](lib/smyth/uneval.ml)
