@@ -791,7 +791,9 @@ let () =
                     benchmark_thunk ()
 
                 | None ->
-                    prerr_endline ("Unknown built-in function '" ^ builtin ^ "'.");
+                    prerr_endline
+                      ( "Unknown built-in function '" ^ builtin ^ "'."
+                      );
                     exit 1
             in
             let results : (int * int) list =
@@ -808,8 +810,12 @@ let () =
                                      ~sketch:(Io2.read_path [sketch_path])
                                      ~assertions
                                  with
-                                   | Ok { top_success; top_recursive_success; _ } ->
-                                       (top_success, top_recursive_success)
+                                   | Ok
+                                       { top_success
+                                       ; top_recursive_success
+                                       ; _
+                                       } ->
+                                         (top_success, top_recursive_success)
 
                                    | Error Endpoint.TimedOut _
                                    | Error Endpoint.NoSolutions ->
@@ -839,7 +845,8 @@ let () =
                 ^ "\ntrial count,"
                 ^ string_of_int trial_count
                 ^ "\n"
-                ^ "example count,top success percent,top recursive success percent"
+                ^ "example count,top success percent,"
+                ^ "top recursive success percent"
                 ^ "\n"
                 ^ String.concat "\n"
                     ( List.mapi
@@ -918,7 +925,9 @@ let () =
                   print_endline spec
 
               | None ->
-                  prerr_endline ("Unknown built-in function '" ^ builtin ^ "'.");
+                  prerr_endline
+                    ( "Unknown built-in function '" ^ builtin ^ "'."
+                    );
                   exit 1
             end
       end;
