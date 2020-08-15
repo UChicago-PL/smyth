@@ -17,6 +17,15 @@ let print_sep () = debug @@ fun _ ->
 let pause () = debug @@ fun _ ->
   let _ = read_line () in ()
 
+let print_env (rs, _ts) = debug @@ fun _ ->
+  println "res bindings:";
+  print_endline @@
+    String.concat "," @@
+      List.map
+        (fun (s, _) -> s)
+        rs
+
+
 (*
 
 let print_hf hf = debug @@ fun _ ->

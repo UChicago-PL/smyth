@@ -217,33 +217,44 @@ module FuelLimited = struct
     let open Result2.Syntax in
     match res with
       | RHole (env, name) ->
-          begin match Hole_map.find_opt name hf with
-            | Some binding ->
-                if binding = EHole name then
-                  Ok (res, [])
-                else
-                  let* (r, ks) =
-                    eval fuel env binding
-                  in
-                  let+ (r', ks') =
-                    resume fuel hf r
-                  in
-                    ( r'
-                    , ks @ ks'
-                    )
+          let* (env', ks_env) =
+            resume_env fuel hf env
+          in
+          begin match
+            !user_constraints
+              |> Hole_map.find_opt name
+              |> Option2.and_then (List.assoc_opt env')
+              |> Option2.and_then Example.to_value
+              |> Option2.map Res.from_value
+          with
+            | Some r ->
+                Ok
+                  ( r
+                  , ks_env
+                  )
 
             | None ->
-                let+ (env', ks) =
-                  resume_env fuel hf env
-                in
-                  ( !user_constraints
-                      |> Hole_map.find_opt name
-                      |> Option2.and_then (List.assoc_opt env')
-                      |> Option2.and_then Example.to_value
-                      |> Option2.map Res.from_value
-                      |> Option2.with_default (RHole (env', name))
-                  , ks
-                  )
+                begin match Hole_map.find_opt name hf with
+                  | Some binding ->
+                      if binding = EHole name then
+                        Ok (res, [])
+                      else
+                        let* (r, ks) =
+                          eval fuel env' binding
+                        in
+                        let+ (r', ks') =
+                          resume fuel hf r
+                        in
+                          ( r'
+                          , ks_env @ ks @ ks'
+                          )
+
+                  | None ->
+                      Ok
+                        ( RHole (env', name)
+                        , ks_env
+                        )
+                end
           end
 
       | RFix (env, f, x, body) ->
