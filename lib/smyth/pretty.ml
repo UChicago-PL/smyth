@@ -360,8 +360,8 @@ and exp' : exp printer =
                 else
                   inner
 
-            | EHole _ ->
-                "??"
+            | EHole name ->
+                "??" ^ string_of_int name
 
             | EAssert (_, _) ->
                 "{ASSERTION}"
