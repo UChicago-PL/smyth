@@ -29,4 +29,5 @@ specifyFunction concat
   , (LCons ([0], LCons([0], LNil ())), [0, 0])
   , (LCons ([1], LNil ()), [1])
   , (LCons ([2], LCons([1], LNil ())), [2, 1])
+  , (LCons ([2, 3], LCons([1], LNil ())), [2, 3, 1])
   ]
