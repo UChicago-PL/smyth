@@ -56,20 +56,21 @@ let print_worlds worlds = debug @@ fun _ ->
   in
     println @@ "{ " ^ s ^ "\n}"
 
-(*
 
 let print_hf hf = debug @@ fun _ ->
   hf
-    |> Hole_map.bindings
+    |> Lang.Hole_map.bindings
     |> List.map
          ( fun (h, e) ->
              "??"
                ^ (string_of_int h)
                ^ ": "
-               ^ Yojson.Safe.to_string (exp_to_yojson e)
+               ^ Pretty.exp e
          )
     |> String.concat "\n"
     |> println
+
+(*
 
 let print_worlds worlds = debug @@ fun _ ->
   let s =
