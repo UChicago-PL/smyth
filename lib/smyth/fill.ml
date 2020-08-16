@@ -3,11 +3,12 @@ open Nondet.Syntax
 
 let refine_or_branch
  params delta sigma hf (hole_name, synthesis_goal) =
-  let* (additional_depth, ((exp, subgoals), choice_constraints)) =
+  let* (additional_match_depth, additional_app_depth,
+   ((exp, subgoals), choice_constraints)) =
     (* Note: Try to branch FIRST! This results in more idiomatic solutions. *)
     Nondet.union
       [ if params.max_match_depth > 0 then
-          Nondet.map (Pair2.pair 1) @@
+          Nondet.map (fun x -> (1, 0, x)) @@
             Branch.branch
               params.max_scrutinee_size
               delta
@@ -16,25 +17,37 @@ let refine_or_branch
               synthesis_goal
         else
           Nondet.none
-      ; Nondet.map (fun x -> (0, (x, Constraints.empty))) @@
+      ; Nondet.map (fun x -> (0, 0, (x, Constraints.empty))) @@
           Nondet.lift_option @@
             Refine.refine
               delta
               sigma
               synthesis_goal
+      ; if params.max_app_depth > 0 then
+          Nondet.map (fun x -> (-1, 1, (x, Constraints.empty))) @@
+            Refine.refine_app
+              delta
+              sigma
+              hf
+              synthesis_goal
+        else
+          Nondet.none
       ]
   in
-  let* (_, _, _, parent_depth) =
+  let* (_, _, _, parent_match_depth, parent_app_depth) =
     Nondet.lift_option @@
       List.assoc_opt hole_name delta
   in
   let match_depth =
-    parent_depth + additional_depth
+    parent_match_depth + additional_match_depth
+  in
+  let app_depth =
+    parent_app_depth + additional_app_depth
   in
   let delta' =
     List.map
       ( Pair2.map_snd @@ fun ((gamma, goal_type, goal_dec), _) ->
-          (gamma, goal_type, goal_dec, match_depth)
+          (gamma, goal_type, goal_dec, match_depth, app_depth)
       )
       subgoals
   in

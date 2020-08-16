@@ -471,6 +471,7 @@ let rec check' :
                 , tau
                 , state.function_decrease_requirement
                 , state.match_depth
+                , 0
                 )
               )
             ]

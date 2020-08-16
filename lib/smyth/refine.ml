@@ -182,3 +182,97 @@ let refine _delta sigma ((gamma, goal_type, goal_dec), worlds) =
 
       | TVar _ ->
           None
+
+let eval_resume_coerce : env -> hole_filling -> exp -> value option =
+  fun env hf exp ->
+    match Eval.eval env exp with
+      | Ok (r, []) ->
+          begin match Eval.resume hf r with
+            | Ok (r', []) ->
+                Res.to_value r'
+
+            | _ ->
+                None
+          end
+
+      | _ ->
+          None
+
+let refine_app :
+ hole_ctx ->
+ datatype_ctx ->
+ hole_filling ->
+ synthesis_goal ->
+ (exp * fill_goal list) Nondet.t =
+  fun _delta _sigma hf ((_gamma, goal_type, goal_dec), worlds) ->
+    let open Nondet.Syntax in
+    let* _ =
+      Nondet.guard (Option.is_none goal_dec)
+    in
+    let
+      filtered_worlds =
+        filter worlds
+    in
+    let tau1 =
+      TData ("NatList", [])
+    in
+    let tau2 =
+      TData ("NatList", [])
+    in
+    let tau_final =
+      TArr (tau1, TArr (tau2, goal_type))
+    in
+    let arg1 =
+      EProj (2, 1, EVar "y1")
+    in
+    let arg2 =
+      EApp (false, EVar "concat", EAExp (EProj (2, 2, EVar "y1")))
+    in
+    let+ final_worlds =
+      filtered_worlds
+        |> List.map
+             ( fun (env, ex) ->
+                 let open! Option2.Syntax in
+                 let* v1 =
+                   eval_resume_coerce env hf arg1
+                 in
+                 let+ v2 =
+                   eval_resume_coerce env hf arg2
+                 in
+                 ( env
+                 , ExInputOutput
+                     ( v1
+                     , ExInputOutput
+                         ( v2
+                         , ex
+                         )
+                     )
+                 )
+             )
+        |> Option2.sequence
+        |> Nondet.lift_option
+    in
+    let hole_name =
+      Fresh.gen_hole ()
+    in
+    let new_goal =
+      ( hole_name
+      , ((Type_ctx.empty, tau_final, None), final_worlds)
+      )
+    in
+    let exp =
+      EApp
+        ( false
+        , EApp
+            ( false
+            , EHole hole_name
+            , EAExp arg1
+            )
+        , EAExp arg2
+        )
+    in
+    print_endline (Pretty.exp exp);
+    print_endline (Pretty.typ tau_final);
+    print_endline (Pretty.typ goal_type);
+    Debug.print_worlds final_worlds;
+    (exp, [new_goal])

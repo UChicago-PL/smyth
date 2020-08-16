@@ -25,6 +25,36 @@ let print_env (rs, _ts) = debug @@ fun _ ->
         (fun (s, _) -> s)
         rs
 
+let rec ex_to_string =
+  function
+    | Lang.ExTuple comps ->
+        "("
+          ^ String.concat ", " (List.map ex_to_string comps)
+          ^ ")"
+
+    | Lang.ExCtor (name, arg) ->
+        name ^ " (" ^ ex_to_string arg ^ ")"
+
+    | Lang.ExInputOutput (input, output) ->
+        "{" ^ ex_to_string (Example.from_value input)
+          ^ " -> " ^ ex_to_string output ^ "}"
+
+    | Lang.ExTop ->
+        "Top"
+
+let print_worlds worlds = debug @@ fun _ ->
+  let s =
+   String.concat "\n, " @@
+    List.map
+      ( fun (_env, ex) ->
+          (* Yojson.Safe.to_string (env_to_yojson env)
+            ^ "\n    ~ "
+            ^ Yojson.Safe.to_string (example_to_yojson ex) *)
+          ex_to_string ex
+      )
+      worlds
+  in
+    println @@ "{ " ^ s ^ "\n}"
 
 (*
 

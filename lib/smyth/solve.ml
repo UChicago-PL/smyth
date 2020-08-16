@@ -66,14 +66,15 @@ let rec iter_solve params delta sigma (hf, us_all) =
         Nondet.pure (hf, delta)
 
     | Some ((hole_name, worlds), us) ->
-        let* (gamma, typ, dec, match_depth) =
+        let* (gamma, typ, dec, match_depth, app_depth) =
           Nondet.lift_option @@
             List.assoc_opt hole_name delta
         in
         let* (k_new, delta_new) =
           Fill.fill
             { params with
-                max_match_depth = params.max_match_depth - match_depth
+                max_match_depth = params.max_match_depth - match_depth;
+                max_app_depth = params.max_app_depth - app_depth;
             }
             delta
             sigma
@@ -134,25 +135,27 @@ let solve_any delta sigma constraints_nd =
                   (1, 1, 13)
 
               | PreThree ->
-                  (1, 2, 8)
+                  (1, 1, 8)
 
               | Three ->
-                  (1, 2, 13)
+                  (1, 1, 13)
 
               | PreFour ->
-                  (6, 2, 8)
+                  (6, 1, 8)
 
               | Four ->
-                  (6, 2, 13)
+                  (6, 1, 13)
 
               | PreFive ->
-                  (6, 3, 8)
+                  (6, 1, 8)
 
               | Five ->
-                  (6, 3, 13)
+                  (6, 1, 13)
           in
           let params =
-            { max_scrutinee_size; max_match_depth; max_term_size }
+            { max_scrutinee_size; max_match_depth; max_term_size
+            ; max_app_depth = 1
+            }
           in
           current_solution_count := 0;
           Timer.Multi.reset Timer.Multi.Guess;

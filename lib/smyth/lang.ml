@@ -128,11 +128,11 @@ type type_ctx =
 type datatype_ctx =
   (string * (string list * (string * typ) list)) list
 
-(** Hole contexts: [(hole name, type context, typ, decrease requirement, match depth)].
+(** Hole contexts: [(hole name, type context, typ, decrease requirement, match depth, app depth)].
     The "decrease requirement", if present, is a function that expressions must
     be decreasing on to fill the hole in question. *)
 type hole_ctx =
-  (hole_name * (type_ctx * typ * string option * int)) list
+  (hole_name * (type_ctx * typ * string option * int * int)) list
 
 (** "Simple" values. *)
 type value =
@@ -190,5 +190,6 @@ type fill_goal =
 type synthesis_params =
   { max_scrutinee_size : int
   ; max_match_depth : int
+  ; max_app_depth : int
   ; max_term_size : int
   }

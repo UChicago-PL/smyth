@@ -13,3 +13,13 @@ val refine :
 
         Type-and-example-directed refinement is deterministic but may fail;
         hence, this function returns an {!option}. *)
+
+val refine_app :
+  hole_ctx
+    -> datatype_ctx
+    -> hole_filling
+    -> synthesis_goal
+    -> (exp * fill_goal list) Nondet.t
+(** [refine_app delta sigma hf goal] transforms the synthesis goal [goal] into a
+    helper function subgoal that is called on randomly generated values in
+    scope. *)

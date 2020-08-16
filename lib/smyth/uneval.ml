@@ -65,7 +65,7 @@ module FuelLimited = struct
           Nondet.lift_option @@
             blocking_hole res
         in
-        let* (gamma, tau, dec, _) =
+        let* (gamma, tau, dec, _, _) =
           Nondet.lift_option @@
             List.assoc_opt hole_name delta
         in

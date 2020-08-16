@@ -9,7 +9,7 @@ let version : string =
 (** The overall version of the system. *)
 
 let debug_mode : bool ref =
-  ref false
+  ref true
 (** Whether or not debugging should be enabled. *)
 
 (** The available methods for ranking synthesis solutions. *)
