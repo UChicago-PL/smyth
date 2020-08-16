@@ -10,13 +10,13 @@ type NatListList
   = LNil ()
   | LCons (NatList, NatListList)
 
-append : NatList -> NatList -> NatList
-append l1 l2 =
-  case l1 of
-    Nil _ ->
-      l2
-    Cons p ->
-      Cons (#2.1 p, append (#2.2 p) l2)
+-- append : NatList -> NatList -> NatList
+-- append l1 l2 =
+--   case l1 of
+--     Nil _ ->
+--       l2
+--     Cons p ->
+--       Cons (#2.1 p, append (#2.2 p) l2)
 
 concat : NatListList -> NatList
 concat xss =
