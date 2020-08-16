@@ -27,7 +27,7 @@ let refine _delta sigma ((gamma, goal_type, goal_dec), worlds) =
           let x_name =
             Term_gen.fresh_ident
               gamma
-              Term_gen.function_char
+              Term_gen.variable_char
           in
           let+ refined_worlds =
             filtered_worlds
@@ -271,8 +271,4 @@ let refine_app :
         , EAExp arg2
         )
     in
-    print_endline (Pretty.exp exp);
-    print_endline (Pretty.typ tau_final);
-    print_endline (Pretty.typ goal_type);
-    Debug.print_worlds final_worlds;
     (exp, [new_goal])
