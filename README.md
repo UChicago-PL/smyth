@@ -88,6 +88,12 @@ So, for example, you could run
 to see the top result of running the `list_sorted_insert` benchmark from the
 `no-sketch` suite.
 
+### Updates
+
+_August 20, 2020:_ A new release, `icfp-2020-v1` includes module-level
+documentation for the `smyth` library and fixes a bug that caused
+Experiments 2b and 3b to fail to run.
+
 ## Running the Experimental Evaluation
 
 _*Quick summary*: navigate to `experiments/`, run `./run-all 10`, look at
