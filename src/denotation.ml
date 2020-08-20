@@ -100,7 +100,7 @@ let rec poly_to_mono : exp -> exp =
     (* Main cases *)
 
     | EApp (_, e1, EAType _) ->
-        e1
+        poly_to_mono e1
 
     | ECtor (ctor_name, [TData ("List", _)], arg) ->
         ECtor ("L" ^ ctor_name, [], poly_to_mono arg)

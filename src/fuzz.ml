@@ -30,9 +30,16 @@ let experiment_proj :
                                     [arg]
                             in
                             ( Desugar.app
-                                ( Desugar.app
-                                    (Lang.EVar function_name)
-                                    (List.map (fun t -> Lang.EAType t) poly_args)
+                                ( if poly then
+                                    Desugar.app
+                                      ( Lang.EVar function_name
+                                      )
+                                      ( List.map
+                                        (fun t -> Lang.EAType t)
+                                        poly_args
+                                      )
+                                  else
+                                    Lang.EVar function_name
                                 )
                                 (List.map (fun e -> Lang.EAExp e) args)
                             , runner d_out output_val
