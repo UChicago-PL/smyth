@@ -27,7 +27,7 @@ let refine _delta sigma ((gamma, goal_type, goal_dec), worlds) =
           let x_name =
             Term_gen.fresh_ident
               gamma
-              Term_gen.function_char
+              Term_gen.variable_char
           in
           let+ refined_worlds =
             filtered_worlds
