@@ -32,6 +32,7 @@ let solve_program : Desugar.program -> solve_result response =
     let (exp, sigma) =
       Desugar.program program
     in
+    Debug.println (Pretty.exp exp);
     begin match Type.check sigma Type_ctx.empty exp (Lang.TTuple []) with
       | Error e ->
           Error (TypeError e)
@@ -118,6 +119,29 @@ let solve ~sketch =
     |> Result2.and_then solve_program
 
 (* Test *)
+
+let debug sketch = match parse_program sketch with
+  | Error e -> Error e 
+  | Ok p ->
+    let exp, sigma = Desugar.program p
+    in 
+      match Type.check sigma Type_ctx.empty exp (Lang.TTuple []) with
+      | Error e -> Error (TypeError e)
+      | Ok delta -> 
+        match delta with
+        | ((_hole, (type_ctx, typ, _, _))::_) -> 
+          Params.debug_mode := true;
+          begin 
+            match fst type_ctx with
+            | ((x, (t,_))::bs) -> 
+              print_endline ("(hd) " ^ x ^ " : " ^ Pretty.typ t);
+              bs |> List.iter (fun (x, (t, _)) -> print_endline ("     " ^x ^ " : " ^ Pretty.typ t))
+            | [] -> print_endline "empty context"
+          end;
+          Ok (Term_gen.up_to_e sigma 6 (type_ctx, typ, None)) 
+        | _ -> Ok Nondet.none
+        
+
 
 type test_result =
   { specification_assertion_count : int

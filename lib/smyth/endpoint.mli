@@ -38,6 +38,8 @@ val solve : sketch:string -> solve_result response
 
 (** {1:test Test} *)
 
+val debug : string -> (Lang.exp Nondet.t) response
+
 type test_result =
   { specification_assertion_count : int
     (** The number of assertions in the specification. *)

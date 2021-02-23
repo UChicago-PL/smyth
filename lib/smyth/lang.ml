@@ -124,7 +124,7 @@ type poly_binding =
 type type_ctx =
   type_binding list * poly_binding list
 
-(** Datatype contexts. *)
+(** Datatype contexts: [(type name, (type parameters, constructors))] *)
 type datatype_ctx =
   (string * (string list * (string * typ) list)) list
 

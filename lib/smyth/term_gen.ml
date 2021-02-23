@@ -270,8 +270,11 @@ let rec gen_e
   (term_size : int)
   ((gamma, goal_type, goal_dec) : gen_goal)
   : exp Nondet.t =
+    Debug.println ("gen_e [" ^ string_of_int term_size ^ "] (" ^ Pretty.typ goal_type ^ ") [" ^ String.concat "," (List.map fst (fst gamma)) ^ "]");
     match Type_ctx.peel_type gamma with
       | Some (binding, gamma_rest) ->
+          (* Debug.println ("binding: " ^ fst binding);
+          Debug.println ("rest: " ^ String.concat "," (List.map fst (fst gamma_rest)) ); *)
           Nondet.union
             [ gen
                 { sigma
@@ -422,6 +425,7 @@ and rel_gen_e
   ((rel_name, (rel_type, rel_bind_spec)) as rel_binding : type_binding)
   ((gamma, goal_type, goal_dec) as goal : gen_goal)
   : exp Nondet.t =
+    Debug.println ("gen_e [" ^ string_of_int term_size ^ "] (" ^ Pretty.typ goal_type ^ ") " ^ rel_name ^ " | [" ^ String.concat "," (List.map fst (fst gamma)) ^ "]");
     match term_size with
       | 1 ->
           let* (specialized_type, specialized_exp) =
@@ -500,6 +504,7 @@ and gen_i
   (term_size : int)
   ((gamma, goal_type, goal_dec) : gen_goal)
   : exp Nondet.t =
+    Debug.println ("gen_i [" ^ string_of_int term_size ^ "] (" ^ Pretty.typ goal_type ^ ") [" ^ String.concat "," (List.map fst (fst gamma)) ^ "]");
     let* _ =
       Nondet.guard (Option.is_none goal_dec)
     in
@@ -621,6 +626,7 @@ and rel_gen_i
   (rel_binding : type_binding)
   ((gamma, goal_type, goal_dec) as goal : gen_goal)
   : exp Nondet.t =
+    Debug.println ("gen_i [" ^ string_of_int term_size ^ "] (" ^ Pretty.typ goal_type ^ ") " ^ fst rel_binding ^ " | [" ^ String.concat "," (List.map fst (fst gamma)) ^ "]");
     let* _ =
       Nondet.guard (Option.is_none goal_dec)
     in
@@ -739,8 +745,16 @@ and gen (gen_input : gen_input) : exp Nondet.t =
             { term_size; sigma; goal; _ } =
               gen_input
           in
+            (
+            (* Debug.println "Sigma:";
+            sigma |> List.iter 
+              ( fun (s, (xs, ys)) -> Debug.println (s ^ ":\n");
+              xs |> List.iter (fun x -> Debug.println ("\t"^x)); 
+              ys |> List.iter (fun (s,t) -> Debug.println ("\t"^s^" : "^Pretty.typ t));
+              ); *)
             record gen_input @@
               Nondet.dedup @@
+                let x = 
                 begin match (gen_input.term_kind, gen_input.rel_binding) with
                   | (E, None) ->
                       gen_e sigma term_size goal
@@ -754,7 +768,10 @@ and gen (gen_input : gen_input) : exp Nondet.t =
                   | (I, Some rb) ->
                       rel_gen_i sigma term_size rb goal
                 end
-
+                in 
+                  (* Nondet.to_list x |> List.iter (fun e -> let s = Pretty.exp e in Debug.println s;if s = "foldr insert []" then (Debug.println "YEAH!"; Debug.pause ())); *)
+                  x
+            )
 (*******************************************************************************
  * Term generation exports
  *)
