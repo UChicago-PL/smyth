@@ -3,6 +3,7 @@
 ## Smyth Code
 
 - Justin Lubin
+- Niek Mulleners
 
 ## Smyth Evaluation
 
