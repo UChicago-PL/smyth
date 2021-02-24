@@ -328,12 +328,13 @@ and rel_gen_e_app
         EApp (special, head, EAExp arg)
     in
     let* arg_type =
-      gamma
+      (* TODO: perhaps arg_type should differ for rel and non-rel cases? *)
+      combined_gamma
         |> Type_ctx.all_type
         |> List.map
              ( fun (name, (tau, _)) ->
                  let* (specialized_tau, _) =
-                   instantiations sigma gamma name tau
+                   instantiations sigma combined_gamma name tau
                  in
                  Nondet.lift_option
                    ( Type.domain_of_codomain
@@ -426,6 +427,9 @@ and rel_gen_e
       | 1 ->
           let* (specialized_type, specialized_exp) =
             instantiations sigma gamma rel_name rel_type
+          in
+          let* _ =
+            Nondet.guard (match rel_bind_spec with Rec _ -> false | _ -> true)
           in
           if
             Type.matches goal_type specialized_type
