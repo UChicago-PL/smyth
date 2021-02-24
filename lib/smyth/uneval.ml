@@ -203,13 +203,14 @@ module FuelLimited = struct
   and simplify_assertions fuel delta sigma rcs =
     let simplify_one (res, value) =
       if Res.final res then
+        (Debug.println (Pretty.res res ^ " = " ^ Pretty.value value);
         uneval
           fuel
           delta
           sigma
           Hole_map.empty
           res
-          (Example.from_value value)
+          (Example.from_value value))
       else
         Nondet.none
     in

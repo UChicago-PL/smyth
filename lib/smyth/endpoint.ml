@@ -135,12 +135,11 @@ let debug sketch = match parse_program sketch with
             match fst type_ctx with
             | ((x, (t,_))::bs) -> 
               print_endline ("(hd) " ^ x ^ " : " ^ Pretty.typ t);
-              bs |> List.iter (fun (x, (t, _)) -> print_endline ("     " ^x ^ " : " ^ Pretty.typ t))
+              bs |> List.iter (fun (x, (t, _)) -> print_endline ("     " ^ x ^ " : " ^ Pretty.typ t))
             | [] -> print_endline "empty context"
           end;
           Ok (Term_gen.up_to_e sigma 6 (type_ctx, typ, None)) 
         | _ -> Ok Nondet.none
-        
 
 
 type test_result =
