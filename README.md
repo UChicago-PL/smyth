@@ -1,4 +1,4 @@
 # Smyth webpage
 
-To ensure the Smyth webpage is up-to-date, run `make all` on the `main` branch,
-then run `./copy.sh` on this branch.
+To ensure that the Smyth webpage and documentation are up-to-date, run
+`make publish` on the `main` branch.
