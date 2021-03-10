@@ -537,7 +537,7 @@ and gen_i
                       ; rel_binding = None
                       ; goal =
                           ( Type_ctx.concat_type
-                              [ (arg_name, (tau1, Dec f_name))
+                              [ (arg_name, (tau1, Arg f_name))
                               ; (f_name, (goal_type, Rec f_name))
                               ]
                               Type_ctx.empty
@@ -649,7 +649,7 @@ and rel_gen_i
                 ; rel_binding = Some rel_binding
                 ; goal =
                     ( Type_ctx.concat_type
-                        [ (arg_name, (tau1, Dec f_name))
+                        [ (arg_name, (tau1, Arg f_name))
                         ; (f_name, (goal_type, Rec f_name))
                         ]
                         gamma
