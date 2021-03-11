@@ -21,7 +21,7 @@ let ranking_method : ranking_method ref =
 (** The method to rank synthesis solutions. *)
 
 let max_solution_count : int option ref =
-  ref (Some 30)
+  ref (Some 40)
 (** The maximum synthesis solution count. [None] indicates no bound/infinity. *)
 
 let uneval_case_budget : int ref =
